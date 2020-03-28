@@ -11,6 +11,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -86,6 +87,8 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
 
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent e) {
+        EquipmentSlot slot = Reflection.getHand(e);
+        if (slot != null && slot != EquipmentSlot.HAND) return;
         if (e.getAction() == Action.RIGHT_CLICK_BLOCK) {
             if (e.getPlayer().hasPermission("regions.selection") && Reflection.getItemInHand(e.getPlayer()).getType() == selectionItem) {
                 e.setCancelled(true);
