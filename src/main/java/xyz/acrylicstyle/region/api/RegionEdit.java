@@ -41,16 +41,37 @@ public interface RegionEdit extends Plugin {
         for (int x = x1; x <= x2; x++) {
             for (int y = y1; y <= y2; y++) {
                 for (int z = z1; z <= z2; z++) {
+                    Block b = loc1.getWorld().getBlockAt(x, y, z);
                     if (block == null) {
                         if (filterFunction != null) {
-                            if (filterFunction.apply(loc1.getWorld().getBlockAt(x, y + 1, z)))
-                                blocks.add(loc1.getWorld().getBlockAt(x, y, z));
-                        } else blocks.add(loc1.getWorld().getBlockAt(x, y, z));
+                            if (filterFunction.apply(b)) blocks.add(b);
+                        } else blocks.add(b);
                     } else {
-                        if (loc1.getWorld().getBlockAt(x, y, z).getType() == block
-                                && filterFunction.apply(loc1.getWorld().getBlockAt(x, y + 1, z)))
-                            blocks.add(loc1.getWorld().getBlockAt(x, y, z));
+                        if (b.getType() == block && filterFunction.apply(b)) blocks.add(b);
                     }
+                }
+            }
+        }
+        return ICollectionList.asList(blocks);
+    }
+
+    @NotNull
+    static CollectionList<Block> getBlocksInvert(@NotNull Location loc1, @NotNull Location loc2, Material block) {
+        if (!loc1.getWorld().equals(loc2.getWorld())) throw new RuntimeException("Cannot compare between worlds");
+        List<Block> blocks = new ArrayList<>();
+        int x1, x2, y1, y2, z1, z2;
+        x1 = loc1.getX() > loc2.getX() ? (int) loc2.getX() : (int) loc1.getX();
+        y1 = loc1.getY() > loc2.getY() ? (int) loc2.getY() : (int) loc1.getY();
+        z1 = loc1.getZ() > loc2.getZ() ? (int) loc2.getZ() : (int) loc1.getZ();
+
+        x2 = ((int) loc1.getX()) == x1 ? (int) loc2.getX() : (int) loc1.getX();
+        y2 = ((int) loc1.getY()) == y1 ? (int) loc2.getY() : (int) loc1.getY();
+        z2 = ((int) loc1.getZ()) == z1 ? (int) loc2.getZ() : (int) loc1.getZ();
+        for (int x = x1; x <= x2; x++) {
+            for (int y = y1; y <= y2; y++) {
+                for (int z = z1; z <= z2; z++) {
+                    Block b = loc1.getWorld().getBlockAt(x, y, z);
+                    if (b.getType() != block) blocks.add(b);
                 }
             }
         }

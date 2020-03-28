@@ -26,7 +26,7 @@ public class CutCommand extends PlayerCommandExecutor {
             new BukkitRunnable() {
                 @Override
                 public void run() {
-                    CollectionList<Block> blocks = RegionEdit.getBlocks(region.getLocation(), region.getLocation2(), null, null);
+                    CollectionList<Block> blocks = RegionEdit.getBlocksInvert(region.getLocation(), region.getLocation2(), Material.AIR);
                     RegionEdit.getInstance().getHistoryManager().resetPointer(player.getUniqueId());
                     RegionEditPlugin.setBlocks(player, blocks, Material.AIR, (byte) 0);
                 }

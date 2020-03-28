@@ -54,7 +54,12 @@ public class ReplaceCommand extends PlayerCommandExecutor {
             new BukkitRunnable() {
                 @Override
                 public void run() {
-                    CollectionList<Block> blocks = RegionEdit.getBlocks(region.getLocation(), region.getLocation2(), before, block -> block.getData() == (byte) beforeData);
+                    CollectionList<Block> blocks;
+                    if (args[0].startsWith("!")) {
+                        blocks = RegionEdit.getBlocksInvert(region.getLocation(), region.getLocation2(), before);
+                    } else {
+                        blocks = RegionEdit.getBlocks(region.getLocation(), region.getLocation2(), before, block -> block.getData() == (byte) beforeData);
+                    }
                     RegionEdit.getInstance().getHistoryManager().resetPointer(player.getUniqueId());
                     RegionEditPlugin.setBlocks(player, blocks, after, (byte) afterData);
                 }
