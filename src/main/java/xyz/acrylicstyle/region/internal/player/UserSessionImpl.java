@@ -48,6 +48,7 @@ public class UserSessionImpl implements UserSession {
     @NotNull
     public CuboidRegion getCuboidRegion() throws RegionEditException {
         RegionSelection region = getRegionSelection();
+        if (region == null) return new CuboidRegion(null, null);
         if (!(region instanceof CuboidRegion)) throw new RegionEditException("Current region selection isn't instance of CuboidRegion!");
         return (CuboidRegion) region;
     }
