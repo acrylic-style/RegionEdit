@@ -32,22 +32,22 @@ public class ReplaceCommand extends PlayerCommandExecutor {
             return;
         }
         CollectionList<String> materials = ICollectionList.asList(Material.values()).filter(Material::isBlock).map(Enum::name).map((Function<String, String>) String::toLowerCase);
-        if (!materials.contains((args[0] + ":").split(":")[0].toLowerCase())) {
-            player.sendMessage(ChatColor.RED + "Error: Invalid block: " + (args[0] + ":").split(":")[0].toLowerCase());
+        if (!materials.contains((args[0].replaceFirst("!", "") + ":").split(":")[0].toLowerCase())) {
+            player.sendMessage(ChatColor.RED + "Error: Invalid block: " + (args[0].replaceFirst("!", "") + ":").split(":")[0].toLowerCase());
             player.sendMessage(ChatColor.LIGHT_PURPLE + "Usage: /replace <before> <after>");
             player.sendMessage(ChatColor.YELLOW + "Replace blocks.");
             return;
         }
-        if (!materials.contains((args[1] + ":").split(":")[0].toLowerCase())) {
-            player.sendMessage(ChatColor.RED + "Error: Invalid block: " + (args[1] + ":").split(":")[0].toLowerCase());
+        if (!materials.contains((args[1].replaceFirst("!", "") + ":").split(":")[0].toLowerCase())) {
+            player.sendMessage(ChatColor.RED + "Error: Invalid block: " + (args[1].replaceFirst("!", "") + ":").split(":")[0].toLowerCase());
             player.sendMessage(ChatColor.LIGHT_PURPLE + "Usage: /replace <before> <after>");
             player.sendMessage(ChatColor.YELLOW + "Replace blocks.");
             return;
         }
         int beforeData = JavaScript.parseInt((args[0] + ":0").split(":")[1], 10);
         int afterData = JavaScript.parseInt((args[1] + ":0").split(":")[1], 10);
-        Material before = Material.getMaterial(materials.filter(s -> s.equalsIgnoreCase(args[0])).first().toUpperCase());
-        Material after = Material.getMaterial(materials.filter(s -> s.equalsIgnoreCase(args[1])).first().toUpperCase());
+        Material before = Material.getMaterial(materials.filter(s -> s.equalsIgnoreCase(args[0].replaceFirst("!", ""))).first().toUpperCase());
+        Material after = Material.getMaterial(materials.filter(s -> s.equalsIgnoreCase(args[1].replaceFirst("!", ""))).first().toUpperCase());
         RegionSelection regionSelection = RegionEditPlugin.regionSelection.get(player.getUniqueId());
         if (regionSelection instanceof CuboidRegion) {
             CuboidRegion region = (CuboidRegion) regionSelection;
