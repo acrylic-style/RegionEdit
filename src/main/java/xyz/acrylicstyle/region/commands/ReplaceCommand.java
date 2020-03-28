@@ -25,7 +25,7 @@ public class ReplaceCommand extends PlayerCommandExecutor {
             player.sendMessage(ChatColor.RED + "You must make selection first.");
             return;
         }
-        if (args.length == 0) {
+        if (args.length < 2) {
             player.sendMessage(ChatColor.RED + "Error: Not enough arguments.");
             player.sendMessage(ChatColor.LIGHT_PURPLE + "Usage: /replace <before> <after>");
             player.sendMessage(ChatColor.YELLOW + "Replace blocks.");
