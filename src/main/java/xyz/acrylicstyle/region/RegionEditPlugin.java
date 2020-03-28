@@ -20,7 +20,7 @@ import util.Collection;
 import util.CollectionList;
 import util.promise.Promise;
 import xyz.acrylicstyle.region.api.RegionEdit;
-import xyz.acrylicstyle.region.api.exception.RegionSelectorException;
+import xyz.acrylicstyle.region.api.exception.RegionEditException;
 import xyz.acrylicstyle.region.api.manager.HistoryManager;
 import xyz.acrylicstyle.region.api.operation.OperationStatus;
 import xyz.acrylicstyle.region.api.player.UserSession;
@@ -121,7 +121,7 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
 
     @Override
     public void setBlocksPerTick(int blocks) {
-        if (blocks <= 0) throw new RegionSelectorException("Blocks per ticks cannot be lower than 1");
+        if (blocks <= 0) throw new RegionEditException("Blocks per ticks cannot be lower than 1");
         blocksPerTick = blocks;
     }
 

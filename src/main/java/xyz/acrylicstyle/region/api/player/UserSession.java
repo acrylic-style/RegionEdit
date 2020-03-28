@@ -2,7 +2,7 @@ package xyz.acrylicstyle.region.api.player;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.acrylicstyle.region.api.exception.RegionSelectorException;
+import xyz.acrylicstyle.region.api.exception.RegionEditException;
 import xyz.acrylicstyle.region.api.region.CuboidRegion;
 import xyz.acrylicstyle.region.api.region.RegionSelection;
 import xyz.acrylicstyle.region.api.selection.SelectionMode;
@@ -27,9 +27,9 @@ public interface UserSession {
     /**
      * Set user's selected region.
      * @param regionSelection New region selection.
-     * @throws RegionSelectorException When RegionSelection isn't compatible with current selection mode.
+     * @throws RegionEditException When RegionSelection isn't compatible with current selection mode.
      */
-    void setRegionSelection(@NotNull RegionSelection regionSelection) throws RegionSelectorException;
+    void setRegionSelection(@NotNull RegionSelection regionSelection) throws RegionEditException;
 
     /**
      * Returns user's selection mode.
@@ -47,8 +47,8 @@ public interface UserSession {
     /**
      * Returns user's cuboid region selection.
      * @return User's cuboid region selection.
-     * @throws RegionSelectorException When current region selection isn't instance of CuboidRegion.
+     * @throws RegionEditException When current region selection isn't instance of CuboidRegion.
      */
     @NotNull
-    CuboidRegion getCuboidRegion() throws RegionSelectorException;
+    CuboidRegion getCuboidRegion() throws RegionEditException;
 }

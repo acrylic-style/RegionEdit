@@ -10,7 +10,7 @@ import util.ICollectionList;
 import util.javascript.JavaScript;
 import xyz.acrylicstyle.region.RegionEditPlugin;
 import xyz.acrylicstyle.region.api.RegionEdit;
-import xyz.acrylicstyle.region.api.exception.RegionSelectorException;
+import xyz.acrylicstyle.region.api.exception.RegionEditException;
 import xyz.acrylicstyle.region.api.region.CuboidRegion;
 import xyz.acrylicstyle.region.api.region.RegionSelection;
 import xyz.acrylicstyle.tomeito_core.command.PlayerCommandExecutor;
@@ -52,7 +52,7 @@ public class SetCommand extends PlayerCommandExecutor {
                 }
             }.runTaskAsynchronously(RegionEdit.getInstance());
         } else {
-            throw new RegionSelectorException("Invalid RegionSelection class: " + regionSelection.getClass().getCanonicalName());
+            throw new RegionEditException("Invalid RegionSelection class: " + regionSelection.getClass().getCanonicalName());
         }
     }
 }
