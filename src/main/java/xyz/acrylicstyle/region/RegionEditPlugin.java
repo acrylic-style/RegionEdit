@@ -52,14 +52,14 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
         Bukkit.getServicesManager().register(RegionEdit.class, this, this, ServicePriority.Normal);
         Bukkit.getPluginManager().registerEvents(this, this);
         TomeitoLib.registerCommand("sel", new SelectionCommand());
-        TomeitoLib.registerCommand("set", new SetCommand());
-        TomeitoLib.registerCommand("limit", new LimitCommand());
+        TomeitoLib.registerCommand("/set", new SetCommand());
+        TomeitoLib.registerCommand("/limit", new LimitCommand());
         TomeitoLib.registerCommand("pos1", new Pos1Command());
         TomeitoLib.registerCommand("pos2", new Pos2Command());
-        TomeitoLib.registerCommand("replace", new ReplaceCommand());
+        TomeitoLib.registerCommand("/replace", new ReplaceCommand());
         TomeitoLib.registerCommand("hpos1", new HPos1Command());
         TomeitoLib.registerCommand("hpos2", new HPos2Command());
-        TomeitoLib.registerCommand("cut", new CutCommand());
+        TomeitoLib.registerCommand("/cut", new CutCommand());
         TomeitoLib.registerCommand("undo", new UndoCommand());
         TomeitoLib.registerCommand("redo", new RedoCommand());
         TomeitoLib.registerCommand("cancel", new CancelCommand());
