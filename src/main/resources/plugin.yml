@@ -1,6 +1,6 @@
 name: RegionEdit
 main: xyz.acrylicstyle.region.RegionEditPlugin
-version: 0.0.3
+version: 0.0.4
 softdepend:
   - TomeitoLib
 commands:
@@ -19,7 +19,7 @@ commands:
     permission-message: "&cYou don't have permission. Are you in a right mode?"
   replace:
     description: ""
-    aliases: ["/replace"]
+    aliases: ["/replace", "rep", "/rep"]
     permission: regions.replace
     permission-message: "&cYou don't have permission. Are you in a right mode?"
   limit:
