@@ -1,6 +1,8 @@
 name: RegionEdit
 main: xyz.acrylicstyle.region.RegionEditPlugin
-version: 0.0.1
+version: 0.0.2
+softdepend:
+  - TomeitoLib
 commands:
   sel:
     description: "Clears region selection."
