@@ -1,0 +1,62 @@
+name: RegionEdit
+main: xyz.acrylicstyle.region.RegionEditPlugin
+version: 0.0.1
+commands:
+  sel:
+    description: "Clears region selection."
+    aliases: ["/sel", ";"]
+  set:
+    description: ""
+    aliases: ["/set"]
+    permission: regions.set
+    permission-message: "&cYou don't have permission. Are you in a right mode?"
+  cut:
+    description: ""
+    aliases: ["/cut"]
+    permission: regions.cut
+    permission-message: "&cYou don't have permission. Are you in a right mode?"
+  replace:
+    description: ""
+    aliases: ["/replace"]
+    permission: regions.replace
+    permission-message: "&cYou don't have permission. Are you in a right mode?"
+  limit:
+    description: ""
+    aliases: ["/limit"]
+    permission: regions.limit
+    permission-message: "&cYou don't have permission. Are you in a right mode?"
+  pos1:
+    description: ""
+    aliases: ["/pos1"]
+    permission: regions.selection
+    permission-message: "&cYou don't have permission. Are you in a right mode?"
+  hpos1:
+    description: ""
+    aliases: ["/hpos1"]
+    permission: regions.selection
+    permission-message: "&cYou don't have permission. Are you in a right mode?"
+  pos2:
+    description: ""
+    aliases: ["/pos2"]
+    permission: regions.selection
+    permission-message: "&cYou don't have permission. Are you in a right mode?"
+  hpos2:
+    description: ""
+    aliases: ["/hpos2"]
+    permission: regions.selection
+    permission-message: "&cYou don't have permission. Are you in a right mode?"
+  undo:
+    description: ""
+    aliases: ["/undo"]
+    permission: regions.undo
+    permission-message: "&cYou don't have permission. Are you in a right mode?"
+  redo:
+    description: ""
+    aliases: ["/redo"]
+    permission: regions.redo
+    permission-message: "&cYou don't have permission. Are you in a right mode?"
+  cancel:
+    description: ""
+    aliases: ["/cancel"]
+    permission: regions.cancel
+    permission-message: "&cYou don't have permission. Are you in a right mode?"
