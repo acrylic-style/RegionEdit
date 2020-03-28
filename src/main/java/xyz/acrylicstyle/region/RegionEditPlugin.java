@@ -12,6 +12,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -19,6 +20,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 import util.Collection;
 import util.CollectionList;
+import util.ReflectionHelper;
 import util.promise.Promise;
 import xyz.acrylicstyle.region.api.RegionEdit;
 import xyz.acrylicstyle.region.api.exception.RegionEditException;
@@ -31,7 +33,9 @@ import xyz.acrylicstyle.region.api.selection.SelectionMode;
 import xyz.acrylicstyle.region.commands.*;
 import xyz.acrylicstyle.region.internal.player.UserSessionImpl;
 import xyz.acrylicstyle.region.internal.utils.Reflection;
+import xyz.acrylicstyle.should.Should;
 import xyz.acrylicstyle.tomeito_core.TomeitoLib;
+import xyz.acrylicstyle.tomeito_core.utils.Log;
 
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -64,7 +68,23 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
         TomeitoLib.registerCommand("undo", new UndoCommand());
         TomeitoLib.registerCommand("redo", new RedoCommand());
         TomeitoLib.registerCommand("cancel", new CancelCommand());
+        TomeitoLib.registerCommand("/drain", new DrainCommand());
         selectionItem = Material.getMaterial(this.getConfig().getString("selection_item", "GOLD_AXE"));
+        if (ReflectionHelper.findMethod(PlayerInventory.class, "getItemInHand") == null) {
+            Log.info("[Compatibility] Not Found Inventory#getItemInHand (1.13+)");
+        } else {
+            Log.info("[Compatibility] Found Inventory#getItemInHand (1.8 - 1.12.2)");
+        }
+        if (ReflectionHelper.findMethod(PlayerInteractEvent.class, "getHand") == null) {
+            Log.info("[Compatibility] Not Found PlayerInteractEvent#getHand (1.8)");
+        } else {
+            Log.info("[Compatibility] Found PlayerInteractEvent#getHand (1.9+)");
+        }
+        if (ReflectionHelper.findMethod(Block.class, "getData") == null) {
+            Log.info("[Compatibility] Not Found Block#getData (1.13+)");
+        } else {
+            Log.info("[Compatibility] Found Block#getData (1.8 - 1.12.2)");
+        }
     }
 
     @EventHandler
@@ -76,11 +96,7 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
                 CuboidRegion cuboidRegion = (CuboidRegion) regionSelection.getOrDefault(e.getPlayer().getUniqueId(), new CuboidRegion(e.getBlock().getLocation(), e.getBlock().getLocation()));
                 if (!cuboidRegion.getLocation2().getWorld().equals(e.getBlock().getWorld())) cuboidRegion = new CuboidRegion(e.getBlock().getLocation(), null);
                 CuboidRegion reg = new CuboidRegion(e.getBlock().getLocation(), cuboidRegion.getLocation2());
-                regionSelection.add(e.getPlayer().getUniqueId(), reg);
-                CollectionList<Block> blocks = RegionEdit.getBlocks(reg.getLocation(), reg.getLocation2(), null, null);
-                e.getPlayer().sendMessage(ChatColor.GREEN + "Selected region "
-                        + ChatColor.YELLOW + "(" + loc2Str(reg.getLocation()) + " -> " + loc2Str(reg.getLocation2()) + ") "
-                        + ChatColor.LIGHT_PURPLE + "(" + blocks.size() + " blocks)");
+                selectRegion(reg, e.getPlayer());
             }
         }
     }
@@ -98,14 +114,18 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
                     if (!cuboidRegion.getLocation().getWorld().equals(e.getClickedBlock().getWorld()))
                         cuboidRegion = new CuboidRegion(e.getClickedBlock().getLocation(), e.getClickedBlock().getLocation());
                     CuboidRegion reg = new CuboidRegion(cuboidRegion.getLocation(), e.getClickedBlock().getLocation());
-                    regionSelection.add(e.getPlayer().getUniqueId(), reg);
-                    CollectionList<Block> blocks = RegionEdit.getBlocks(reg.getLocation(), reg.getLocation2(), null, null);
-                    e.getPlayer().sendMessage(ChatColor.GREEN + "Selected region "
-                            + ChatColor.YELLOW + "(" + loc2Str(reg.getLocation()) + " -> " + loc2Str(reg.getLocation2()) + ") "
-                            + ChatColor.LIGHT_PURPLE + "(" + blocks.size() + " blocks)");
+                    selectRegion(reg, e.getPlayer());
                 }
             }
         }
+    }
+
+    private void selectRegion(CuboidRegion reg, Player player) {
+        regionSelection.add(player.getUniqueId(), reg);
+        CollectionList<Block> blocks = RegionEdit.getBlocks(reg.getLocation(), reg.getLocation2(), null, null);
+        player.sendMessage(ChatColor.GREEN + "Selected region "
+                + ChatColor.YELLOW + "(" + loc2Str(reg.getLocation()) + " -> " + loc2Str(reg.getLocation2()) + ") "
+                + ChatColor.LIGHT_PURPLE + "(" + blocks.size() + " blocks)");
     }
 
     private String loc2Str(Location location) {
@@ -139,7 +159,7 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
 
     public static void setBlocks(Player player, CollectionList<Block> blocks, Material material, byte data) {
         double start = System.currentTimeMillis();
-        historyManager.addEntry(player.getUniqueId(), blocks);
+        CollectionList<xyz.acrylicstyle.region.api.block.Block> blocks2 = blocks.map(xyz.acrylicstyle.region.api.block.Block::new);
         if (!playerTasks.containsKey(player.getUniqueId())) playerTasks.add(player.getUniqueId(), new CollectionList<>());
         Plugin plugin = RegionEdit.getInstance();
         AtomicInteger i0 = new AtomicInteger();
@@ -158,7 +178,7 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
                         public void run() {
                             if (tasks.get(taskId) == OperationStatus.CANCELLED) return;
                             block.setType(material);
-                            block.setData(data);
+                            if (Should.object(block).have().method("setData")) block.setData(data); // use Block#setData only if it presents
                         }
                     }.runTaskLater(plugin, i0.get() % RegionEditPlugin.blocksPerTick == 0 ? i.getAndIncrement() : i.get());
                     return null;
@@ -169,20 +189,37 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
         new BukkitRunnable() {
             @Override
             public void run() {
-                if (tasks.get(taskId) == OperationStatus.CANCELLED) return;
-                tasks.add(taskId, OperationStatus.FINISHED);
-                double end = System.currentTimeMillis();
-                double seconds = (end-start)/1000F;
-                int bpt = (int) (blocks.size()/((float) (end-start)/50F));
-                player.sendMessage(ChatColor.GREEN + "Operation completed. " + ChatColor.LIGHT_PURPLE + "(" + bpt + " blocks per ticks, took " + seconds + " seconds)");
+                new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        historyManager.addEntry(player.getUniqueId(), blocks2);
+                    }
+                }.runTaskLater(RegionEdit.getInstance(), 10);
+                completeOperation(blocks.size(), taskId, start, player);
             }
         }.runTaskLater(plugin, i.getAndIncrement());
     }
 
-    public static void setBlocks(Player player, Collection<Location, Block> blocks) {
+    private static void completeOperation(int size, int taskId, double start, Player player) {
+        if (tasks.get(taskId) == OperationStatus.CANCELLED) return;
+        tasks.add(taskId, OperationStatus.FINISHED);
+        double end = System.currentTimeMillis();
+        double seconds = (end-start)/1000F;
+        int bpt = (int) (size /((float) (end-start)/50F));
+        player.sendMessage(ChatColor.GREEN + "Operation completed. " + ChatColor.LIGHT_PURPLE + "(" + bpt + " blocks per ticks, took " + seconds + " seconds)");
+    }
+
+    public static void setBlocks(Player player, Collection<Location, xyz.acrylicstyle.region.api.block.Block> blocks) {
+        double start = System.currentTimeMillis();
+        // historyManager.addEntry(player.getUniqueId(), blocks);
+        if (!playerTasks.containsKey(player.getUniqueId())) playerTasks.add(player.getUniqueId(), new CollectionList<>());
         Plugin plugin = RegionEdit.getInstance();
         AtomicInteger i0 = new AtomicInteger();
         AtomicInteger i = new AtomicInteger();
+        final int taskId = RegionEditPlugin.taskId.getAndIncrement();
+        playerTasks.get(player.getUniqueId()).add(taskId);
+        tasks.add(taskId, OperationStatus.RUNNING);
+        player.sendMessage("" + ChatColor.RED + blocks.size() + ChatColor.GREEN + " blocks affected. " + ChatColor.LIGHT_PURPLE + " (Task ID: " + taskId + ")");
         blocks.forEach((loc, block) -> {
             new Promise<Object>() {
                 @SuppressWarnings("deprecation")
@@ -191,8 +228,9 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
                     new BukkitRunnable() {
                         @Override
                         public void run() {
+                            if (tasks.get(taskId) == OperationStatus.CANCELLED) return;
                             loc.getBlock().setType(block.getType());
-                            loc.getBlock().setData(block.getData());
+                            if (ReflectionHelper.findMethod(Block.class, "getData") != null) loc.getBlock().setData(block.getData());
                         }
                     }.runTaskLater(plugin, i0.get() % RegionEditPlugin.blocksPerTick == 0 ? i.getAndIncrement() : i.get());
                     return null;
@@ -200,15 +238,11 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
             }.queue();
             i0.incrementAndGet();
         });
-        double start = System.currentTimeMillis();
         new BukkitRunnable() {
             @Override
             public void run() {
-                double end = System.currentTimeMillis();
-                double seconds = (end-start)/1000F;
-                player.sendMessage(ChatColor.GREEN + "Operation completed. " + ChatColor.LIGHT_PURPLE + "(" + blocks.size() + " blocks, took " + seconds + " seconds)");
+                completeOperation(blocks.size(), taskId, start, player);
             }
         }.runTaskLater(plugin, i.getAndIncrement());
-        player.sendMessage("" + ChatColor.RED + blocks.size() + ChatColor.GREEN + " blocks affected.");
     }
 }

@@ -79,6 +79,18 @@ public interface RegionEdit extends Plugin {
     }
 
     @NotNull
+    static CollectionList<Block> getNearbyBlocks(@NotNull Location location, int radius) {
+        CollectionList<Block> blocks = new CollectionList<>();
+        for (int x = location.getBlockX() - radius; x <= location.getBlockX() + radius; x++) {
+            for (int y = location.getBlockY() - radius; y <= location.getBlockY() + radius; y++) {
+                for (int z = location.getBlockZ() - radius; z <= location.getBlockZ() + radius; z++) {
+                    blocks.add(location.getWorld().getBlockAt(x, y, z));
+                }
+            }
+        }
+        return blocks;
+    }
+    @NotNull
     UserSession getUserSession(@NotNull UUID uuid);
 
     @NotNull

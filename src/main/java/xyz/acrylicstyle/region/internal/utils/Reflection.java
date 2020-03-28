@@ -1,5 +1,6 @@
 package xyz.acrylicstyle.region.internal.utils;
 
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
@@ -43,5 +44,16 @@ public class Reflection {
                 throw new RuntimeException(ex);
             }
         } else return null;
+    }
+
+    /**
+     * Returns block data.<br />
+     * For 1.8-1.12.2, it returns actual block data value.<br />
+     * For 1.13+, it always returns 0 since it's not supported.
+     */
+    @SuppressWarnings("deprecation")
+    public static byte getData(@NotNull Block block) {
+        if (ReflectionHelper.findMethod(Block.class, "getData") != null) return block.getData();
+        return (byte) 0;
     }
 }

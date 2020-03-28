@@ -38,7 +38,7 @@ public class SetCommand extends PlayerCommandExecutor {
             return;
         }
         int data = JavaScript.parseInt((args[0] + ":0").split(":")[1], 10);
-        Material material = Material.getMaterial(materials.filter(s -> s.equalsIgnoreCase(args[0])).first().toUpperCase());
+        Material material = Material.getMaterial(materials.filter(s -> s.equalsIgnoreCase((args[0] + ":0").split(":")[0])).first().toUpperCase());
         RegionSelection regionSelection = RegionEditPlugin.regionSelection.get(player.getUniqueId());
         if (regionSelection instanceof CuboidRegion) {
             CuboidRegion region = (CuboidRegion) regionSelection;
@@ -46,7 +46,7 @@ public class SetCommand extends PlayerCommandExecutor {
             new BukkitRunnable() {
                 @Override
                 public void run() {
-                    CollectionList<Block> blocks = RegionEdit.getBlocks(region.getLocation(), region.getLocation2(), null, null);
+                    CollectionList<Block> blocks = RegionEdit.getBlocksInvert(region.getLocation(), region.getLocation2(), material);
                     RegionEdit.getInstance().getHistoryManager().resetPointer(player.getUniqueId());
                     RegionEditPlugin.setBlocks(player, blocks, material, (byte) data);
                 }
