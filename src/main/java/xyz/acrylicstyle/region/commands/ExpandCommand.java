@@ -14,6 +14,17 @@ import java.util.Arrays;
 public class ExpandCommand extends PlayerCommandExecutor {
     @Override
     public void onCommand(Player player, String[] args) {
+        if (args.length == 1 && args[0].equalsIgnoreCase("vert")) {
+            CuboidRegion region = RegionEdit.getInstance().getUserSession(player).getCuboidRegion();
+            if (!region.isValid()) {
+                player.sendMessage(ChatColor.RED + "You must make selection first.");
+                return;
+            }
+            region.getLocation().setY(0);
+            region.getLocation2().setY(255);
+            RegionEditPlugin.showCurrentRegion(player);
+            return;
+        }
         if (args.length <= 1) {
             player.sendMessage(ChatColor.LIGHT_PURPLE + "//expand <number> <up/down/east/south/west/north>");
             player.sendMessage(ChatColor.YELLOW + "Expands selection area by <number>.");
@@ -26,12 +37,6 @@ public class ExpandCommand extends PlayerCommandExecutor {
         CuboidRegion region = RegionEdit.getInstance().getUserSession(player).getCuboidRegion();
         if (!region.isValid()) {
             player.sendMessage(ChatColor.RED + "You must make selection first.");
-            return;
-        }
-        if (args[0].equalsIgnoreCase("vert")) {
-            region.getLocation().setY(0);
-            region.getLocation2().setY(255);
-            RegionEditPlugin.showCurrentRegion(player);
             return;
         }
         if (!TypeUtil.isInt(args[0])) {
