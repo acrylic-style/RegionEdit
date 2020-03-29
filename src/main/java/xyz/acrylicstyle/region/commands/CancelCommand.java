@@ -2,6 +2,7 @@ package xyz.acrylicstyle.region.commands;
 
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
+import util.Collection;
 import util.CollectionList;
 import xyz.acrylicstyle.region.RegionEditPlugin;
 import xyz.acrylicstyle.region.api.operation.OperationStatus;
@@ -26,12 +27,24 @@ public class CancelCommand extends PlayerCommandExecutor {
             player.sendMessage(ChatColor.GREEN + "Cancelled the operation.");
             return;
         }
+        if (args[0].equalsIgnoreCase("all")) {
+            if (!player.hasPermission("regions.cancel.c")) {
+                player.sendMessage(ChatColor.LIGHT_PURPLE + "You need following permission: " + ChatColor.AQUA + "regions.cancel.c");
+                return;
+            }
+            Collection<Integer, OperationStatus> running = RegionEditPlugin.tasks
+                    .clone()
+                    .filter((status) -> status == OperationStatus.RUNNING);
+            running.forEach((i, status) -> RegionEditPlugin.tasks.add(i, OperationStatus.CANCELLED));
+            player.sendMessage(ChatColor.GREEN + "Cancelled all running operations. " + ChatColor.LIGHT_PURPLE + "(" + running.size() + " operations were running)");
+            return;
+        }
         if (!player.hasPermission("regions.cancel.b")) {
             player.sendMessage(ChatColor.LIGHT_PURPLE + "You need following permission: " + ChatColor.AQUA + "regions.cancel.b");
             return;
         }
         if (!TypeUtil.isInt(args[0])) {
-            player.sendMessage(ChatColor.LIGHT_PURPLE + "Usage: /cancel [task id]");
+            player.sendMessage(ChatColor.LIGHT_PURPLE + "Usage: /cancel [task id / all]");
             player.sendMessage(ChatColor.YELLOW + "Cancels the operation.");
             return;
         }

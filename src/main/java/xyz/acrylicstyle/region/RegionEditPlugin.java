@@ -31,12 +31,15 @@ import xyz.acrylicstyle.region.api.region.CuboidRegion;
 import xyz.acrylicstyle.region.api.region.RegionSelection;
 import xyz.acrylicstyle.region.api.selection.SelectionMode;
 import xyz.acrylicstyle.region.commands.*;
+import xyz.acrylicstyle.region.internal.commands.CommandDescription;
+import xyz.acrylicstyle.region.internal.commands.CommandDescriptionManager;
 import xyz.acrylicstyle.region.internal.player.UserSessionImpl;
 import xyz.acrylicstyle.region.internal.utils.Reflection;
 import xyz.acrylicstyle.should.Should;
 import xyz.acrylicstyle.tomeito_core.TomeitoLib;
 import xyz.acrylicstyle.tomeito_core.utils.Log;
 
+import java.util.Arrays;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -49,6 +52,7 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
     private static HistoryManager historyManager = new HistoryManager();
     public static Collection<UUID, SelectionMode> selectionMode = new Collection<>();
     public static Collection<UUID, RegionSelection> regionSelection = new Collection<>();
+    public static CommandDescriptionManager commandDescriptionManager = new CommandDescriptionManager();
 
     public static int blocksPerTick = 4096;
 
@@ -56,19 +60,38 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
     public void onEnable() {
         Bukkit.getServicesManager().register(RegionEdit.class, this, this, ServicePriority.Normal);
         Bukkit.getPluginManager().registerEvents(this, this);
+        TomeitoLib.registerCommand("regionedit", new RegionEditCommand());
+        TomeitoLib.registerCommand("/help", new HelpCommand());
         TomeitoLib.registerCommand("sel", new SelectionCommand());
         TomeitoLib.registerCommand("/set", new SetCommand());
         TomeitoLib.registerCommand("/limit", new LimitCommand());
-        TomeitoLib.registerCommand("pos1", new Pos1Command());
-        TomeitoLib.registerCommand("pos2", new Pos2Command());
+        TomeitoLib.registerCommand("/pos1", new Pos1Command());
+        TomeitoLib.registerCommand("/pos2", new Pos2Command());
         TomeitoLib.registerCommand("/replace", new ReplaceCommand());
-        TomeitoLib.registerCommand("hpos1", new HPos1Command());
-        TomeitoLib.registerCommand("hpos2", new HPos2Command());
+        TomeitoLib.registerCommand("/hpos1", new HPos1Command());
+        TomeitoLib.registerCommand("/hpos2", new HPos2Command());
         TomeitoLib.registerCommand("/cut", new CutCommand());
-        TomeitoLib.registerCommand("undo", new UndoCommand());
-        TomeitoLib.registerCommand("redo", new RedoCommand());
-        TomeitoLib.registerCommand("cancel", new CancelCommand());
+        TomeitoLib.registerCommand("/undo", new UndoCommand());
+        TomeitoLib.registerCommand("/redo", new RedoCommand());
+        TomeitoLib.registerCommand("/cancel", new CancelCommand());
         TomeitoLib.registerCommand("/drain", new DrainCommand());
+        commandDescriptionManager.add("//help", new CommandDescription("//help [page]", "regions.help", "Shows all RegionEdit commands."));
+        commandDescriptionManager.add("/;", new CommandDescription("//sel [cuboid]", "", "Clears selection or switches selection mode."));
+        commandDescriptionManager.add("//sel", new CommandDescription("//sel [cuboid]", "", "Clears selection or switches selection mode."));
+        commandDescriptionManager.add("//limit", new CommandDescription("//limit [number]", "regions.limit", "Limits blocks per ticks"));
+        commandDescriptionManager.add("//pos1", new CommandDescription("//pos1", "regions.selection", "Set position 1 at player's location."));
+        commandDescriptionManager.add("//pos2", new CommandDescription("//pos2", "regions.selection", "Set position 2 at player's location."));
+        commandDescriptionManager.add("//hpos1", new CommandDescription("//hpos1", "regions.selection", "Set position 1 at block player's is looking at."));
+        commandDescriptionManager.add("//hpos2", new CommandDescription("//hpos2", "regions.selection", "Set position 2 at block player's is looking at."));
+        commandDescriptionManager.add("//cut", new CommandDescription("//cut", "regions.cut", "Removes blocks at specified region."));
+        commandDescriptionManager.add("//replace", new CommandDescription("//replace [before] [after]", "regions.replace", "Replace blocks at specified region."));
+        commandDescriptionManager.add("//set", new CommandDescription("//set [block]", "regions.set", "Places blocks at specified region."));
+        commandDescriptionManager.add("//undo", new CommandDescription("//undo", "regions.undo", "Rollbacks action."));
+        commandDescriptionManager.add("//redo", new CommandDescription("//redo", "regions.redo", "Rollbacks undo action."));
+        commandDescriptionManager.add("//drain", new CommandDescription("//drain [radius] [lava]", "regions.drain", "Drains water near you."));
+        commandDescriptionManager.add("//cancel", new CommandDescription("//cancel [task id/all]",
+                Arrays.asList("regions.cancel", "regions.cancel.a -> self", "regions.cancel.b -> others", "regions.cancel.c -> all"),
+                "Cancels current operation."));
         selectionItem = Material.getMaterial(this.getConfig().getString("selection_item", "GOLD_AXE"));
         if (ReflectionHelper.findMethod(PlayerInventory.class, "getItemInHand") == null) {
             Log.info("[Compatibility] Not Found Inventory#getItemInHand (1.13+)");

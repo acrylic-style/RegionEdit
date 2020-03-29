@@ -1,6 +1,7 @@
 name: RegionEdit
 main: xyz.acrylicstyle.region.RegionEditPlugin
-version: 0.0.9
+version: 0.0.10
+author: acrylic-style
 softdepend:
   - TomeitoLib
 commands:
@@ -28,38 +29,38 @@ commands:
     description: ""
     permission: regions.drain
     permission-message: "&cYou don't have permission. Are you in a right mode?"
-  pos1:
+  "/pos1":
     description: ""
-    aliases: ["/pos1"]
     permission: regions.selection
     permission-message: "&cYou don't have permission. Are you in a right mode?"
-  hpos1:
+  "/hpos1":
     description: ""
-    aliases: ["/hpos1"]
     permission: regions.selection
     permission-message: "&cYou don't have permission. Are you in a right mode?"
-  pos2:
+  "/pos2":
     description: ""
-    aliases: ["/pos2"]
     permission: regions.selection
     permission-message: "&cYou don't have permission. Are you in a right mode?"
-  hpos2:
+  "/hpos2":
     description: ""
-    aliases: ["/hpos2"]
     permission: regions.selection
     permission-message: "&cYou don't have permission. Are you in a right mode?"
-  undo:
+  "/undo":
     description: ""
-    aliases: ["/undo"]
     permission: regions.undo
     permission-message: "&cYou don't have permission. Are you in a right mode?"
-  redo:
+  "/redo":
     description: ""
-    aliases: ["/redo"]
     permission: regions.redo
     permission-message: "&cYou don't have permission. Are you in a right mode?"
-  cancel:
+  "/cancel":
     description: ""
-    aliases: ["/cancel"]
     permission: regions.cancel
+    permission-message: "&cYou don't have permission. Are you in a right mode?"
+  regionedit:
+    description: "RegionEdit"
+    aliases: ["/re", "re", "/regionedit"]
+  "/help":
+    description: ""
+    permission: regions.help
     permission-message: "&cYou don't have permission. Are you in a right mode?"
