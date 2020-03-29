@@ -13,6 +13,7 @@ import xyz.acrylicstyle.region.api.RegionEdit;
 import xyz.acrylicstyle.region.api.exception.RegionEditException;
 import xyz.acrylicstyle.region.api.region.CuboidRegion;
 import xyz.acrylicstyle.region.api.region.RegionSelection;
+import xyz.acrylicstyle.region.internal.utils.Reflection;
 import xyz.acrylicstyle.tomeito_core.command.PlayerCommandExecutor;
 
 import java.util.function.Function;
@@ -46,7 +47,7 @@ public class SetCommand extends PlayerCommandExecutor {
             new BukkitRunnable() {
                 @Override
                 public void run() {
-                    CollectionList<Block> blocks = RegionEdit.getBlocksInvert(region.getLocation(), region.getLocation2(), material);
+                    CollectionList<Block> blocks = RegionEdit.getBlocks(region.getLocation(), region.getLocation2(), null, block -> block.getType() != material || Reflection.getData(block) != data);
                     RegionEdit.getInstance().getHistoryManager().resetPointer(player.getUniqueId());
                     RegionEditPlugin.setBlocks(player, blocks, material, (byte) data);
                 }
