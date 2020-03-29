@@ -40,6 +40,7 @@ import xyz.acrylicstyle.tomeito_core.TomeitoLib;
 import xyz.acrylicstyle.tomeito_core.utils.Log;
 
 import java.util.Arrays;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -48,6 +49,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener {
     private Material selectionItem = null;
+    private Material navigationItem = null;
 
     private static HistoryManager historyManager = new HistoryManager();
     public static Collection<UUID, SelectionMode> selectionMode = new Collection<>();
@@ -93,6 +95,7 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
                 Arrays.asList("regions.cancel", "regions.cancel.a -> self", "regions.cancel.b -> others", "regions.cancel.c -> all"),
                 "Cancels current operation."));
         selectionItem = Material.getMaterial(this.getConfig().getString("selection_item", "GOLD_AXE"));
+        navigationItem = Material.getMaterial(this.getConfig().getString("navigation_item", "COMPASS"));
         if (ReflectionHelper.findMethod(PlayerInventory.class, "getItemInHand") == null) {
             Log.info("[Compatibility] Not Found Inventory#getItemInHand (1.13+)");
         } else {
@@ -139,6 +142,20 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
                     CuboidRegion reg = new CuboidRegion(cuboidRegion.getLocation(), e.getClickedBlock().getLocation());
                     selectRegion(reg, e.getPlayer());
                 }
+            }
+        }
+        if (e.getAction() == Action.LEFT_CLICK_BLOCK || e.getAction() == Action.LEFT_CLICK_AIR) {
+            if (e.getPlayer().hasPermission("regions.navigation") && Reflection.getItemInHand(e.getPlayer()).getType() == navigationItem) {
+                Block block = e.getPlayer().getTargetBlock((Set<Material>) null, 500);
+                e.setCancelled(true);
+                if (block == null || block.getType() == Material.AIR) {
+                    e.getPlayer().sendMessage(ChatColor.RED + "Couldn't find block! (or too far)");
+                    return;
+                }
+                Location location = block.getLocation().clone().add(0.5, 1, 0.5);
+                location.setYaw(e.getPlayer().getLocation().getYaw());
+                location.setPitch(e.getPlayer().getLocation().getPitch());
+                e.getPlayer().teleport(location);
             }
         }
     }
