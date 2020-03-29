@@ -77,6 +77,7 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
         TomeitoLib.registerCommand("/redo", new RedoCommand());
         TomeitoLib.registerCommand("/cancel", new CancelCommand());
         TomeitoLib.registerCommand("/drain", new DrainCommand());
+        TomeitoLib.registerCommand("/expand", new ExpandCommand());
         commandDescriptionManager.add("//help", new CommandDescription("//help [page]", "regions.help", "Shows all RegionEdit commands."));
         commandDescriptionManager.add("/;", new CommandDescription("//sel [cuboid]", "", "Clears selection or switches selection mode."));
         commandDescriptionManager.add("//sel", new CommandDescription("//sel [cuboid]", "", "Clears selection or switches selection mode."));
@@ -94,6 +95,7 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
         commandDescriptionManager.add("//cancel", new CommandDescription("//cancel [task id/all]",
                 Arrays.asList("regions.cancel", "regions.cancel.a -> self", "regions.cancel.b -> others", "regions.cancel.c -> all"),
                 "Cancels current operation."));
+        commandDescriptionManager.add("//expand", new CommandDescription("//expand <<<number> <up/down/east/south/west/north>>/<vert>>", "regions.selection", "Expands selection area by <number>."));
         selectionItem = Material.getMaterial(this.getConfig().getString("selection_item", "GOLD_AXE"));
         navigationItem = Material.getMaterial(this.getConfig().getString("navigation_item", "COMPASS"));
         if (ReflectionHelper.findMethod(PlayerInventory.class, "getItemInHand") == null) {
@@ -152,7 +154,9 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
                     e.getPlayer().sendMessage(ChatColor.RED + "Couldn't find block! (or too far)");
                     return;
                 }
-                Location location = block.getLocation().clone().add(0.5, 1, 0.5);
+                int i = 0;
+                while (block.getLocation().add(0, i+1, 0).getBlock().getType() != Material.AIR) i++;
+                Location location = block.getLocation().clone().add(0.5, i+1, 0.5);
                 location.setYaw(e.getPlayer().getLocation().getYaw());
                 location.setPitch(e.getPlayer().getLocation().getPitch());
                 e.getPlayer().teleport(location);
@@ -162,13 +166,18 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
 
     private void selectRegion(CuboidRegion reg, Player player) {
         regionSelection.add(player.getUniqueId(), reg);
+        showCurrentRegion(player);
+    }
+
+    public static void showCurrentRegion(Player player) {
+        CuboidRegion reg = (CuboidRegion) regionSelection.get(player.getUniqueId());
         CollectionList<Block> blocks = RegionEdit.getBlocks(reg.getLocation(), reg.getLocation2(), null, null);
         player.sendMessage(ChatColor.GREEN + "Selected region "
                 + ChatColor.YELLOW + "(" + loc2Str(reg.getLocation()) + " -> " + loc2Str(reg.getLocation2()) + ") "
                 + ChatColor.LIGHT_PURPLE + "(" + blocks.size() + " blocks)");
     }
 
-    private String loc2Str(Location location) {
+    public static String loc2Str(Location location) {
         if (location == null) return "null";
         return String.format(ChatColor.LIGHT_PURPLE + "%d, %d, %d" + ChatColor.YELLOW, location.getBlockX(), location.getBlockY(), location.getBlockZ());
     }

@@ -11,6 +11,10 @@ public class CuboidRegion implements RegionSelection {
     public final Location loc2;
 
     public CuboidRegion(Location loc1, Location loc2) {
+        if (loc1 != null && loc1.getY() > 255) loc1.setY(255);
+        if (loc2 != null && loc2.getY() > 255) loc2.setY(255);
+        if (loc1 != null && loc1.getY() < 0) loc1.setY(0);
+        if (loc2 != null && loc2.getY() < 0) loc2.setY(0);
         this.loc1 = loc1;
         this.loc2 = loc2;
     }
