@@ -218,21 +218,14 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
         tasks.add(taskId, OperationStatus.RUNNING);
         player.sendMessage("" + ChatColor.RED + blocks.size() + ChatColor.GREEN + " blocks affected. " + ChatColor.LIGHT_PURPLE + " (Task ID: " + taskId + ")");
         blocks.forEach(block -> {
-            new Promise<Object>() {
-                @SuppressWarnings("deprecation")
+            new Thread(() -> new BukkitRunnable() {
                 @Override
-                public Object apply(Object o) {
-                    new BukkitRunnable() {
-                        @Override
-                        public void run() {
-                            if (tasks.get(taskId) == OperationStatus.CANCELLED) return;
-                            block.setType(material);
-                            if (Should.object(block).have().method("setData")) block.setData(data); // use Block#setData only if it presents
-                        }
-                    }.runTaskLater(plugin, i0.get() % RegionEditPlugin.blocksPerTick == 0 ? i.getAndIncrement() : i.get());
-                    return null;
+                public void run() {
+                    if (tasks.get(taskId) == OperationStatus.CANCELLED) return;
+                    block.setType(material);
+                    if (Should.object(block).have().method("setData")) block.setData(data); // use Block#setData only if it presents
                 }
-            }.queue();
+            }.runTaskLater(plugin, i0.get() % RegionEditPlugin.blocksPerTick == 0 ? i.getAndIncrement() : i.get())).start();
             i0.incrementAndGet();
         });
         new BukkitRunnable() {
