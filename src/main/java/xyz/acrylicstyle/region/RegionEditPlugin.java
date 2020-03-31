@@ -206,7 +206,7 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
 
     public static Collection<UUID, CollectionList<Integer>> playerTasks = new Collection<>();
 
-    public static void setBlocks(Player player, CollectionList<Block> blocks, Material material, byte data) {
+    public static void setBlocks(Player player, @NotNull CollectionList<Block> blocks, Material material, byte data) {
         double start = System.currentTimeMillis();
         CollectionList<xyz.acrylicstyle.region.api.block.Block> blocks2 = blocks.map(xyz.acrylicstyle.region.api.block.Block::new);
         if (!playerTasks.containsKey(player.getUniqueId())) playerTasks.add(player.getUniqueId(), new CollectionList<>());

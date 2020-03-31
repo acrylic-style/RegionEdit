@@ -4,7 +4,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitRunnable;
 import util.CollectionList;
 import xyz.acrylicstyle.region.RegionEditPlugin;
 import xyz.acrylicstyle.region.api.RegionEdit;
@@ -12,6 +11,7 @@ import xyz.acrylicstyle.region.api.exception.RegionEditException;
 import xyz.acrylicstyle.region.api.region.CuboidRegion;
 import xyz.acrylicstyle.region.api.region.RegionSelection;
 import xyz.acrylicstyle.tomeito_core.command.PlayerCommandExecutor;
+import xyz.acrylicstyle.tomeito_core.utils.Callback;
 
 public class CutCommand extends PlayerCommandExecutor {
     @Override
@@ -23,14 +23,13 @@ public class CutCommand extends PlayerCommandExecutor {
         RegionSelection regionSelection = RegionEditPlugin.regionSelection.get(player.getUniqueId());
         if (regionSelection instanceof CuboidRegion) {
             CuboidRegion region = (CuboidRegion) regionSelection;
-            new BukkitRunnable() {
+            RegionEdit.getBlocksInvertAsync(region.getLocation(), region.getLocation2(), Material.AIR, new Callback<CollectionList<Block>>() {
                 @Override
-                public void run() {
-                    CollectionList<Block> blocks = RegionEdit.getBlocksInvert(region.getLocation(), region.getLocation2(), Material.AIR);
+                public void done(CollectionList<Block> blocks, Throwable throwable) {
                     RegionEdit.getInstance().getHistoryManager().resetPointer(player.getUniqueId());
                     RegionEditPlugin.setBlocks(player, blocks, Material.AIR, (byte) 0);
                 }
-            }.runTaskAsynchronously(RegionEdit.getInstance());
+            });
         } else {
             throw new RegionEditException("Invalid RegionSelection class: " + regionSelection.getClass().getCanonicalName());
         }

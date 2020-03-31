@@ -9,12 +9,10 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.jetbrains.annotations.NotNull;
 import util.CollectionList;
-import util.ICollectionList;
 import xyz.acrylicstyle.region.api.manager.HistoryManager;
 import xyz.acrylicstyle.region.api.player.UserSession;
+import xyz.acrylicstyle.tomeito_core.utils.Callback;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
 
@@ -26,10 +24,13 @@ public interface RegionEdit extends Plugin {
         return service.getProvider();
     }
 
+    static void getBlocksAsync(@NotNull Location loc1, @NotNull Location loc2, Material block, Function<Block, Boolean> filterFunction, Callback<CollectionList<Block>> callback) {
+        new Thread(() -> callback.done(getBlocks(loc1, loc2, block, filterFunction), null)).start();
+    }
+
     @NotNull
     static CollectionList<Block> getBlocks(@NotNull Location loc1, @NotNull Location loc2, Material block, Function<Block, Boolean> filterFunction) {
-        if (!loc1.getWorld().equals(loc2.getWorld())) throw new RuntimeException("Cannot compare between worlds");
-        List<Block> blocks = new ArrayList<>();
+        CollectionList<Block> blocks = new CollectionList<>();
         int x1, x2, y1, y2, z1, z2;
         x1 = loc1.getX() > loc2.getX() ? (int) loc2.getX() : (int) loc1.getX();
         y1 = loc1.getY() > loc2.getY() ? (int) loc2.getY() : (int) loc1.getY();
@@ -52,13 +53,16 @@ public interface RegionEdit extends Plugin {
                 }
             }
         }
-        return ICollectionList.asList(blocks);
+        return blocks;
+    }
+
+    static void getBlocksInvertAsync(@NotNull Location loc1, @NotNull Location loc2, Material block, Callback<CollectionList<Block>> callback) {
+        new Thread(() -> callback.done(getBlocksInvert(loc1, loc2, block), null)).start();
     }
 
     @NotNull
     static CollectionList<Block> getBlocksInvert(@NotNull Location loc1, @NotNull Location loc2, Material block) {
-        if (!loc1.getWorld().equals(loc2.getWorld())) throw new RuntimeException("Cannot compare between worlds");
-        List<Block> blocks = new ArrayList<>();
+        CollectionList<Block> blocks = new CollectionList<>();
         int x1, x2, y1, y2, z1, z2;
         x1 = loc1.getX() > loc2.getX() ? (int) loc2.getX() : (int) loc1.getX();
         y1 = loc1.getY() > loc2.getY() ? (int) loc2.getY() : (int) loc1.getY();
@@ -75,7 +79,11 @@ public interface RegionEdit extends Plugin {
                 }
             }
         }
-        return ICollectionList.asList(blocks);
+        return blocks;
+    }
+
+    static void getNearbyBlocksAsync(@NotNull Location location, int radius, Callback<CollectionList<Block>> callback) {
+        new Thread(() -> callback.done(getNearbyBlocks(location, radius), null)).start();
     }
 
     @NotNull
@@ -90,6 +98,7 @@ public interface RegionEdit extends Plugin {
         }
         return blocks;
     }
+
     @NotNull
     UserSession getUserSession(@NotNull UUID uuid);
 

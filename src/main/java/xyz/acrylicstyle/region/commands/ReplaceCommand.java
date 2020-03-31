@@ -4,7 +4,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitRunnable;
 import util.CollectionList;
 import util.ICollectionList;
 import util.javascript.JavaScript;
@@ -15,6 +14,7 @@ import xyz.acrylicstyle.region.api.region.CuboidRegion;
 import xyz.acrylicstyle.region.api.region.RegionSelection;
 import xyz.acrylicstyle.region.internal.utils.Reflection;
 import xyz.acrylicstyle.tomeito_core.command.PlayerCommandExecutor;
+import xyz.acrylicstyle.tomeito_core.utils.Callback;
 
 import java.util.function.Function;
 
@@ -53,19 +53,23 @@ public class ReplaceCommand extends PlayerCommandExecutor {
         RegionSelection regionSelection = RegionEditPlugin.regionSelection.get(player.getUniqueId());
         if (regionSelection instanceof CuboidRegion) {
             CuboidRegion region = (CuboidRegion) regionSelection;
-            new BukkitRunnable() {
-                @Override
-                public void run() {
-                    CollectionList<Block> blocks;
-                    if (args[0].startsWith("!")) {
-                        blocks = RegionEdit.getBlocksInvert(region.getLocation(), region.getLocation2(), before);
-                    } else {
-                        blocks = RegionEdit.getBlocks(region.getLocation(), region.getLocation2(), before, block -> Reflection.getData(block) == (byte) beforeData);
+            if (args[0].startsWith("!")) {
+                RegionEdit.getBlocksInvertAsync(region.getLocation(), region.getLocation2(), before, new Callback<CollectionList<Block>>() {
+                    @Override
+                    public void done(CollectionList<Block> blocks, Throwable throwable) {
+                        RegionEdit.getInstance().getHistoryManager().resetPointer(player.getUniqueId());
+                        RegionEditPlugin.setBlocks(player, blocks, after, (byte) afterData);
                     }
-                    RegionEdit.getInstance().getHistoryManager().resetPointer(player.getUniqueId());
-                    RegionEditPlugin.setBlocks(player, blocks, after, (byte) afterData);
-                }
-            }.runTaskAsynchronously(RegionEdit.getInstance());
+                });
+            } else {
+                RegionEdit.getBlocksAsync(region.getLocation(), region.getLocation2(), before, block -> Reflection.getData(block) == (byte) beforeData, new Callback<CollectionList<Block>>() {
+                    @Override
+                    public void done(CollectionList<Block> blocks, Throwable throwable) {
+                        RegionEdit.getInstance().getHistoryManager().resetPointer(player.getUniqueId());
+                        RegionEditPlugin.setBlocks(player, blocks, after, (byte) afterData);
+                    }
+                });
+            }
         } else {
             throw new RegionEditException("Invalid RegionSelection class: " + regionSelection.getClass().getCanonicalName());
         }

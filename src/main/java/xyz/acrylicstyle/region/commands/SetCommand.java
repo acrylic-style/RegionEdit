@@ -4,7 +4,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitRunnable;
 import util.CollectionList;
 import util.ICollectionList;
 import util.javascript.JavaScript;
@@ -15,6 +14,7 @@ import xyz.acrylicstyle.region.api.region.CuboidRegion;
 import xyz.acrylicstyle.region.api.region.RegionSelection;
 import xyz.acrylicstyle.region.internal.utils.Reflection;
 import xyz.acrylicstyle.tomeito_core.command.PlayerCommandExecutor;
+import xyz.acrylicstyle.tomeito_core.utils.Callback;
 
 import java.util.function.Function;
 
@@ -43,15 +43,13 @@ public class SetCommand extends PlayerCommandExecutor {
         RegionSelection regionSelection = RegionEditPlugin.regionSelection.get(player.getUniqueId());
         if (regionSelection instanceof CuboidRegion) {
             CuboidRegion region = (CuboidRegion) regionSelection;
-            player.sendMessage(ChatColor.GREEN + "Fetching blocks...");
-            new BukkitRunnable() {
+            RegionEdit.getBlocksAsync(region.getLocation(), region.getLocation2(), null, block -> block.getType() != material || Reflection.getData(block) != data, new Callback<CollectionList<Block>>() {
                 @Override
-                public void run() {
-                    CollectionList<Block> blocks = RegionEdit.getBlocks(region.getLocation(), region.getLocation2(), null, block -> block.getType() != material || Reflection.getData(block) != data);
+                public void done(CollectionList<Block> blocks, Throwable throwable) {
                     RegionEdit.getInstance().getHistoryManager().resetPointer(player.getUniqueId());
                     RegionEditPlugin.setBlocks(player, blocks, material, (byte) data);
                 }
-            }.runTaskAsynchronously(RegionEdit.getInstance());
+            });
         } else {
             throw new RegionEditException("Invalid RegionSelection class: " + regionSelection.getClass().getCanonicalName());
         }
