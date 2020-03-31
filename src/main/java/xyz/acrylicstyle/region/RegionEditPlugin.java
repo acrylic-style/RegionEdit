@@ -97,17 +97,17 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
         commandDescriptionManager.add("//expand", new CommandDescription("//expand <<<number> <up/down/east/south/west/north>>/<vert>>", "regions.selection", "Expands selection area by <number>."));
         selectionItem = Material.getMaterial(this.getConfig().getString("selection_item", "GOLD_AXE"));
         navigationItem = Material.getMaterial(this.getConfig().getString("navigation_item", "COMPASS"));
-        if (Compatibility.checkPlayerInventory_getItemInHand()) {
+        if (!Compatibility.checkPlayerInventory_getItemInHand()) {
             Log.info("[Compatibility] Not Found Inventory#getItemInHand (1.13+)");
         } else {
             Log.info("[Compatibility] Found Inventory#getItemInHand (1.8 - 1.12.2)");
         }
-        if (Compatibility.checkPlayerInteractEvent_getHand()) {
+        if (!Compatibility.checkPlayerInteractEvent_getHand()) {
             Log.info("[Compatibility] Not Found PlayerInteractEvent#getHand (1.8)");
         } else {
             Log.info("[Compatibility] Found PlayerInteractEvent#getHand (1.9+)");
         }
-        if (Compatibility.checkBlock_getData()) {
+        if (!Compatibility.checkBlock_getData()) {
             Log.info("[Compatibility] Not Found Block#getData (1.13+)");
         } else {
             Log.info("[Compatibility] Found Block#getData (1.8 - 1.12.2)");
@@ -223,7 +223,7 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
                 public void run() {
                     if (tasks.get(taskId) == OperationStatus.CANCELLED) return;
                     block.setType(material);
-                    if (Compatibility.checkBlock_getData()) block.setData(data); // use Block#setData only if it presents
+                    if (!Compatibility.checkBlock_getData()) block.setData(data); // use Block#setData only if it presents
                 }
             }.runTaskLater(plugin, i0.get() % RegionEditPlugin.blocksPerTick == 0 ? i.getAndIncrement() : i.get())).start();
             i0.incrementAndGet();
