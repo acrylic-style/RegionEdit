@@ -12,7 +12,6 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
-import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -34,8 +33,8 @@ import xyz.acrylicstyle.region.commands.*;
 import xyz.acrylicstyle.region.internal.commands.CommandDescription;
 import xyz.acrylicstyle.region.internal.commands.CommandDescriptionManager;
 import xyz.acrylicstyle.region.internal.player.UserSessionImpl;
+import xyz.acrylicstyle.region.internal.utils.Compatibility;
 import xyz.acrylicstyle.region.internal.utils.Reflection;
-import xyz.acrylicstyle.should.Should;
 import xyz.acrylicstyle.tomeito_core.TomeitoLib;
 import xyz.acrylicstyle.tomeito_core.utils.Log;
 
@@ -98,17 +97,17 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
         commandDescriptionManager.add("//expand", new CommandDescription("//expand <<<number> <up/down/east/south/west/north>>/<vert>>", "regions.selection", "Expands selection area by <number>."));
         selectionItem = Material.getMaterial(this.getConfig().getString("selection_item", "GOLD_AXE"));
         navigationItem = Material.getMaterial(this.getConfig().getString("navigation_item", "COMPASS"));
-        if (ReflectionHelper.findMethod(PlayerInventory.class, "getItemInHand") == null) {
+        if (Compatibility.checkPlayerInventory_getItemInHand()) {
             Log.info("[Compatibility] Not Found Inventory#getItemInHand (1.13+)");
         } else {
             Log.info("[Compatibility] Found Inventory#getItemInHand (1.8 - 1.12.2)");
         }
-        if (ReflectionHelper.findMethod(PlayerInteractEvent.class, "getHand") == null) {
+        if (Compatibility.checkPlayerInteractEvent_getHand()) {
             Log.info("[Compatibility] Not Found PlayerInteractEvent#getHand (1.8)");
         } else {
             Log.info("[Compatibility] Found PlayerInteractEvent#getHand (1.9+)");
         }
-        if (ReflectionHelper.findMethod(Block.class, "getData") == null) {
+        if (Compatibility.checkBlock_getData()) {
             Log.info("[Compatibility] Not Found Block#getData (1.13+)");
         } else {
             Log.info("[Compatibility] Found Block#getData (1.8 - 1.12.2)");
@@ -164,7 +163,7 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
         }
     }
 
-    private void selectRegion(CuboidRegion reg, Player player) {
+    private void selectRegion(@NotNull CuboidRegion reg, @NotNull Player player) {
         regionSelection.add(player.getUniqueId(), reg);
         showCurrentRegion(player);
     }
@@ -219,11 +218,12 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
         player.sendMessage("" + ChatColor.RED + blocks.size() + ChatColor.GREEN + " blocks affected. " + ChatColor.LIGHT_PURPLE + " (Task ID: " + taskId + ")");
         blocks.forEach(block -> {
             new Thread(() -> new BukkitRunnable() {
+                @SuppressWarnings("deprecation")
                 @Override
                 public void run() {
                     if (tasks.get(taskId) == OperationStatus.CANCELLED) return;
                     block.setType(material);
-                    if (Should.object(block).have().method("setData")) block.setData(data); // use Block#setData only if it presents
+                    if (Compatibility.checkBlock_getData()) block.setData(data); // use Block#setData only if it presents
                 }
             }.runTaskLater(plugin, i0.get() % RegionEditPlugin.blocksPerTick == 0 ? i.getAndIncrement() : i.get())).start();
             i0.incrementAndGet();
