@@ -248,13 +248,6 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
                                     for (Player p : Bukkit.getOnlinePlayers()) Reflection.sendBlockChange(p, b.getLocation(), material, data, Reflection.getBlockData(b));
                                     Reflection.notify(b.getWorld(), b, new BlockPosition(b.getLocation().getBlockX(), b.getLocation().getBlockY(), b.getLocation().getBlockZ()));
                                     Reflection.markDirty(b.getChunk());
-                                    new BukkitRunnable() {
-                                        @Override
-                                        public void run() {
-                                            b.getLocation().getChunk().unload();
-                                            b.getLocation().getChunk().load();
-                                        }
-                                    }.runTask(plugin);
                                 });
                                 break;
                             }
