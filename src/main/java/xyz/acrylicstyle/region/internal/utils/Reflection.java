@@ -15,9 +15,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import util.ReflectionHelper;
 import xyz.acrylicstyle.craftbukkit.CraftUtils;
+import xyz.acrylicstyle.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import xyz.acrylicstyle.minecraft.BlockPosition;
 import xyz.acrylicstyle.region.api.RegionEdit;
 import xyz.acrylicstyle.region.api.block.BlockData;
+import xyz.acrylicstyle.region.internal.nms.PacketPlayOutMapChunk;
 import xyz.acrylicstyle.tomeito_core.utils.Log;
 import xyz.acrylicstyle.tomeito_core.utils.ReflectionUtil;
 
@@ -158,5 +160,21 @@ public class Reflection {
                 }
             }
         }.runTask(RegionEdit.getInstance());
+    }
+
+    public static void sendChunk(Player player, xyz.acrylicstyle.region.internal.nms.Chunk chunk) {
+        try {
+            Object entityPlayer = player.getClass()
+                    .getMethod("getHandle")
+                    .invoke(player);
+            Object playerConnection = entityPlayer.getClass()
+                    .getField("playerConnection")
+                    .get(entityPlayer);
+            playerConnection.getClass()
+                    .getMethod("sendPacket", ReflectionUtil.getNMSClass("Packet"))
+                    .invoke(playerConnection, new PacketPlayOutMapChunk(chunk).getNMSClass());
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

@@ -77,7 +77,7 @@ public class RegionEditCommand implements CommandExecutor {
             if (Compatibility.checkOldPlayer_sendBlockChange()) {
                 sender.sendMessage(ChatColor.GREEN + " ✔ " + ChatColor.YELLOW + "Found Player#sendBlockChange(Location, Material, byte) (1.8 - 1.15.2)");
             } else {
-                sender.sendMessage(ChatColor.RED + " ✖ " + ChatColor.YELLOW + "Not Found Player#sendBlockChange(Location, Material, byte) (1.15+)");
+                sender.sendMessage(ChatColor.RED + " ✖ " + ChatColor.YELLOW + "Not Found Player#sendBlockChange(Location, Material, byte) (?)");
             }
             if (Compatibility.checkNewPlayer_sendBlockChange()) {
                 sender.sendMessage(ChatColor.GREEN + " ✔ " + ChatColor.YELLOW + "Found Player#sendBlockChange(Location, BlockData) (1.13 - 1.15.2)");
@@ -93,6 +93,16 @@ public class RegionEditCommand implements CommandExecutor {
                 sender.sendMessage(ChatColor.GREEN + " ✔ " + ChatColor.YELLOW + "Found nms.Chunk#markDirty() (1.9+)");
             } else {
                 sender.sendMessage(ChatColor.RED + " ✖ " + ChatColor.YELLOW + "Not Found nms.Chunk#markDirty() (1.8)");
+            }
+            if (Compatibility.checkPacketPlayOutMapChunkOldConstructor()) {
+                sender.sendMessage(ChatColor.GREEN + " ✔ " + ChatColor.YELLOW + "Found old nms.PacketPlayOutMapChunk constructor (1.8)");
+            } else {
+                sender.sendMessage(ChatColor.RED + " ✖ " + ChatColor.YELLOW + "Not Found old nms.PacketPlayOutMapChunk constructor (1.9+)");
+            }
+            if (Compatibility.checkOldChunkSectionConstructor()) {
+                sender.sendMessage(ChatColor.GREEN + " ✔ " + ChatColor.YELLOW + "Found old nms.ChunkSection constructor (1.8 - 1.12.2)");
+            } else {
+                sender.sendMessage(ChatColor.RED + " ✖ " + ChatColor.YELLOW + "Not Found old nms.ChunkSection constructor (1.13+)");
             }
             sender.sendMessage(ChatColor.GOLD + "-------------------------");
         } else if (args[0].equalsIgnoreCase("reload")) {

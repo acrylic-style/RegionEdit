@@ -10,7 +10,10 @@ import java.lang.reflect.InvocationTargetException;
 public class Chunk extends NMSAPI {
     public Chunk(Object o) {
         super(o, "Chunk");
-        this.sections = ICollectionList.asList((Object[]) getField("sections")).map(ChunkSection::new).toArray(new ChunkSection[0]);
+        this.sections = ICollectionList
+                .asList((Object[]) getField("sections"))
+                .map((s, i) -> s == null ? new ChunkSection(i << 4) : new ChunkSection(s))
+                .toArray(new ChunkSection[0]);
     }
 
     public final ChunkSection[] sections;
@@ -21,6 +24,10 @@ public class Chunk extends NMSAPI {
         } catch (InvocationTargetException | IllegalAccessException | NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void initLighting() {
+        invoke("initLighting");
     }
 
     public void setType(BlockPosition blockPosition, Object blockData, boolean applyPhysics) {

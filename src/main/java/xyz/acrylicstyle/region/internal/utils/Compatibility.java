@@ -11,10 +11,34 @@ import xyz.acrylicstyle.tomeito_core.utils.ReflectionUtil;
 
 public class Compatibility {
     public static BukkitVersion getBukkitVersion() {
+        if (!checkOldPlayer_sendBlockChange()) return BukkitVersion.UNKNOWN; // There are no known versions of Bukkit API that doesn't have this method.
         if (!checkPlayerInteractEvent_getHand()) return BukkitVersion.v1_8; // returns false in 1.8
-        if (!checkOldPlayer_sendBlockChange()) return BukkitVersion.v1_15; // returns false in 1.15+
         if (!checkPlayerInventory_getItemInHand()) return BukkitVersion.v1_13; // returns false in 1.13+
         return BukkitVersion.v1_9; // otherwise
+    }
+
+    /**
+     * Checks compatibility for nms.ChunkSection constructor (1.8 - 1.12.2).<br />
+     * For 1.8 - 1.12.2, it returns true.<br />
+     * For 1.13+, it returns false.
+     */
+    public static boolean checkOldChunkSectionConstructor() {
+        try {
+            return ReflectionHelper.findConstructor(ReflectionUtil.getNMSClass("ChunkSection"), int.class, boolean.class) != null;
+        } catch (ClassNotFoundException ignored) {}
+        return false;
+    }
+
+    /**
+     * Checks compatibility for nms.PacketPlayOutMapChunk constructor (1.8).<br />
+     * For 1.8, it returns true.<br />
+     * For 1.9+, it returns false.
+     */
+    public static boolean checkPacketPlayOutMapChunkOldConstructor() {
+        try {
+            return ReflectionHelper.findConstructor(ReflectionUtil.getNMSClass("PacketPlayOutMapChunk"), ReflectionUtil.getNMSClass("Chunk"), boolean.class, int.class) != null;
+        } catch (ClassNotFoundException ignored) {}
+        return false;
     }
 
     /**
@@ -87,8 +111,8 @@ public class Compatibility {
 
     /**
      * Checks compatibility for {@link Player#sendBlockChange(Location, int, byte)}.<br />
-     * For 1.8 - 1.14.4, it returns true.<br />
-     * For 1.15+, it returns false.
+     * For 1.8+, it returns true.<br />
+     * There are no known versions of Bukkit API that doesn't have this method.
      */
     @SuppressWarnings("deprecation")
     public static boolean checkOldPlayer_sendBlockChange() {

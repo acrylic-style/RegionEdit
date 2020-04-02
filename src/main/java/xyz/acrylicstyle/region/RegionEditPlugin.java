@@ -18,6 +18,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 import util.Collection;
 import util.CollectionList;
+import xyz.acrylicstyle.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import xyz.acrylicstyle.minecraft.BlockPosition;
 import xyz.acrylicstyle.region.api.RegionEdit;
 import xyz.acrylicstyle.region.api.exception.RegionEditException;
@@ -30,15 +31,15 @@ import xyz.acrylicstyle.region.api.selection.SelectionMode;
 import xyz.acrylicstyle.region.commands.*;
 import xyz.acrylicstyle.region.internal.commands.CommandDescription;
 import xyz.acrylicstyle.region.internal.commands.CommandDescriptionManager;
+import xyz.acrylicstyle.region.internal.nms.Chunk;
 import xyz.acrylicstyle.region.internal.player.UserSessionImpl;
 import xyz.acrylicstyle.region.internal.utils.Blocks;
 import xyz.acrylicstyle.region.internal.utils.Reflection;
 import xyz.acrylicstyle.tomeito_core.TomeitoLib;
+import xyz.acrylicstyle.tomeito_core.utils.Callback;
 import xyz.acrylicstyle.tomeito_core.utils.Log;
 
-import java.util.Arrays;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -228,12 +229,11 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
                 int y = block.getLocation().getBlockY();
                 int z = block.getLocation().getBlockZ();
                 World world = block.getLocation().getWorld();
-                new Thread(() -> {
-                    Blocks.setBlock(world, x, y, z, material, data, block.getBlockData());
-                    i0.incrementAndGet();
-                }).start();
+                Blocks.setBlock(world, x, y, z, material, data, block.getBlockData());
+                i0.incrementAndGet();
             }
         });
+        CollectionList<Map.Entry<Integer, Integer>> entries = new CollectionList<>();
         new BukkitRunnable() {
             @Override
             public void run() {
@@ -241,15 +241,25 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
                     @Override
                     public void run() {
                         historyManager.addEntry(player.getUniqueId(), blocks2);
-                        while (true) {
-                            if (i0.get() >= blocks.size()) {
-                                Log.debug("Updating " + blocks.size() + " blocks");
-                                blocks.forEach(b -> {
-                                    for (Player p : Bukkit.getOnlinePlayers()) Reflection.sendBlockChange(p, b.getLocation(), material, data, Reflection.getBlockData(b));
-                                    Reflection.notify(b.getWorld(), b, new BlockPosition(b.getLocation().getBlockX(), b.getLocation().getBlockY(), b.getLocation().getBlockZ()));
-                                    Reflection.markDirty(b.getChunk());
-                                });
-                                break;
+                        if (fastMode) {
+                            while (true) {
+                                if (i0.get() >= blocks.size()) {
+                                    Log.debug("Updating " + blocks.size() + " blocks");
+                                    blocks.forEach(b -> {
+                                        for (Player p : Bukkit.getOnlinePlayers())
+                                            Reflection.sendBlockChange(p, b.getLocation(), material, data, Reflection.getBlockData(b));
+                                        Reflection.notify(b.getWorld(), b, new BlockPosition(b.getLocation().getBlockX(), b.getLocation().getBlockY(), b.getLocation().getBlockZ()));
+                                        Reflection.markDirty(b.getChunk());
+                                        entries.add(new AbstractMap.SimpleEntry<>(b.getChunk().getX(), b.getChunk().getZ()));
+                                    });
+                                    Log.debug("Relighting " + entries.unique().size() + " chunks");
+                                    entries.unique().forEach(e -> {
+                                        Chunk chunk = Chunk.wrap(blocks.first().getWorld().getChunkAt(e.getKey(), e.getValue()));
+                                        chunk.initLighting();
+                                        Reflection.sendChunk(player, chunk);
+                                    });
+                                    break;
+                                }
                             }
                         }
                     }
