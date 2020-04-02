@@ -6,7 +6,7 @@
 
     <groupId>xyz.acrylicstyle</groupId>
     <artifactId>RegionEdit</artifactId>
-    <version>0.0.13</version>
+    <version>0.0.14</version>
     <build>
         <plugins>
             <plugin>
@@ -90,8 +90,8 @@
         </dependency>
         <dependency>
             <groupId>xyz.acrylicstyle</groupId>
-            <artifactId>Should</artifactId>
-            <version>0.0.2</version>
+            <artifactId>NMSAPI-1.8.8</artifactId>
+            <version>0.1.2</version>
         </dependency>
     </dependencies>
 </project>

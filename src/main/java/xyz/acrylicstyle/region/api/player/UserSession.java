@@ -26,10 +26,10 @@ public interface UserSession {
 
     /**
      * Set user's selected region.
-     * @param regionSelection New region selection.
+     * @param regionSelection New region selection. Set to null to remove.
      * @throws RegionEditException When RegionSelection isn't compatible with current selection mode.
      */
-    void setRegionSelection(@NotNull RegionSelection regionSelection) throws RegionEditException;
+    void setRegionSelection(RegionSelection regionSelection) throws RegionEditException;
 
     /**
      * Returns user's selection mode.
@@ -51,4 +51,16 @@ public interface UserSession {
      */
     @NotNull
     CuboidRegion getCuboidRegion() throws RegionEditException;
+
+    /**
+     * Returns whatever if player enabled a fast mode or not.
+     * @return Fast mode enabled or not
+     */
+    boolean isFastMode();
+
+    /**
+     * Set fast mode to specified flag.
+     * @param flag Fast Mode flag
+     */
+    void setFastMode(boolean flag);
 }

@@ -27,14 +27,14 @@ public class SetCommand extends PlayerCommandExecutor {
         }
         if (args.length == 0) {
             player.sendMessage(ChatColor.RED + "Error: Not enough arguments.");
-            player.sendMessage(ChatColor.LIGHT_PURPLE + "Usage: /set <block>");
+            player.sendMessage(ChatColor.LIGHT_PURPLE + "Usage: //set <block>");
             player.sendMessage(ChatColor.YELLOW + "Set blocks.");
             return;
         }
         CollectionList<String> materials = ICollectionList.asList(Material.values()).filter(Material::isBlock).map(Enum::name).map((Function<String, String>) String::toLowerCase);
         if (!materials.contains((args[0] + ":").split(":")[0].toLowerCase())) {
             player.sendMessage(ChatColor.RED + "Error: Invalid block: " + (args[0] + ":").split(":")[0].toLowerCase());
-            player.sendMessage(ChatColor.LIGHT_PURPLE + "Usage: /set <block>");
+            player.sendMessage(ChatColor.LIGHT_PURPLE + "Usage: //set <block>");
             player.sendMessage(ChatColor.YELLOW + "Set blocks.");
             return;
         }

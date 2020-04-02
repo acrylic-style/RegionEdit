@@ -53,20 +53,46 @@ public class RegionEditCommand implements CommandExecutor {
                 return true;
             }
             sender.sendMessage(ChatColor.GOLD + "----- Compatibility -----");
-            if (!Compatibility.checkPlayerInventory_getItemInHand()) {
-                sender.sendMessage(ChatColor.RED + " ✖ " + ChatColor.YELLOW + "Not Found Inventory#getItemInHand (1.13+)");
-            } else {
+            sender.sendMessage(ChatColor.LIGHT_PURPLE + "Version: " + ChatColor.YELLOW + Compatibility.getBukkitVersion().getName());
+            if (Compatibility.checkPlayerInventory_getItemInHand()) {
                 sender.sendMessage(ChatColor.GREEN + " ✔ " + ChatColor.YELLOW + "Found Inventory#getItemInHand (1.8 - 1.12.2)");
-            }
-            if (!Compatibility.checkPlayerInteractEvent_getHand()) {
-                sender.sendMessage(ChatColor.RED + " ✖ " + ChatColor.YELLOW + "Not Found PlayerInteractEvent#getHand (1.8)");
             } else {
+                sender.sendMessage(ChatColor.RED + " ✖ " + ChatColor.YELLOW + "Not Found Inventory#getItemInHand (1.13+)");
+            }
+            if (Compatibility.checkPlayerInteractEvent_getHand()) {
                 sender.sendMessage(ChatColor.GREEN + " ✔ " + ChatColor.YELLOW + "Found PlayerInteractEvent#getHand (1.9+)");
-            }
-            if (!Compatibility.checkBlock_getData()) {
-                sender.sendMessage(ChatColor.RED + " ✖ " + ChatColor.YELLOW + "Not Found Block#getData (1.13+)");
             } else {
+                sender.sendMessage(ChatColor.RED + " ✖ " + ChatColor.YELLOW + "Not Found PlayerInteractEvent#getHand (1.8)");
+            }
+            if (Compatibility.checkBlock_getData()) {
                 sender.sendMessage(ChatColor.GREEN + " ✔ " + ChatColor.YELLOW + "Found Block#getData (1.8 - 1.12.2)");
+            } else {
+                sender.sendMessage(ChatColor.RED + " ✖ " + ChatColor.YELLOW + "Not Found Block#getData (1.13+)");
+            }
+            if (Compatibility.checkBlockData()) {
+                sender.sendMessage(ChatColor.GREEN + " ✔ " + ChatColor.YELLOW + "Found BlockData (1.13+)");
+            } else {
+                sender.sendMessage(ChatColor.RED + " ✖ " + ChatColor.YELLOW + "Not Found BlockData (1.8 - 1.12.2)");
+            }
+            if (Compatibility.checkOldPlayer_sendBlockChange()) {
+                sender.sendMessage(ChatColor.GREEN + " ✔ " + ChatColor.YELLOW + "Found Player#sendBlockChange(Location, Material, byte) (1.8 - 1.15.2)");
+            } else {
+                sender.sendMessage(ChatColor.RED + " ✖ " + ChatColor.YELLOW + "Not Found Player#sendBlockChange(Location, Material, byte) (1.15+)");
+            }
+            if (Compatibility.checkNewPlayer_sendBlockChange()) {
+                sender.sendMessage(ChatColor.GREEN + " ✔ " + ChatColor.YELLOW + "Found Player#sendBlockChange(Location, BlockData) (1.13 - 1.15.2)");
+            } else {
+                sender.sendMessage(ChatColor.RED + " ✖ " + ChatColor.YELLOW + "Not Found Player#sendBlockChange(Location, BlockData) (1.8 - 1.12.2)");
+            }
+            if (Compatibility.checkWorld_notify()) {
+                sender.sendMessage(ChatColor.GREEN + " ✔ " + ChatColor.YELLOW + "Found nms.World#notify(BlockPosition) (1.8)");
+            } else {
+                sender.sendMessage(ChatColor.RED + " ✖ " + ChatColor.YELLOW + "Not Found nms.World#notify(BlockPosition) (1.9+)");
+            }
+            if (Compatibility.checkChunk_markDirty()) {
+                sender.sendMessage(ChatColor.GREEN + " ✔ " + ChatColor.YELLOW + "Found nms.Chunk#markDirty() (1.9+)");
+            } else {
+                sender.sendMessage(ChatColor.RED + " ✖ " + ChatColor.YELLOW + "Not Found nms.Chunk#markDirty() (1.8)");
             }
             sender.sendMessage(ChatColor.GOLD + "-------------------------");
         } else if (args[0].equalsIgnoreCase("reload")) {

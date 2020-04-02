@@ -3,6 +3,7 @@ package xyz.acrylicstyle.region.commands;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import xyz.acrylicstyle.region.RegionEditPlugin;
+import xyz.acrylicstyle.region.api.RegionEdit;
 import xyz.acrylicstyle.region.api.selection.SelectionMode;
 import xyz.acrylicstyle.tomeito_core.command.PlayerCommandExecutor;
 
@@ -15,8 +16,7 @@ public class SelectionCommand extends PlayerCommandExecutor {
             return;
         }
         if (args[0].equalsIgnoreCase("cuboid")) {
-            RegionEditPlugin.regionSelection.remove(player.getUniqueId());
-            RegionEditPlugin.selectionMode.add(player.getUniqueId(), SelectionMode.CUBOID);
+            RegionEdit.getInstance().getUserSession(player).setSelectionMode(SelectionMode.CUBOID);
             player.sendMessage(ChatColor.GREEN + "Switched to the " + ChatColor.YELLOW + "cuboid " + ChatColor.GREEN + "mode!");
             player.sendMessage(ChatColor.YELLOW + "Left click: Position #1");
             player.sendMessage(ChatColor.YELLOW + "Right click: Position #2");
