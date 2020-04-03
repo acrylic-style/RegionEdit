@@ -1,6 +1,6 @@
 name: RegionEdit
 main: xyz.acrylicstyle.region.RegionEditPlugin
-version: 0.1.1
+version: 0.1.2
 author: acrylic-style
 softdepend:
   - TomeitoLib
@@ -71,4 +71,8 @@ commands:
   "/fast":
     description: ""
     permission: regions.fast
+    permission-message: "&cYou don't have permission. Are you in a right mode?"
+  "/unstuck":
+    description: ""
+    permission: regions.unstuck
     permission-message: "&cYou don't have permission. Are you in a right mode?"

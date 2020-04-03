@@ -79,6 +79,7 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
         TomeitoLib.registerCommand("/drain", new DrainCommand());
         TomeitoLib.registerCommand("/expand", new ExpandCommand());
         TomeitoLib.registerCommand("/fast", new FastCommand());
+        TomeitoLib.registerCommand("/unstuck", new UnstuckCommand());
         commandDescriptionManager.add("//help", new CommandDescription("//help [page]", "regions.help", "Shows all RegionEdit commands."));
         commandDescriptionManager.add("/;", new CommandDescription("//sel [cuboid]", "", "Clears selection or switches selection mode."));
         commandDescriptionManager.add("//sel", new CommandDescription("//sel [cuboid]", "", "Clears selection or switches selection mode."));
@@ -98,6 +99,7 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
                 "Cancels current operation."));
         commandDescriptionManager.add("//expand", new CommandDescription("//expand <<<number> <up/down/east/south/west/north>>/<vert>>", "regions.selection", "Expands selection area by <number>."));
         commandDescriptionManager.add("//fast", new CommandDescription("//fast", "regions.fast", "Toggles fast mode.", "Fast mode disables some physics on operation."));
+        commandDescriptionManager.add("//unstuck", new CommandDescription("//unstuck", "regions.unstuck", "Get out of stuck."));
         selectionItem = Material.getMaterial(this.getConfig().getString("selection_item", "GOLD_AXE"));
         navigationItem = Material.getMaterial(this.getConfig().getString("navigation_item", "COMPASS"));
         for (Player p : Bukkit.getOnlinePlayers()) onPlayerJoin(new PlayerJoinEvent(p, ""));
