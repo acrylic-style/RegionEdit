@@ -11,7 +11,7 @@ public enum BukkitVersion {
     UNKNOWN("Unknown");
 
     @NotNull
-    private String name;
+    private final String name;
 
     BukkitVersion(@NotNull String name) {
         this.name = name;

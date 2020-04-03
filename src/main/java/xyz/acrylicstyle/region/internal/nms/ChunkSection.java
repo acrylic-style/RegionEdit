@@ -11,7 +11,7 @@ import java.util.Objects;
  */
 public class ChunkSection {
     private Object o;
-    private Chunk chunk;
+    private final Chunk chunk;
 
     public ChunkSection(Chunk chunk, Object o) {
         this.chunk = chunk;

@@ -1,97 +1,64 @@
 package xyz.acrylicstyle.region.api.block;
 
 import org.bukkit.Material;
-import org.bukkit.block.Block;
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import util.ReflectionHelper;
-import xyz.acrylicstyle.region.internal.utils.Reflection;
-import xyz.acrylicstyle.tomeito_core.utils.ReflectionUtil;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.Objects;
-
-public class BlockData {
+public interface BlockData {
+    /**
+     * Returns bukkit implementation of block.
+     * @return Bukkit implementation of block.
+     */
     @NotNull
-    private final Object data;
+    org.bukkit.block.Block getBukkitBlock();
 
-    public BlockData(@NotNull Object o) {
-        this.data = o;
-    }
-
-    public BlockData(@NotNull Block block) {
-        this.data = Objects.requireNonNull(Reflection.getBlockData(block));
-    }
-
+    /**
+     * Returns parent block.
+     * @return Parent block
+     */
     @NotNull
-    @Contract("_ -> new")
-    public static BlockData wrap(@NotNull Block block) {
-        return new BlockData(block);
-    }
+    Block getBlock();
 
-    public xyz.acrylicstyle.region.api.block.Block getBlock() {
-        return xyz.acrylicstyle.region.api.block.Block.wrap((Block) data);
-    }
-
-    public Block getBukkitBlock() {
-        return (Block) data;
-    }
-
+    /**
+     * Returns block data represented as JSON.
+     * @return Block data represented as JSON
+     */
     @NotNull
-    public String getAsString() {
-        try {
-            return (String) ReflectionHelper.invokeMethod(ReflectionUtil.getOBCClass("CraftBlockData"), data, "getAsString");
-        } catch (InvocationTargetException | IllegalAccessException | NoSuchMethodException | ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-    }
+    String getAsString();
 
+    /**
+     * Returns block data represented as JSON.
+     * @param paramBoolean Plain or not
+     * @return Block data represented as JSON
+     */
     @NotNull
-    public String getAsString(boolean paramBoolean) {
-        try {
-            return (String) ReflectionHelper.invokeMethod(ReflectionUtil.getOBCClass("CraftBlockData"), data, "getAsString", paramBoolean);
-        } catch (InvocationTargetException | IllegalAccessException | NoSuchMethodException | ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-    }
+    String getAsString(boolean paramBoolean);
 
+    /**
+     * Returns material.
+     * @return Material
+     */
     @NotNull
-    public Material getMaterial() {
-        try {
-            return (Material) ReflectionHelper.invokeMethod(ReflectionUtil.getOBCClass("CraftBlockData"), data, "getMaterial");
-        } catch (InvocationTargetException | IllegalAccessException | NoSuchMethodException | ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-    }
+    Material getMaterial();
 
+    /**
+     * Returns nms BlockState.
+     * @return NMS BlockState
+     */
     @NotNull
-    public Object getState() {
-        try {
-            return ReflectionHelper.invokeMethod(ReflectionUtil.getOBCClass("CraftBlockData"), data, "getState");
-        } catch (InvocationTargetException | IllegalAccessException | NoSuchMethodException | ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-    }
+    Object getState();
 
+    /**
+     * Merges two BlockData.<br />
+     * Returns merged BlockData.
+     * @param paramBlockData 2nd BlockData.
+     * @return Merged BlockData
+     */
     @NotNull
-    public BlockData merge(@NotNull BlockData paramBlockData) {
-        try {
-            return new BlockData(ReflectionHelper.invokeMethod(ReflectionUtil.getOBCClass("CraftBlockData"), data, "merge", paramBlockData.getData()));
-        } catch (InvocationTargetException | IllegalAccessException | NoSuchMethodException | ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-    }
+    BlockData merge(@NotNull BlockData paramBlockData);
 
-    public boolean matches(@NotNull BlockData paramBlockData) {
-        try {
-            return (boolean) ReflectionHelper.invokeMethod(ReflectionUtil.getOBCClass("CraftBlockData"), data, "matches", paramBlockData.getData());
-        } catch (InvocationTargetException | IllegalAccessException | NoSuchMethodException | ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @NotNull
-    public Object getData() {
-        return data;
-    }
+    /**
+     * Returns if does two block data matches.
+     * @param paramBlockData Block data that compares to.
+     */
+    boolean matches(@NotNull BlockData paramBlockData);
 }

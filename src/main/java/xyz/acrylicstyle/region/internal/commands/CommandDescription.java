@@ -8,9 +8,9 @@ import java.util.Collections;
 import java.util.List;
 
 public class CommandDescription {
-    private String name;
-    private CollectionList<String> permissions;
-    private CollectionList<String> description;
+    private final String name;
+    private final CollectionList<String> permissions;
+    private final CollectionList<String> description;
 
     public CommandDescription(String name, List<String> permissions, String... description) {
         this.name = name;

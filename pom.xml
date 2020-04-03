@@ -6,7 +6,7 @@
 
     <groupId>xyz.acrylicstyle</groupId>
     <artifactId>RegionEdit</artifactId>
-    <version>0.0.16</version>
+    <version>0.1.1</version>
     <build>
         <plugins>
             <plugin>

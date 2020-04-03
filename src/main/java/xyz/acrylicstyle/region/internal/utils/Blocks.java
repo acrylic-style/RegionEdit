@@ -4,7 +4,7 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import xyz.acrylicstyle.craftbukkit.CraftUtils;
 import xyz.acrylicstyle.minecraft.BlockPosition;
-import xyz.acrylicstyle.region.api.block.BlockData;
+import xyz.acrylicstyle.region.internal.block.RegionBlockData;
 import xyz.acrylicstyle.region.internal.nms.Chunk;
 import xyz.acrylicstyle.tomeito_core.utils.ReflectionUtil;
 
@@ -23,12 +23,12 @@ public class Blocks {
         }
     }
 
-    public static void setBlock1_13(World world, int x, int y, int z, BlockData blockData) {
+    public static void setBlock1_13(World world, int x, int y, int z, RegionBlockData blockData) {
         org.bukkit.Chunk chunk = world.getBlockAt(x, y, z).getChunk();
-        Chunk.wrap(chunk).setType(new BlockPosition(x, y, z), blockData.getData(), false);
+        Chunk.wrap(chunk).setType(new BlockPosition(x, y, z), blockData.getHandle(), false);
     }
 
-    public static void setBlock(World world, int x, int y, int z, Material material, byte data, BlockData blockData) {
+    public static void setBlock(World world, int x, int y, int z, Material material, byte data, RegionBlockData blockData) {
         if (Compatibility.checkNewPlayer_sendBlockChange()) {
             setBlock1_13(world, x, y, z, blockData);
         } else {

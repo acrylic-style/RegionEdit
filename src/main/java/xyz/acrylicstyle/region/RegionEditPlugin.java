@@ -21,7 +21,9 @@ import util.CollectionList;
 import xyz.acrylicstyle.minecraft.BlockPosition;
 import xyz.acrylicstyle.region.api.RegionEdit;
 import xyz.acrylicstyle.region.api.exception.RegionEditException;
-import xyz.acrylicstyle.region.api.manager.HistoryManager;
+import xyz.acrylicstyle.region.internal.block.RegionBlock;
+import xyz.acrylicstyle.region.internal.block.RegionBlockData;
+import xyz.acrylicstyle.region.internal.manager.HistoryManagerImpl;
 import xyz.acrylicstyle.region.api.operation.OperationStatus;
 import xyz.acrylicstyle.region.api.player.UserSession;
 import xyz.acrylicstyle.region.api.region.CuboidRegion;
@@ -47,12 +49,12 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
     private Material selectionItem = null;
     private Material navigationItem = null;
 
-    private static HistoryManager historyManager = new HistoryManager();
-    public static Collection<UUID, SelectionMode> selectionMode = new Collection<>();
-    public static Collection<UUID, RegionSelection> regionSelection = new Collection<>();
-    public static CommandDescriptionManager commandDescriptionManager = new CommandDescriptionManager();
+    private static final HistoryManagerImpl historyManager = new HistoryManagerImpl();
+    public static final Collection<UUID, SelectionMode> selectionMode = new Collection<>();
+    public static final Collection<UUID, RegionSelection> regionSelection = new Collection<>();
+    public static final CommandDescriptionManager commandDescriptionManager = new CommandDescriptionManager();
 
-    public static Collection<UUID, UserSession> sessions = new Collection<>();
+    public static final Collection<UUID, UserSession> sessions = new Collection<>();
 
     public static int blocksPerTick = 4096;
 
@@ -192,17 +194,17 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
     }
 
     @Override
-    public HistoryManager getHistoryManager() { return historyManager; }
+    public HistoryManagerImpl getHistoryManager() { return historyManager; }
 
     // task id : cancelled state
-    public static AtomicInteger taskId = new AtomicInteger();
-    public static Collection<Integer, OperationStatus> tasks = new Collection<>();
+    public static final AtomicInteger taskId = new AtomicInteger();
+    public static final Collection<Integer, OperationStatus> tasks = new Collection<>();
 
-    public static Collection<UUID, CollectionList<Integer>> playerTasks = new Collection<>();
+    public static final Collection<UUID, CollectionList<Integer>> playerTasks = new Collection<>();
 
     public static void setBlocks(Player player, @NotNull CollectionList<Block> blocks, Material material, byte data) {
         double start = System.currentTimeMillis();
-        CollectionList<xyz.acrylicstyle.region.api.block.Block> blocks2 = blocks.map(xyz.acrylicstyle.region.api.block.Block::new);
+        CollectionList<xyz.acrylicstyle.region.api.block.Block> blocks2 = blocks.map(RegionBlock::new);
         if (!playerTasks.containsKey(player.getUniqueId())) playerTasks.add(player.getUniqueId(), new CollectionList<>());
         Plugin plugin = RegionEdit.getInstance();
         AtomicInteger i0 = new AtomicInteger();
@@ -212,7 +214,7 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
         tasks.add(taskId, OperationStatus.RUNNING);
         final boolean fastMode = sessions.getOrDefault(player.getUniqueId(), new UserSessionImpl(player.getUniqueId())).isFastMode();
         player.sendMessage("" + ChatColor.RED + blocks.size() + ChatColor.GREEN + " blocks affected. " + ChatColor.LIGHT_PURPLE + " (Task ID: " + taskId + ")");
-        blocks.map(xyz.acrylicstyle.region.api.block.Block::wrap).forEach(block -> {
+        blocks.map(RegionBlock::wrap).forEach(block -> {
             if (!fastMode) {
                 new Thread(() -> new BukkitRunnable() {
                     @Override
@@ -303,7 +305,7 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
                 int z = block.getLocation().getBlockZ();
                 World world = block.getLocation().getWorld();
                 new Thread(() -> {
-                    Blocks.setBlock(world, x, y, z, block.getType(), block.getData(), block.getBlockData());
+                    Blocks.setBlock(world, x, y, z, block.getType(), block.getData(), (RegionBlockData) block.getBlockData());
                     i0.incrementAndGet();
                 }).start();
             }

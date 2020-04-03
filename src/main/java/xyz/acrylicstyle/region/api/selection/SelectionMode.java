@@ -6,7 +6,7 @@ import xyz.acrylicstyle.region.api.region.RegionSelection;
 public enum SelectionMode {
     CUBOID(CuboidRegion.class);
 
-    private Class<? extends RegionSelection> clazz;
+    private final Class<? extends RegionSelection> clazz;
 
     SelectionMode(Class<? extends RegionSelection> clazz) {
         this.clazz = clazz;

@@ -9,7 +9,7 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.jetbrains.annotations.NotNull;
 import util.CollectionList;
-import xyz.acrylicstyle.region.api.manager.HistoryManager;
+import xyz.acrylicstyle.region.internal.manager.HistoryManagerImpl;
 import xyz.acrylicstyle.region.api.player.UserSession;
 import xyz.acrylicstyle.tomeito_core.utils.Callback;
 
@@ -111,5 +111,5 @@ public interface RegionEdit extends Plugin {
 
     void setBlocksPerTick(int blocks);
 
-    HistoryManager getHistoryManager();
+    HistoryManagerImpl getHistoryManager();
 }

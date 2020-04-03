@@ -1,6 +1,6 @@
 name: RegionEdit
 main: xyz.acrylicstyle.region.RegionEditPlugin
-version: 0.0.16
+version: 0.1.1
 author: acrylic-style
 softdepend:
   - TomeitoLib

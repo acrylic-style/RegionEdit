@@ -15,10 +15,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import util.ReflectionHelper;
 import xyz.acrylicstyle.craftbukkit.CraftUtils;
-import xyz.acrylicstyle.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import xyz.acrylicstyle.minecraft.BlockPosition;
 import xyz.acrylicstyle.region.api.RegionEdit;
-import xyz.acrylicstyle.region.api.block.BlockData;
+import xyz.acrylicstyle.region.internal.block.RegionBlockData;
 import xyz.acrylicstyle.region.internal.nms.PacketPlayOutMapChunk;
 import xyz.acrylicstyle.tomeito_core.utils.Log;
 import xyz.acrylicstyle.tomeito_core.utils.ReflectionUtil;
@@ -80,10 +79,10 @@ public class Reflection {
      * @return A block data
      */
     @Nullable
-    public static BlockData getBlockData(@NotNull Block block) {
+    public static RegionBlockData getBlockData(@NotNull Block block) {
         if (Compatibility.checkBlockData()) {
             try {
-                return new BlockData(ReflectionHelper.invokeMethod(block.getClass(), block, "getBlockData"));
+                return new RegionBlockData(ReflectionHelper.invokeMethod(block.getClass(), block, "getBlockData"));
             } catch (InvocationTargetException | IllegalAccessException | NoSuchMethodException e) {
                 e.printStackTrace();
             }
@@ -91,10 +90,10 @@ public class Reflection {
         return null;
     }
 
-    public static void setBlockData(@NotNull BlockData blockData, boolean applyPhysics) {
+    public static void setBlockData(@NotNull RegionBlockData blockData, boolean applyPhysics) {
         if (!Compatibility.checkBlockData()) return;
         try {
-            ReflectionHelper.invokeMethod(blockData.getBukkitBlock().getClass(), blockData.getBukkitBlock(), "setBlockData", blockData.getData(), applyPhysics);
+            ReflectionHelper.invokeMethod(blockData.getBukkitBlock().getClass(), blockData.getBukkitBlock(), "setBlockData", blockData.getHandle(), applyPhysics);
         } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
             e.printStackTrace();
         }

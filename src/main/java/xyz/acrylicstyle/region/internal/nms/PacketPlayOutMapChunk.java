@@ -1,6 +1,5 @@
 package xyz.acrylicstyle.region.internal.nms;
 
-import util.ReflectionHelper;
 import xyz.acrylicstyle.minecraft.Packet;
 import xyz.acrylicstyle.minecraft.PacketDataSerializer;
 import xyz.acrylicstyle.minecraft.PacketListener;

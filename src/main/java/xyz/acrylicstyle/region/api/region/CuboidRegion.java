@@ -6,7 +6,7 @@ import util.CollectionList;
 /**
  * Cuboid region to specify pos1, and pos2 (cube)
  */
-public class CuboidRegion implements RegionSelection {
+public class CuboidRegion implements RegionSelection, Cloneable {
     public final Location loc1;
     public final Location loc2;
 
@@ -25,6 +25,15 @@ public class CuboidRegion implements RegionSelection {
     @Override
     public Location getLocation() {
         return loc1;
+    }
+
+    @Override
+    public CuboidRegion clone() {
+        try {
+            return (CuboidRegion) super.clone();
+        } catch (CloneNotSupportedException e) {
+            return new CuboidRegion(loc1, loc2);
+        }
     }
 
     /**
