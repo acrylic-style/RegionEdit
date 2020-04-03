@@ -18,7 +18,6 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 import util.Collection;
 import util.CollectionList;
-import xyz.acrylicstyle.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import xyz.acrylicstyle.minecraft.BlockPosition;
 import xyz.acrylicstyle.region.api.RegionEdit;
 import xyz.acrylicstyle.region.api.exception.RegionEditException;
@@ -36,7 +35,6 @@ import xyz.acrylicstyle.region.internal.player.UserSessionImpl;
 import xyz.acrylicstyle.region.internal.utils.Blocks;
 import xyz.acrylicstyle.region.internal.utils.Reflection;
 import xyz.acrylicstyle.tomeito_core.TomeitoLib;
-import xyz.acrylicstyle.tomeito_core.utils.Callback;
 import xyz.acrylicstyle.tomeito_core.utils.Log;
 
 import java.util.*;
@@ -223,15 +221,14 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
                         block.setTypeAndData(material, data, Reflection.getBlockData(block.getLocation().getBlock()), true);
                     }
                 }.runTaskLater(plugin, i0.get() % RegionEditPlugin.blocksPerTick == 0 ? i.getAndIncrement() : i.get())).start();
-                i0.incrementAndGet();
             } else {
                 int x = block.getLocation().getBlockX();
                 int y = block.getLocation().getBlockY();
                 int z = block.getLocation().getBlockZ();
                 World world = block.getLocation().getWorld();
                 Blocks.setBlock(world, x, y, z, material, data, block.getBlockData());
-                i0.incrementAndGet();
             }
+            i0.incrementAndGet();
         });
         CollectionList<Map.Entry<Integer, Integer>> entries = new CollectionList<>();
         new BukkitRunnable() {

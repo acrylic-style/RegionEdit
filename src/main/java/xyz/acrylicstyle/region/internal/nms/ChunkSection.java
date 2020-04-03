@@ -6,14 +6,24 @@ import xyz.acrylicstyle.tomeito_core.utils.ReflectionUtil;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Objects;
 
+/**
+ * Partial implementation of NMS ChunkSection.
+ */
 public class ChunkSection {
     private Object o;
+    private Chunk chunk;
 
-    public ChunkSection(Object o) {
+    public ChunkSection(Chunk chunk, Object o) {
+        this.chunk = chunk;
         this.o = Objects.requireNonNull(o);
     }
 
-    public ChunkSection(int i) {
+    public Chunk getChunk() {
+        return chunk;
+    }
+
+    public ChunkSection(Chunk chunk, int i) {
+        this.chunk = chunk;
         try {
             if (Compatibility.checkOldChunkSectionConstructor()) {
                 this.o = ReflectionUtil.getNMSClass("ChunkSection").getConstructor(int.class, boolean.class).newInstance(i, true);
@@ -33,5 +43,10 @@ public class ChunkSection {
         } catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException | ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
+        chunk.save();
+    }
+
+    public Object getNMSClass() {
+        return o;
     }
 }
