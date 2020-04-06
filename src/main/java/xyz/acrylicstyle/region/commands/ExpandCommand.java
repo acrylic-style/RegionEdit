@@ -20,7 +20,9 @@ public class ExpandCommand extends PlayerCommandExecutor {
                 player.sendMessage(ChatColor.RED + "You must make selection first.");
                 return;
             }
+            assert region.getLocation() != null;
             region.getLocation().setY(0);
+            assert region.getLocation2() != null;
             region.getLocation2().setY(255);
             RegionEditPlugin.showCurrentRegion(player);
             return;
@@ -51,6 +53,8 @@ public class ExpandCommand extends PlayerCommandExecutor {
             return;
         }
         int number = Integer.parseInt(args[0]);
+        assert region.getLocation() != null;
+        assert region.getLocation2() != null;
         if (args[1].equalsIgnoreCase("up")) { // y+
             if (region.getLocation().getY() >= region.getLocation2().getY()) {
                 region.getLocation().setY(Math.min(region.getLocation().getY() + number, 255));

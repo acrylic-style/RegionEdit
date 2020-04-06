@@ -8,9 +8,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import util.CollectionList;
-import xyz.acrylicstyle.region.internal.manager.HistoryManagerImpl;
 import xyz.acrylicstyle.region.api.player.UserSession;
+import xyz.acrylicstyle.region.internal.manager.HistoryManagerImpl;
 import xyz.acrylicstyle.tomeito_core.utils.Callback;
 
 import java.util.UUID;
@@ -24,12 +25,12 @@ public interface RegionEdit extends Plugin {
         return service.getProvider();
     }
 
-    static void getBlocksAsync(@NotNull Location loc1, @NotNull Location loc2, Material block, Function<Block, Boolean> filterFunction, Callback<CollectionList<Block>> callback) {
+    static void getBlocksAsync(@NotNull Location loc1, @NotNull Location loc2, Material block, Function<Block, Boolean> filterFunction, @NotNull Callback<CollectionList<Block>> callback) {
         new Thread(() -> callback.done(getBlocks(loc1, loc2, block, filterFunction), null)).start();
     }
 
     @NotNull
-    static CollectionList<Block> getBlocks(@NotNull Location loc1, @NotNull Location loc2, Material block, Function<Block, Boolean> filterFunction) {
+    static CollectionList<Block> getBlocks(@NotNull Location loc1, @NotNull Location loc2, @Nullable Material block, @Nullable Function<Block, Boolean> filterFunction) {
         CollectionList<Block> blocks = new CollectionList<>();
         int x1, x2, y1, y2, z1, z2;
         x1 = loc1.getX() > loc2.getX() ? (int) loc2.getX() : (int) loc1.getX();
@@ -48,7 +49,13 @@ public interface RegionEdit extends Plugin {
                             if (filterFunction.apply(b)) blocks.add(b);
                         } else blocks.add(b);
                     } else {
-                        if (b.getType() == block && filterFunction.apply(b)) blocks.add(b);
+                        if (b.getType() == block) {
+                            if (filterFunction == null) {
+                                blocks.add(b);
+                            } else {
+                                if (filterFunction.apply(b)) blocks.add(b);
+                            }
+                        }
                     }
                 }
             }
@@ -56,7 +63,7 @@ public interface RegionEdit extends Plugin {
         return blocks;
     }
 
-    static void getBlocksInvertAsync(@NotNull Location loc1, @NotNull Location loc2, Material block, Callback<CollectionList<Block>> callback) {
+    static void getBlocksInvertAsync(@NotNull Location loc1, @NotNull Location loc2, Material block, @NotNull Callback<CollectionList<Block>> callback) {
         new Thread(() -> callback.done(getBlocksInvert(loc1, loc2, block), null)).start();
     }
 
@@ -82,7 +89,7 @@ public interface RegionEdit extends Plugin {
         return blocks;
     }
 
-    static void getNearbyBlocksAsync(@NotNull Location location, int radius, Callback<CollectionList<Block>> callback) {
+    static void getNearbyBlocksAsync(@NotNull Location location, int radius, @NotNull Callback<CollectionList<Block>> callback) {
         new Thread(() -> callback.done(getNearbyBlocks(location, radius), null)).start();
     }
 

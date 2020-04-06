@@ -11,10 +11,6 @@ import java.lang.reflect.InvocationTargetException;
 public class PacketPlayOutMapChunk implements Packet {
     private Object o;
 
-    public PacketPlayOutMapChunk(Object o) {
-        this.o = o;
-    }
-
     public PacketPlayOutMapChunk(Chunk chunk) {
         try {
             if (Compatibility.checkPacketPlayOutMapChunkOldConstructor()) {

@@ -117,7 +117,7 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
             SelectionMode selectionMode = RegionEditPlugin.selectionMode.getOrDefault(e.getPlayer().getUniqueId(), SelectionMode.CUBOID);
             if (selectionMode == SelectionMode.CUBOID) {
                 CuboidRegion cuboidRegion = (CuboidRegion) regionSelection.getOrDefault(e.getPlayer().getUniqueId(), new CuboidRegion(e.getBlock().getLocation(), e.getBlock().getLocation()));
-                if (!cuboidRegion.getLocation2().getWorld().equals(e.getBlock().getWorld())) cuboidRegion = new CuboidRegion(e.getBlock().getLocation(), null);
+                if (!Objects.requireNonNull(cuboidRegion.getLocation2()).getWorld().equals(e.getBlock().getWorld())) cuboidRegion = new CuboidRegion(e.getBlock().getLocation(), null);
                 CuboidRegion reg = new CuboidRegion(e.getBlock().getLocation(), cuboidRegion.getLocation2());
                 selectRegion(reg, e.getPlayer());
             }
@@ -134,7 +134,7 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
                 SelectionMode selectionMode = RegionEditPlugin.selectionMode.getOrDefault(e.getPlayer().getUniqueId(), SelectionMode.CUBOID);
                 if (selectionMode == SelectionMode.CUBOID) {
                     CuboidRegion cuboidRegion = (CuboidRegion) regionSelection.getOrDefault(e.getPlayer().getUniqueId(), new CuboidRegion(e.getClickedBlock().getLocation(), e.getClickedBlock().getLocation()));
-                    if (!cuboidRegion.getLocation().getWorld().equals(e.getClickedBlock().getWorld()))
+                    if (!Objects.requireNonNull(cuboidRegion.getLocation()).getWorld().equals(e.getClickedBlock().getWorld()))
                         cuboidRegion = new CuboidRegion(e.getClickedBlock().getLocation(), e.getClickedBlock().getLocation());
                     CuboidRegion reg = new CuboidRegion(cuboidRegion.getLocation(), e.getClickedBlock().getLocation());
                     selectRegion(reg, e.getPlayer());
@@ -166,6 +166,8 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
 
     public static void showCurrentRegion(Player player) {
         CuboidRegion reg = (CuboidRegion) regionSelection.get(player.getUniqueId());
+        assert reg.getLocation() != null;
+        assert reg.getLocation2() != null;
         CollectionList<Block> blocks = RegionEdit.getBlocks(reg.getLocation(), reg.getLocation2(), null, null);
         player.sendMessage(ChatColor.GREEN + "Selected region "
                 + ChatColor.YELLOW + "(" + loc2Str(reg.getLocation()) + " -> " + loc2Str(reg.getLocation2()) + ") "

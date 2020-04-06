@@ -23,6 +23,9 @@ public class CutCommand extends PlayerCommandExecutor {
         RegionSelection regionSelection = RegionEditPlugin.regionSelection.get(player.getUniqueId());
         if (regionSelection instanceof CuboidRegion) {
             CuboidRegion region = (CuboidRegion) regionSelection;
+            /* these locations isn't null and it's already safe to use */
+            assert region.getLocation() != null;
+            assert region.getLocation2() != null;
             RegionEdit.getBlocksInvertAsync(region.getLocation(), region.getLocation2(), Material.AIR, new Callback<CollectionList<Block>>() {
                 @Override
                 public void done(CollectionList<Block> blocks, Throwable throwable) {
