@@ -34,7 +34,7 @@ import xyz.acrylicstyle.region.internal.commands.CommandDescription;
 import xyz.acrylicstyle.region.internal.commands.CommandDescriptionManager;
 import xyz.acrylicstyle.region.internal.nms.Chunk;
 import xyz.acrylicstyle.region.internal.player.UserSessionImpl;
-import xyz.acrylicstyle.region.internal.utils.Blocks;
+import xyz.acrylicstyle.region.internal.block.Blocks;
 import xyz.acrylicstyle.region.internal.utils.Reflection;
 import xyz.acrylicstyle.tomeito_core.TomeitoLib;
 import xyz.acrylicstyle.tomeito_core.utils.Log;
