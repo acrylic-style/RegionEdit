@@ -1,4 +1,4 @@
-package xyz.acrylicstyle.region.commands;
+package xyz.acrylicstyle.region.internal.commands;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -9,12 +9,12 @@ import xyz.acrylicstyle.region.api.RegionEdit;
 import xyz.acrylicstyle.region.api.block.Block;
 import xyz.acrylicstyle.tomeito_core.command.PlayerCommandExecutor;
 
-public class UndoCommand extends PlayerCommandExecutor {
+public class RedoCommand extends PlayerCommandExecutor {
     @Override
     public void onCommand(Player player, String[] args) {
-        Collection<Location, Block> blocks = RegionEdit.getInstance().getHistoryManager().next(player.getUniqueId());
+        Collection<Location, Block> blocks = RegionEdit.getInstance().getHistoryManager().previous(player.getUniqueId());
         if (blocks == null) {
-            player.sendMessage(ChatColor.RED + "There's nothing to undo.");
+            player.sendMessage(ChatColor.RED + "There's nothing to redo.");
             return;
         }
         RegionEditPlugin.setBlocks(player, blocks);

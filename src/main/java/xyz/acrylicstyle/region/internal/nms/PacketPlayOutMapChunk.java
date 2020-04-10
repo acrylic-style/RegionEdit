@@ -34,7 +34,7 @@ public class PacketPlayOutMapChunk implements Packet {
         try {
             ReflectionUtil.getNMSClass("PacketPlayOutMapChunk")
                     .getMethod("a", ReflectionUtil.getNMSClass("PacketDataSerializer"))
-                    .invoke(getNMSClass(), packetDataSerializer.getPacketDataSerializer());
+                    .invoke(getNMSClass(), packetDataSerializer.getHandle());
         } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException | ClassNotFoundException e) {
             e.printStackTrace();
         }
@@ -45,7 +45,7 @@ public class PacketPlayOutMapChunk implements Packet {
         try {
             ReflectionUtil.getNMSClass("PacketPlayOutMapChunk")
                     .getMethod("b", ReflectionUtil.getNMSClass("PacketDataSerializer"))
-                    .invoke(getNMSClass(), packetDataSerializer.getPacketDataSerializer());
+                    .invoke(getNMSClass(), packetDataSerializer.getHandle());
         } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException | ClassNotFoundException e) {
             e.printStackTrace();
         }

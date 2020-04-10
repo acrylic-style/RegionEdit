@@ -29,12 +29,17 @@ import xyz.acrylicstyle.region.api.player.UserSession;
 import xyz.acrylicstyle.region.api.region.CuboidRegion;
 import xyz.acrylicstyle.region.api.region.RegionSelection;
 import xyz.acrylicstyle.region.api.selection.SelectionMode;
-import xyz.acrylicstyle.region.commands.*;
-import xyz.acrylicstyle.region.internal.commands.CommandDescription;
-import xyz.acrylicstyle.region.internal.commands.CommandDescriptionManager;
+import xyz.acrylicstyle.region.internal.commands.*;
+import xyz.acrylicstyle.region.internal.command.CommandDescription;
+import xyz.acrylicstyle.region.internal.command.CommandDescriptionManager;
 import xyz.acrylicstyle.region.internal.nms.Chunk;
 import xyz.acrylicstyle.region.internal.player.UserSessionImpl;
 import xyz.acrylicstyle.region.internal.block.Blocks;
+import xyz.acrylicstyle.region.internal.tabCompleters.BlocksTabCompleter;
+import xyz.acrylicstyle.region.internal.tabCompleters.RegionEditTabCompleter;
+import xyz.acrylicstyle.region.internal.tabCompleters.ReplaceBlocksTabCompleter;
+import xyz.acrylicstyle.region.internal.utils.BukkitVersion;
+import xyz.acrylicstyle.region.internal.utils.Compatibility;
 import xyz.acrylicstyle.region.internal.utils.Reflection;
 import xyz.acrylicstyle.tomeito_core.TomeitoLib;
 import xyz.acrylicstyle.tomeito_core.utils.Log;
@@ -60,8 +65,11 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
 
     @Override
     public void onEnable() {
+        if (Compatibility.getBukkitVersion() == BukkitVersion.UNKNOWN) Log.warn("You are using an unknown bukkit version. Proceed with caution.");
+        Log.info("Registering events");
         Bukkit.getServicesManager().register(RegionEdit.class, this, this, ServicePriority.Normal);
         Bukkit.getPluginManager().registerEvents(this, this);
+        Log.info("Registering commands");
         TomeitoLib.registerCommand("regionedit", new RegionEditCommand());
         TomeitoLib.registerCommand("/help", new HelpCommand());
         TomeitoLib.registerCommand("sel", new SelectionCommand());
@@ -80,6 +88,12 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
         TomeitoLib.registerCommand("/expand", new ExpandCommand());
         TomeitoLib.registerCommand("/fast", new FastCommand());
         TomeitoLib.registerCommand("/unstuck", new UnstuckCommand());
+        TomeitoLib.registerCommand("/chunk", new ChunkCommand());
+        Log.info("Registering tab completers");
+        Bukkit.getPluginCommand("regionedit").setTabCompleter(new RegionEditTabCompleter());
+        Bukkit.getPluginCommand("/set").setTabCompleter(new BlocksTabCompleter());
+        Bukkit.getPluginCommand("/replace").setTabCompleter(new ReplaceBlocksTabCompleter());
+        Log.info("Registering command help");
         commandDescriptionManager.add("//help", new CommandDescription("//help [page]", "regions.help", "Shows all RegionEdit commands."));
         commandDescriptionManager.add("/;", new CommandDescription("//sel [cuboid]", "", "Clears selection or switches selection mode."));
         commandDescriptionManager.add("//sel", new CommandDescription("//sel [cuboid]", "", "Clears selection or switches selection mode."));
@@ -100,7 +114,8 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
         commandDescriptionManager.add("//expand", new CommandDescription("//expand <<<number> <up/down/east/south/west/north>>/<vert>>", "regions.selection", "Expands selection area by <number>."));
         commandDescriptionManager.add("//fast", new CommandDescription("//fast", "regions.fast", "Toggles fast mode.", "Fast mode disables some physics on operation."));
         commandDescriptionManager.add("//unstuck", new CommandDescription("//unstuck", "regions.unstuck", "Get out of stuck."));
-        selectionItem = Material.getMaterial(this.getConfig().getString("selection_item", "GOLD_AXE"));
+        commandDescriptionManager.add("//chunk", new CommandDescription("//chunk", "regions.selection", "Selects an entire chunk."));
+        selectionItem = Material.getMaterial(this.getConfig().getString("selection_item", Compatibility.getGoldenAxe().name()));
         navigationItem = Material.getMaterial(this.getConfig().getString("navigation_item", "COMPASS"));
         for (Player p : Bukkit.getOnlinePlayers()) onPlayerJoin(new PlayerJoinEvent(p, ""));
     }
@@ -251,13 +266,13 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
                                     blocks.forEach(b -> {
                                         for (Player p : Bukkit.getOnlinePlayers())
                                             Reflection.sendBlockChange(p, b.getLocation(), material, data, Reflection.getBlockData(b));
-                                        Reflection.notify(b.getWorld(), b, new BlockPosition(b.getLocation().getBlockX(), b.getLocation().getBlockY(), b.getLocation().getBlockZ()));
+                                        Reflection.notify(b.getWorld(), b, Reflection.newRawBlockPosition(b.getLocation().getBlockX(), b.getLocation().getBlockY(), b.getLocation().getBlockZ()));
                                         Reflection.markDirty(b.getChunk());
                                         entries.add(new AbstractMap.SimpleEntry<>(b.getChunk().getX(), b.getChunk().getZ()));
                                     });
                                     Log.debug("Relighting " + entries.unique().size() + " chunks");
                                     entries.unique().forEach(e -> {
-                                        Chunk chunk = Chunk.wrap(blocks.first().getWorld().getChunkAt(e.getKey(), e.getValue()));
+                                        Chunk chunk = Chunk.wrap(Objects.requireNonNull(blocks.first()).getWorld().getChunkAt(e.getKey(), e.getValue()));
                                         chunk.initLighting();
                                         Reflection.sendChunk(player, chunk);
                                     });
@@ -325,7 +340,7 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
                                 Log.debug("Updating " + blocks.size() + " blocks");
                                 blocks.valuesList().forEach(b -> {
                                     for (Player p : Bukkit.getOnlinePlayers()) Reflection.sendBlockChange(p, b.getLocation(), b.getType(), b.getData(), Reflection.getBlockData(b.getBukkitBlock()));
-                                    Reflection.notify(b.getLocation().getWorld(), b.getBukkitBlock(), new BlockPosition(b.getLocation().getBlockX(), b.getLocation().getBlockY(), b.getLocation().getBlockZ()));
+                                    Reflection.notify(b.getLocation().getWorld(), b.getBukkitBlock(), new BlockPosition(b.getLocation().getBlockX(), b.getLocation().getBlockY(), b.getLocation().getBlockZ()).getHandle());
                                     Reflection.markDirty(b.getLocation().getChunk());
                                     new BukkitRunnable() {
                                         @Override

@@ -1,14 +1,15 @@
 package xyz.acrylicstyle.region.internal.nms;
 
-import sun.misc.Unsafe;
 import util.ICollectionList;
 import util.ReflectionHelper;
-import xyz.acrylicstyle.minecraft.BlockPosition;
+import xyz.acrylicstyle.region.internal.utils.Compatibility;
 import xyz.acrylicstyle.shared.NMSAPI;
 import xyz.acrylicstyle.tomeito_core.utils.ReflectionUtil;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
 import java.util.Objects;
 
 /**
@@ -35,20 +36,56 @@ public class Chunk extends NMSAPI {
 
     // uses Unsafe method for faster operation
     public void save() {
-        Unsafe unsafe = (Unsafe) Objects.requireNonNull(ReflectionHelper.getFieldWithoutException(Unsafe.class, null, "theUnsafe"));
         try {
             Field field = Objects.requireNonNull(ReflectionHelper.findField(ReflectionUtil.getNMSClass("Chunk"), "sections"));
-            unsafe.putObject(getNMSClass(), unsafe.objectFieldOffset(field), ICollectionList.asList(this.sections).map(ChunkSection::getNMSClass).toArray(new Object[0]));
-        } catch (ClassNotFoundException e) {
+            Field modifiers = Field.class.getDeclaredField("modifiers");
+            modifiers.setAccessible(true);
+            modifiers.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+            field.setAccessible(true);
+            Object arr = Array.newInstance(ReflectionUtil.getNMSClass("ChunkSection"), this.sections.length);
+            ICollectionList.asList(this.sections).map(ChunkSection::getNMSClass).foreach((o, i) -> Array.set(arr, i, o));
+            field.set(getNMSClass(), arr);
+        } catch (ReflectiveOperationException e) {
             throw new RuntimeException(e);
         }
     }
 
     public void initLighting() {
-        invoke("initLighting");
+        /*
+        if (Compatibility.checkLightEngine()) {
+            try {
+                Object SKY = ReflectionUtil.getNMSClass("EnumSkyBlock").getField("SKY").get(null);
+                Object BLOCK = ReflectionUtil.getNMSClass("EnumSkyBlock").getField("BLOCK").get(null);
+                Object sky = invoke("e")
+                        .getClass()
+                        .getMethod("a", ReflectionUtil.getNMSClass("EnumSkyBlock"))
+                        .invoke(o, SKY);
+                Object block = invoke("e")
+                        .getClass()
+                        .getMethod("a", ReflectionUtil.getNMSClass("EnumSkyBlock"))
+                        .invoke(o, BLOCK);
+                sky.getClass().getMethod("a", ReflectionUtil.getNMSClass("BlockPosition")).invoke(sky, new BlockPosition())
+            } catch (ReflectiveOperationException e) {
+                e.printStackTrace();
+            }
+        } else {
+            invoke("initLighting");
+        }
+         */
+        if (!Compatibility.checkLightEngine()) invoke("initLighting");
     }
 
-    public void setType(BlockPosition blockPosition, Object blockData, boolean applyPhysics) {
-        invoke("setType", blockPosition.toNMSClass(), blockData, applyPhysics);
+    public void setType(Object blockPosition, Object blockData, boolean applyPhysics) {
+        try {
+            Objects.requireNonNull(ReflectionHelper.findMethod(
+                    ReflectionUtil.getNMSClass("Chunk"),
+                    "setType",
+                    ReflectionUtil.getNMSClass("BlockPosition"),
+                    ReflectionUtil.getNMSClass("IBlockData"),
+                    boolean.class
+            )).invoke(o, blockPosition, blockData, applyPhysics);
+        } catch (ReflectiveOperationException e) {
+            e.printStackTrace();
+        }
     }
 }

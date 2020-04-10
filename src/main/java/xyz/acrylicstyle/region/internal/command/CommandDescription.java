@@ -1,4 +1,4 @@
-package xyz.acrylicstyle.region.internal.commands;
+package xyz.acrylicstyle.region.internal.command;
 
 import org.bukkit.ChatColor;
 import util.CollectionList;

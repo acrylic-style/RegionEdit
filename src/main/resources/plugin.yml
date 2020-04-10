@@ -1,7 +1,8 @@
 name: RegionEdit
 main: xyz.acrylicstyle.region.RegionEditPlugin
-version: 0.1.3
+version: 0.1.5
 author: acrylic-style
+api-version: "1.13"
 softdepend:
   - TomeitoLib
 commands:
@@ -46,6 +47,10 @@ commands:
     permission: regions.selection
     permission-message: "&cYou don't have permission. Are you in a right mode?"
   "/expand":
+    description: ""
+    permission: regions.selection
+    permission-message: "&cYou don't have permission. Are you in a right mode?"
+  "/chunk":
     description: ""
     permission: regions.selection
     permission-message: "&cYou don't have permission. Are you in a right mode?"

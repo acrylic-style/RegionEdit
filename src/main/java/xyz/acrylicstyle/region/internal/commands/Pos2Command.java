@@ -1,4 +1,4 @@
-package xyz.acrylicstyle.region.commands;
+package xyz.acrylicstyle.region.internal.commands;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;

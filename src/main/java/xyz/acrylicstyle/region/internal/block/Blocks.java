@@ -11,7 +11,6 @@ import org.jetbrains.annotations.NotNull;
 import util.BiBiConsumer;
 import util.CollectionList;
 import xyz.acrylicstyle.craftbukkit.CraftUtils;
-import xyz.acrylicstyle.minecraft.BlockPosition;
 import xyz.acrylicstyle.region.RegionEditPlugin;
 import xyz.acrylicstyle.region.api.RegionEdit;
 import xyz.acrylicstyle.region.internal.nms.Chunk;
@@ -27,7 +26,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class Blocks {
     @SuppressWarnings("deprecation")
-    public static void setBlock1_8_1_12_2(World world, int x, int y, int z, Material material, byte data) {
+    public static void setBlock1_8_1_13_2(World world, int x, int y, int z, Material material, byte data) {
         int blockId = material.getId();
         try {
             Object o = CraftUtils.getHandle(world).getClass().getMethod("getChunkAt", int.class, int.class).invoke(CraftUtils.getHandle(world), x >> 4, z >> 4);
@@ -37,16 +36,20 @@ public class Blocks {
         }
     }
 
-    public static void setBlock1_13(World world, int x, int y, int z, RegionBlockData blockData) {
+    public static void setBlock1_14(World world, int x, int y, int z, RegionBlockData blockData) {
         org.bukkit.Chunk chunk = world.getBlockAt(x, y, z).getChunk();
-        Chunk.wrap(chunk).setType(new BlockPosition(x, y, z), blockData.getHandle(), false);
+        try {
+            Chunk.wrap(chunk).setType(Reflection.newRawBlockPosition(x, y, z), blockData.getHandle().getClass().getMethod("getState").invoke(blockData.getHandle()), false);
+        } catch (ReflectiveOperationException e) {
+            e.printStackTrace();
+        }
     }
 
     public static void setBlock(World world, int x, int y, int z, Material material, byte data, RegionBlockData blockData) {
-        if (Compatibility.checkNewPlayer_sendBlockChange()) {
-            setBlock1_13(world, x, y, z, blockData);
+        if (Compatibility.checkChunk_setType()) {
+            setBlock1_14(world, x, y, z, blockData);
         } else {
-            setBlock1_8_1_12_2(world, x, y, z, material, data);
+            setBlock1_8_1_13_2(world, x, y, z, material, data);
         }
     }
 
@@ -85,11 +88,11 @@ public class Blocks {
                             if (i0.get() >= blocks.size()) {
                                 blocks.forEach(b -> {
                                     for (Player p : Bukkit.getOnlinePlayers()) Reflection.sendBlockChange(p, b.getLocation(), material, data, Reflection.getBlockData(b));
-                                    Reflection.notify(b.getWorld(), b, new BlockPosition(b.getLocation().getBlockX(), b.getLocation().getBlockY(), b.getLocation().getBlockZ()));
+                                    Reflection.notify(b.getWorld(), b, Reflection.newRawBlockPosition(b.getLocation().getBlockX(), b.getLocation().getBlockY(), b.getLocation().getBlockZ()));
                                     chunks.add(new AbstractMap.SimpleEntry<>(b.getChunk().getX(), b.getChunk().getZ()));
                                 });
                                 chunks.unique().forEach(e -> {
-                                    Chunk chunk = Chunk.wrap(blocks.first().getWorld().getChunkAt(e.getKey(), e.getValue()));
+                                    Chunk chunk = Chunk.wrap(Objects.requireNonNull(blocks.first()).getWorld().getChunkAt(e.getKey(), e.getValue()));
                                     chunk.initLighting();
                                     for (Player p : Bukkit.getOnlinePlayers()) Reflection.sendChunk(p, chunk);
                                 });

@@ -1,4 +1,4 @@
-package xyz.acrylicstyle.region.commands;
+package xyz.acrylicstyle.region.internal.commands;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -16,9 +16,11 @@ import xyz.acrylicstyle.region.internal.utils.Reflection;
 import xyz.acrylicstyle.tomeito_core.command.PlayerCommandExecutor;
 import xyz.acrylicstyle.tomeito_core.utils.Callback;
 
+import java.util.Objects;
 import java.util.function.Function;
 
 public class SetCommand extends PlayerCommandExecutor {
+    @SuppressWarnings("UnstableApiUsage")
     @Override
     public void onCommand(Player player, String[] args) {
         if (!RegionEditPlugin.regionSelection.getOrDefault(player.getUniqueId(), new CuboidRegion(null, null)).isValid()) {
@@ -39,7 +41,7 @@ public class SetCommand extends PlayerCommandExecutor {
             return;
         }
         int data = JavaScript.parseInt((args[0] + ":0").split(":")[1], 10);
-        Material material = Material.getMaterial(materials.filter(s -> s.equalsIgnoreCase((args[0] + ":0").split(":")[0])).first().toUpperCase());
+        Material material = Material.getMaterial(Objects.requireNonNull(materials.filter(s -> s.equalsIgnoreCase((args[0] + ":0").split(":")[0])).first()).toUpperCase());
         RegionSelection regionSelection = RegionEditPlugin.regionSelection.get(player.getUniqueId());
         if (regionSelection instanceof CuboidRegion) {
             CuboidRegion region = (CuboidRegion) regionSelection;

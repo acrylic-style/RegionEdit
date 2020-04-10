@@ -1,4 +1,4 @@
-package xyz.acrylicstyle.region.commands;
+package xyz.acrylicstyle.region.internal.commands;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -7,6 +7,7 @@ import org.bukkit.entity.Player;
 import util.CollectionList;
 import xyz.acrylicstyle.region.RegionEditPlugin;
 import xyz.acrylicstyle.region.api.RegionEdit;
+import xyz.acrylicstyle.region.internal.utils.Compatibility;
 import xyz.acrylicstyle.tomeito_core.command.PlayerCommandExecutor;
 import xyz.acrylicstyle.tomeito_core.utils.Callback;
 import xyz.acrylicstyle.tomeito_core.utils.TypeUtil;
@@ -30,7 +31,7 @@ public class DrainCommand extends PlayerCommandExecutor {
         RegionEdit.getNearbyBlocksAsync(player.getLocation(), finalRadius, new Callback<CollectionList<Block>>() {
             @Override
             public void done(CollectionList<Block> blocks, Throwable throwable) {
-                blocks = blocks.filter(block -> block.getType() == (finalLava ? Material.LAVA : Material.WATER) || block.getType() == (finalLava ? Material.STATIONARY_LAVA : Material.STATIONARY_WATER));
+                blocks = blocks.filter(block -> block.getType() == (finalLava ? Material.LAVA : Material.WATER) || (Compatibility.checkStationary_Water() && block.getType() == (finalLava ? Material.STATIONARY_LAVA : Material.STATIONARY_WATER)));
                 RegionEdit.getInstance().getHistoryManager().resetPointer(player.getUniqueId());
                 RegionEditPlugin.setBlocks(player, blocks, Material.AIR, (byte) 0);
             }
