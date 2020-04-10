@@ -36,6 +36,7 @@ import xyz.acrylicstyle.region.internal.nms.Chunk;
 import xyz.acrylicstyle.region.internal.player.UserSessionImpl;
 import xyz.acrylicstyle.region.internal.block.Blocks;
 import xyz.acrylicstyle.region.internal.tabCompleters.BlocksTabCompleter;
+import xyz.acrylicstyle.region.internal.tabCompleters.DrainTabCompleter;
 import xyz.acrylicstyle.region.internal.tabCompleters.RegionEditTabCompleter;
 import xyz.acrylicstyle.region.internal.tabCompleters.ReplaceBlocksTabCompleter;
 import xyz.acrylicstyle.region.internal.utils.BukkitVersion;
@@ -93,6 +94,7 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
         Bukkit.getPluginCommand("regionedit").setTabCompleter(new RegionEditTabCompleter());
         Bukkit.getPluginCommand("/set").setTabCompleter(new BlocksTabCompleter());
         Bukkit.getPluginCommand("/replace").setTabCompleter(new ReplaceBlocksTabCompleter());
+        Bukkit.getPluginCommand("/drain").setTabCompleter(new DrainTabCompleter());
         Log.info("Registering command help");
         commandDescriptionManager.add("//help", new CommandDescription("//help [page]", "regions.help", "Shows all RegionEdit commands."));
         commandDescriptionManager.add("/;", new CommandDescription("//sel [cuboid]", "", "Clears selection or switches selection mode."));
