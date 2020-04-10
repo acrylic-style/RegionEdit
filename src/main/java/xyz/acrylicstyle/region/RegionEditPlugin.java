@@ -262,14 +262,6 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
                         if (fastMode) {
                             while (true) {
                                 if (i0.get() >= blocks.size()) {
-                                    Log.debug("Updating " + blocks.size() + " blocks");
-                                    blocks.forEach(b -> {
-                                        for (Player p : Bukkit.getOnlinePlayers())
-                                            Reflection.sendBlockChange(p, b.getLocation(), material, data, Reflection.getBlockData(b));
-                                        Reflection.notify(b.getWorld(), b, Reflection.newRawBlockPosition(b.getLocation().getBlockX(), b.getLocation().getBlockY(), b.getLocation().getBlockZ()));
-                                        Reflection.markDirty(b.getChunk());
-                                        entries.add(new AbstractMap.SimpleEntry<>(b.getChunk().getX(), b.getChunk().getZ()));
-                                    });
                                     Log.debug("Relighting " + entries.unique().size() + " chunks");
                                     entries.unique().forEach(e -> {
                                         Chunk chunk = Chunk.wrap(Objects.requireNonNull(blocks.first()).getWorld().getChunkAt(e.getKey(), e.getValue()));
@@ -283,6 +275,14 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
                     }
                 }.runTaskLaterAsynchronously(RegionEdit.getInstance(), 10);
                 completeOperation(blocks.size(), taskId, start, player);
+                Log.debug("Updating " + blocks.size() + " blocks");
+                blocks.forEach(b -> entries.add(new AbstractMap.SimpleEntry<>(b.getChunk().getX(), b.getChunk().getZ())));
+                blocks.forEach(b -> {
+                    for (Player p : Bukkit.getOnlinePlayers())
+                        Reflection.sendBlockChange(p, b.getLocation(), material, data, Reflection.getBlockData(b));
+                    Reflection.notify(b.getWorld(), b, Reflection.newRawBlockPosition(b.getLocation().getBlockX(), b.getLocation().getBlockY(), b.getLocation().getBlockZ()));
+                    Reflection.markDirty(b.getChunk());
+                });
             }
         }.runTaskLater(plugin, i.getAndIncrement());
     }
