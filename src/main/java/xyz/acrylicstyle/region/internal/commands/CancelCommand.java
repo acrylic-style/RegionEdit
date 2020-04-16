@@ -6,8 +6,8 @@ import util.Collection;
 import util.CollectionList;
 import xyz.acrylicstyle.region.RegionEditPlugin;
 import xyz.acrylicstyle.region.api.operation.OperationStatus;
-import xyz.acrylicstyle.tomeito_core.command.PlayerCommandExecutor;
-import xyz.acrylicstyle.tomeito_core.utils.TypeUtil;
+import xyz.acrylicstyle.tomeito_api.command.PlayerCommandExecutor;
+import xyz.acrylicstyle.tomeito_api.utils.TypeUtil;
 
 public class CancelCommand extends PlayerCommandExecutor {
     @Override

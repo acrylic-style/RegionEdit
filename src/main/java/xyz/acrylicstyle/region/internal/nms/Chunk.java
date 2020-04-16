@@ -4,7 +4,7 @@ import util.ICollectionList;
 import util.ReflectionHelper;
 import xyz.acrylicstyle.region.internal.utils.Compatibility;
 import xyz.acrylicstyle.shared.NMSAPI;
-import xyz.acrylicstyle.tomeito_core.utils.ReflectionUtil;
+import xyz.acrylicstyle.tomeito_api.utils.ReflectionUtil;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;

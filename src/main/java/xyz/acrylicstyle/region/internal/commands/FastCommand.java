@@ -3,7 +3,7 @@ package xyz.acrylicstyle.region.internal.commands;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import xyz.acrylicstyle.region.api.RegionEdit;
-import xyz.acrylicstyle.tomeito_core.command.PlayerCommandExecutor;
+import xyz.acrylicstyle.tomeito_api.command.PlayerCommandExecutor;
 
 public class FastCommand extends PlayerCommandExecutor {
     @Override

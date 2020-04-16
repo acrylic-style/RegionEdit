@@ -9,9 +9,9 @@ import xyz.acrylicstyle.region.RegionEditPlugin;
 import xyz.acrylicstyle.region.api.RegionEdit;
 import xyz.acrylicstyle.region.internal.utils.BukkitVersion;
 import xyz.acrylicstyle.region.internal.utils.Compatibility;
-import xyz.acrylicstyle.tomeito_core.command.PlayerCommandExecutor;
-import xyz.acrylicstyle.tomeito_core.utils.Callback;
-import xyz.acrylicstyle.tomeito_core.utils.TypeUtil;
+import xyz.acrylicstyle.tomeito_api.command.PlayerCommandExecutor;
+import xyz.acrylicstyle.tomeito_api.utils.Callback;
+import xyz.acrylicstyle.tomeito_api.utils.TypeUtil;
 
 public class DrainCommand extends PlayerCommandExecutor {
     @Override

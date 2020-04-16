@@ -4,7 +4,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import xyz.acrylicstyle.tomeito_core.command.PlayerCommandExecutor;
+import xyz.acrylicstyle.tomeito_api.command.PlayerCommandExecutor;
 
 public class UnstuckCommand extends PlayerCommandExecutor {
     @Override

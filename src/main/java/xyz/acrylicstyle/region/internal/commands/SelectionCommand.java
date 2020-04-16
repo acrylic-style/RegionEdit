@@ -5,7 +5,7 @@ import org.bukkit.entity.Player;
 import xyz.acrylicstyle.region.RegionEditPlugin;
 import xyz.acrylicstyle.region.api.RegionEdit;
 import xyz.acrylicstyle.region.api.selection.SelectionMode;
-import xyz.acrylicstyle.tomeito_core.command.PlayerCommandExecutor;
+import xyz.acrylicstyle.tomeito_api.command.PlayerCommandExecutor;
 
 public class SelectionCommand extends PlayerCommandExecutor {
     @Override

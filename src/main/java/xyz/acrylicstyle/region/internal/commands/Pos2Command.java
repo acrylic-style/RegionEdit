@@ -9,7 +9,7 @@ import xyz.acrylicstyle.region.RegionEditPlugin;
 import xyz.acrylicstyle.region.api.RegionEdit;
 import xyz.acrylicstyle.region.api.region.CuboidRegion;
 import xyz.acrylicstyle.region.api.selection.SelectionMode;
-import xyz.acrylicstyle.tomeito_core.command.PlayerCommandExecutor;
+import xyz.acrylicstyle.tomeito_api.command.PlayerCommandExecutor;
 
 public class Pos2Command extends PlayerCommandExecutor {
     @Override
@@ -17,10 +17,12 @@ public class Pos2Command extends PlayerCommandExecutor {
         SelectionMode selectionMode = RegionEditPlugin.selectionMode.getOrDefault(player.getUniqueId(), SelectionMode.CUBOID);
         if (selectionMode == SelectionMode.CUBOID) {
             CuboidRegion cuboidRegion = (CuboidRegion) RegionEditPlugin.regionSelection.getOrDefault(player.getUniqueId(), new CuboidRegion(player.getLocation(), player.getLocation()));
+            assert cuboidRegion.getLocation() != null;
             if (!cuboidRegion.getLocation().getWorld().equals(player.getWorld()))
                 cuboidRegion = new CuboidRegion(player.getLocation(), player.getLocation());
             CuboidRegion reg = new CuboidRegion(cuboidRegion.getLocation(), player.getLocation());
             RegionEditPlugin.regionSelection.add(player.getUniqueId(), reg);
+            assert reg.getLocation() != null;
             CollectionList<Block> blocks = RegionEdit.getBlocks(reg.getLocation(), reg.getLocation2(), null, null);
             player.sendMessage(ChatColor.GREEN + "Selected region "
                     + ChatColor.YELLOW + "(" + loc2Str(reg.getLocation()) + " -> " + loc2Str(reg.getLocation2()) + ") "

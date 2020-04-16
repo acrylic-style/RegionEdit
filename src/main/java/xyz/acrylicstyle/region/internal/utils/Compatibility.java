@@ -7,7 +7,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.PlayerInventory;
 import util.ReflectionHelper;
-import xyz.acrylicstyle.tomeito_core.utils.ReflectionUtil;
+import xyz.acrylicstyle.tomeito_api.utils.ReflectionUtil;
 
 public class Compatibility {
     public static BukkitVersion getBukkitVersion() {

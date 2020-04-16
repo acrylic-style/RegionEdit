@@ -7,7 +7,7 @@ import util.Collection;
 import xyz.acrylicstyle.region.RegionEditPlugin;
 import xyz.acrylicstyle.region.api.RegionEdit;
 import xyz.acrylicstyle.region.api.block.Block;
-import xyz.acrylicstyle.tomeito_core.command.PlayerCommandExecutor;
+import xyz.acrylicstyle.tomeito_api.command.PlayerCommandExecutor;
 
 public class RedoCommand extends PlayerCommandExecutor {
     @Override

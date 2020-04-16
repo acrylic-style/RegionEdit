@@ -10,13 +10,13 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 import util.BiBiConsumer;
 import util.CollectionList;
-import xyz.acrylicstyle.craftbukkit.CraftUtils;
+import xyz.acrylicstyle.craftbukkit.v1_8_R3.util.CraftUtils;
 import xyz.acrylicstyle.region.RegionEditPlugin;
 import xyz.acrylicstyle.region.api.RegionEdit;
 import xyz.acrylicstyle.region.internal.nms.Chunk;
 import xyz.acrylicstyle.region.internal.utils.Compatibility;
 import xyz.acrylicstyle.region.internal.utils.Reflection;
-import xyz.acrylicstyle.tomeito_core.utils.ReflectionUtil;
+import xyz.acrylicstyle.tomeito_api.utils.ReflectionUtil;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.AbstractMap;

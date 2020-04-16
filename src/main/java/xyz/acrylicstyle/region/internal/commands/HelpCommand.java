@@ -6,7 +6,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import util.CollectionList;
 import xyz.acrylicstyle.region.RegionEditPlugin;
-import xyz.acrylicstyle.tomeito_core.utils.TypeUtil;
+import xyz.acrylicstyle.tomeito_api.utils.TypeUtil;
 
 public class HelpCommand implements CommandExecutor {
     @Override

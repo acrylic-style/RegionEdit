@@ -14,12 +14,12 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import util.ReflectionHelper;
-import xyz.acrylicstyle.craftbukkit.CraftUtils;
+import xyz.acrylicstyle.craftbukkit.v1_8_R3.util.CraftUtils;
 import xyz.acrylicstyle.region.api.RegionEdit;
 import xyz.acrylicstyle.region.internal.block.RegionBlockData;
 import xyz.acrylicstyle.region.internal.nms.PacketPlayOutMapChunk;
-import xyz.acrylicstyle.tomeito_core.utils.Log;
-import xyz.acrylicstyle.tomeito_core.utils.ReflectionUtil;
+import xyz.acrylicstyle.tomeito_api.utils.Log;
+import xyz.acrylicstyle.tomeito_api.utils.ReflectionUtil;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

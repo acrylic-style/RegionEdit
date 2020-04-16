@@ -63,4 +63,12 @@ public interface UserSession {
      * @param flag Fast Mode flag
      */
     void setFastMode(boolean flag);
+
+    boolean isSuperPickaxeEnabled();
+
+    /**
+     * Set super pickaxe mode to specified flag.
+     * @param flag Enable Super Pickaxe
+     */
+    void setSuperPickaxe(boolean flag);
 }

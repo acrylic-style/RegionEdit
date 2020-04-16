@@ -68,4 +68,16 @@ public class UserSessionImpl implements UserSession {
     public void setFastMode(boolean flag) {
         this.fastMode = flag;
     }
+
+    private boolean superPickaxe = false;
+
+    @Override
+    public boolean isSuperPickaxeEnabled() {
+        return superPickaxe;
+    }
+
+    @Override
+    public void setSuperPickaxe(boolean flag) {
+        this.superPickaxe = flag;
+    }
 }

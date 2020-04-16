@@ -5,7 +5,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import xyz.acrylicstyle.region.RegionEditPlugin;
-import xyz.acrylicstyle.tomeito_core.utils.TypeUtil;
+import xyz.acrylicstyle.tomeito_api.utils.TypeUtil;
 
 public class LimitCommand implements CommandExecutor {
     @Override

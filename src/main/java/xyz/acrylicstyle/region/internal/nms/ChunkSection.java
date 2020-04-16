@@ -1,7 +1,7 @@
 package xyz.acrylicstyle.region.internal.nms;
 
 import xyz.acrylicstyle.region.internal.utils.Compatibility;
-import xyz.acrylicstyle.tomeito_core.utils.ReflectionUtil;
+import xyz.acrylicstyle.tomeito_api.utils.ReflectionUtil;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Objects;
@@ -10,7 +10,7 @@ import java.util.Objects;
  * Partial implementation of NMS ChunkSection.
  */
 public class ChunkSection {
-    private Object o;
+    private final Object o;
     private final Chunk chunk;
 
     public ChunkSection(Chunk chunk, Object o) {

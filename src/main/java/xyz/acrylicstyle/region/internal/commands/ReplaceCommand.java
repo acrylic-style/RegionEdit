@@ -13,12 +13,14 @@ import xyz.acrylicstyle.region.api.exception.RegionEditException;
 import xyz.acrylicstyle.region.api.region.CuboidRegion;
 import xyz.acrylicstyle.region.api.region.RegionSelection;
 import xyz.acrylicstyle.region.internal.utils.Reflection;
-import xyz.acrylicstyle.tomeito_core.command.PlayerCommandExecutor;
-import xyz.acrylicstyle.tomeito_core.utils.Callback;
+import xyz.acrylicstyle.tomeito_api.command.PlayerCommandExecutor;
+import xyz.acrylicstyle.tomeito_api.utils.Callback;
 
+import java.util.Objects;
 import java.util.function.Function;
 
 public class ReplaceCommand extends PlayerCommandExecutor {
+    @SuppressWarnings("UnstableApiUsage")
     @Override
     public void onCommand(Player player, String[] args) {
         if (!RegionEditPlugin.regionSelection.getOrDefault(player.getUniqueId(), new CuboidRegion(null, null)).isValid()) {
@@ -48,12 +50,13 @@ public class ReplaceCommand extends PlayerCommandExecutor {
         }
         int beforeData = JavaScript.parseInt((args[0] + ":0").split(":")[1], 10);
         int afterData = JavaScript.parseInt((args[1] + ":0").split(":")[1], 10);
-        Material before = Material.getMaterial(materials.filter(s -> s.equalsIgnoreCase(beforeMaterial)).first().toUpperCase());
-        Material after = Material.getMaterial(materials.filter(s -> s.equalsIgnoreCase(afterMaterial)).first().toUpperCase());
+        Material before = Material.getMaterial(Objects.requireNonNull(materials.filter(s -> s.equalsIgnoreCase(beforeMaterial)).first()).toUpperCase());
+        Material after = Material.getMaterial(Objects.requireNonNull(materials.filter(s -> s.equalsIgnoreCase(afterMaterial)).first()).toUpperCase());
         RegionSelection regionSelection = RegionEditPlugin.regionSelection.get(player.getUniqueId());
         if (regionSelection instanceof CuboidRegion) {
             CuboidRegion region = (CuboidRegion) regionSelection;
             if (args[0].startsWith("!")) {
+                assert region.getLocation() != null;
                 RegionEdit.getBlocksInvertAsync(region.getLocation(), region.getLocation2(), before, new Callback<CollectionList<Block>>() {
                     @Override
                     public void done(CollectionList<Block> blocks, Throwable throwable) {
@@ -62,6 +65,7 @@ public class ReplaceCommand extends PlayerCommandExecutor {
                     }
                 });
             } else {
+                assert region.getLocation() != null;
                 RegionEdit.getBlocksAsync(region.getLocation(), region.getLocation2(), before, block -> Reflection.getData(block) == (byte) beforeData, new Callback<CollectionList<Block>>() {
                     @Override
                     public void done(CollectionList<Block> blocks, Throwable throwable) {

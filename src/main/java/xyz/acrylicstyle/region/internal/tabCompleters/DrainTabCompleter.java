@@ -9,7 +9,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class DrainTabCompleter extends TabCompleterHelper {
-    private List<String> list = create100List();
+    private final List<String> list = create100List();
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {

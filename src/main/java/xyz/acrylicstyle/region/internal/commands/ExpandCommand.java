@@ -6,8 +6,8 @@ import xyz.acrylicstyle.region.RegionEditPlugin;
 import xyz.acrylicstyle.region.api.RegionEdit;
 import xyz.acrylicstyle.region.api.region.CuboidRegion;
 import xyz.acrylicstyle.region.api.selection.SelectionMode;
-import xyz.acrylicstyle.tomeito_core.command.PlayerCommandExecutor;
-import xyz.acrylicstyle.tomeito_core.utils.TypeUtil;
+import xyz.acrylicstyle.tomeito_api.command.PlayerCommandExecutor;
+import xyz.acrylicstyle.tomeito_api.utils.TypeUtil;
 
 import java.util.Arrays;
 

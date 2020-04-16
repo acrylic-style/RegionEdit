@@ -10,7 +10,7 @@ import xyz.acrylicstyle.region.RegionEditPlugin;
 import xyz.acrylicstyle.region.api.RegionEdit;
 import xyz.acrylicstyle.region.api.region.CuboidRegion;
 import xyz.acrylicstyle.region.api.selection.SelectionMode;
-import xyz.acrylicstyle.tomeito_core.command.PlayerCommandExecutor;
+import xyz.acrylicstyle.tomeito_api.command.PlayerCommandExecutor;
 
 import java.util.Set;
 
@@ -26,10 +26,12 @@ public class HPos2Command extends PlayerCommandExecutor {
         Location location = targetBlock.getLocation();
         if (selectionMode == SelectionMode.CUBOID) {
             CuboidRegion cuboidRegion = (CuboidRegion) RegionEditPlugin.regionSelection.getOrDefault(player.getUniqueId(), new CuboidRegion(location, location));
+            assert cuboidRegion.getLocation() != null;
             if (!cuboidRegion.getLocation().getWorld().equals(player.getWorld()))
                 cuboidRegion = new CuboidRegion(location, location);
             CuboidRegion reg = new CuboidRegion(cuboidRegion.getLocation(), location);
             RegionEditPlugin.regionSelection.add(player.getUniqueId(), reg);
+            assert reg.getLocation() != null;
             CollectionList<Block> blocks = RegionEdit.getBlocks(reg.getLocation(), reg.getLocation2(), null, null);
             player.sendMessage(ChatColor.GREEN + "Selected region "
                     + ChatColor.YELLOW + "(" + loc2Str(reg.getLocation()) + " -> " + loc2Str(reg.getLocation2()) + ") "

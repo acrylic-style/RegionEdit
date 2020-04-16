@@ -13,8 +13,8 @@ import xyz.acrylicstyle.region.api.exception.RegionEditException;
 import xyz.acrylicstyle.region.api.region.CuboidRegion;
 import xyz.acrylicstyle.region.api.region.RegionSelection;
 import xyz.acrylicstyle.region.internal.utils.Reflection;
-import xyz.acrylicstyle.tomeito_core.command.PlayerCommandExecutor;
-import xyz.acrylicstyle.tomeito_core.utils.Callback;
+import xyz.acrylicstyle.tomeito_api.command.PlayerCommandExecutor;
+import xyz.acrylicstyle.tomeito_api.utils.Callback;
 
 import java.util.Objects;
 import java.util.function.Function;
@@ -45,6 +45,7 @@ public class SetCommand extends PlayerCommandExecutor {
         RegionSelection regionSelection = RegionEditPlugin.regionSelection.get(player.getUniqueId());
         if (regionSelection instanceof CuboidRegion) {
             CuboidRegion region = (CuboidRegion) regionSelection;
+            assert region.getLocation() != null;
             RegionEdit.getBlocksAsync(region.getLocation(), region.getLocation2(), null, block -> block.getType() != material || Reflection.getData(block) != data, new Callback<CollectionList<Block>>() {
                 @Override
                 public void done(CollectionList<Block> blocks, Throwable throwable) {

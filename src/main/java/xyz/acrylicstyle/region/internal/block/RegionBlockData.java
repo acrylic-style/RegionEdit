@@ -7,7 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import util.ReflectionHelper;
 import xyz.acrylicstyle.region.api.block.BlockData;
 import xyz.acrylicstyle.region.internal.utils.Reflection;
-import xyz.acrylicstyle.tomeito_core.utils.ReflectionUtil;
+import xyz.acrylicstyle.tomeito_api.utils.ReflectionUtil;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Objects;

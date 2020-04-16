@@ -4,12 +4,12 @@ import xyz.acrylicstyle.minecraft.Packet;
 import xyz.acrylicstyle.minecraft.PacketDataSerializer;
 import xyz.acrylicstyle.minecraft.PacketListener;
 import xyz.acrylicstyle.region.internal.utils.Compatibility;
-import xyz.acrylicstyle.tomeito_core.utils.ReflectionUtil;
+import xyz.acrylicstyle.tomeito_api.utils.ReflectionUtil;
 
 import java.lang.reflect.InvocationTargetException;
 
 public class PacketPlayOutMapChunk implements Packet {
-    private Object o;
+    private final Object o;
 
     public PacketPlayOutMapChunk(Chunk chunk) {
         try {
