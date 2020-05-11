@@ -30,7 +30,7 @@ public class RegionBlock implements Block, Cloneable {
     }
 
     @NotNull
-    @Contract("_ -> new")
+    @Contract(value = "_ -> new", pure = true)
     public static RegionBlock wrap(@NotNull org.bukkit.block.Block block) {
         return new RegionBlock(block);
     }

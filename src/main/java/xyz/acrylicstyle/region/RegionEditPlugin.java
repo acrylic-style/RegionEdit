@@ -167,7 +167,7 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
                     return;
                 }
                 int i = 0;
-                while (block.getLocation().add(0, i+1, 0).getBlock().getType() != Material.AIR) i++;
+                while (i < 256 && block.getLocation().add(0, i+1, 0).getBlock().getType() != Material.AIR) i++;
                 Location location = block.getLocation().clone().add(0.5, i+1, 0.5);
                 location.setYaw(e.getPlayer().getLocation().getYaw());
                 location.setPitch(e.getPlayer().getLocation().getPitch());

@@ -34,7 +34,6 @@ public class Chunk extends NMSAPI {
         }
     }
 
-    // uses Unsafe method for faster operation
     public void save() {
         try {
             Field field = Objects.requireNonNull(ReflectionHelper.findField(ReflectionUtil.getNMSClass("Chunk"), "sections"));

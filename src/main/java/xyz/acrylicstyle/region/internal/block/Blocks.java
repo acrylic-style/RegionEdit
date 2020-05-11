@@ -36,6 +36,15 @@ public class Blocks {
         }
     }
 
+    public static Object getByCombinedId(int i) {
+        try {
+            return ReflectionUtil.getNMSClass("Block").getMethod("getByCombinedId", int.class).invoke(null, i);
+        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public static void setBlock1_14(World world, int x, int y, int z, RegionBlockData blockData) {
         org.bukkit.Chunk chunk = world.getBlockAt(x, y, z).getChunk();
         try {
@@ -51,15 +60,6 @@ public class Blocks {
         } else {
             setBlock1_8_1_13_2(world, x, y, z, material, data);
         }
-    }
-
-    public static Object getByCombinedId(int i) {
-        try {
-            return ReflectionUtil.getNMSClass("Block").getMethod("getByCombinedId", int.class).invoke(null, i);
-        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException | ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-        return null;
     }
 
     @SuppressWarnings({"DuplicatedCode", "unused"})
