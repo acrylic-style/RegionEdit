@@ -6,7 +6,7 @@
 
     <groupId>xyz.acrylicstyle</groupId>
     <artifactId>RegionEdit</artifactId>
-    <version>0.1.7</version>
+    <version>0.1.8</version>
     <build>
         <plugins>
             <plugin>
@@ -63,29 +63,12 @@
         <dependency>
             <groupId>xyz.acrylicstyle</groupId>
             <artifactId>Util</artifactId>
-            <version>0.11.1</version>
-        </dependency>
-        <dependency>
-            <groupId>xyz.acrylicstyle</groupId>
-            <artifactId>NMSAPI-1.8.8</artifactId>
-            <version>0.1.22</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>xyz.acrylicstyle</groupId>
-                    <artifactId>tomeito_lib</artifactId>
-                </exclusion>
-            </exclusions>
+            <version>0.11.12</version>
         </dependency>
         <dependency>
             <groupId>xyz.acrylicstyle</groupId>
             <artifactId>api</artifactId>
-            <version>0.4.0</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>xyz.acrylicstyle</groupId>
-                    <artifactId>NMSAPI-1.8.8</artifactId>
-                </exclusion>
-            </exclusions>
+            <version>0.5.0</version>
         </dependency>
         <dependency>
             <groupId>org.spigotmc</groupId>
