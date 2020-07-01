@@ -1,4 +1,4 @@
-# RegionEdit
+# RegionEdit ![](https://ci.acrylicstyle.xyz/job/RegionEdit/badge/icon)
 A lightweight block manipulation
 
 ## Warning

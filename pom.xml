@@ -8,6 +8,7 @@
     <artifactId>RegionEdit</artifactId>
     <version>0.1.9</version>
     <build>
+        <finalName>RegionEdit</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
