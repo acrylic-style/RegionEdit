@@ -8,11 +8,13 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import util.BiBiConsumer;
 import util.CollectionList;
-import xyz.acrylicstyle.craftbukkit.v1_8_R3.util.CraftUtils;
+import util.reflect.Ref;
 import xyz.acrylicstyle.region.RegionEditPlugin;
 import xyz.acrylicstyle.region.api.RegionEdit;
+import xyz.acrylicstyle.region.api.block.BlockData;
 import xyz.acrylicstyle.region.internal.nms.Chunk;
 import xyz.acrylicstyle.region.internal.utils.Compatibility;
 import xyz.acrylicstyle.region.internal.utils.Reflection;
@@ -25,15 +27,14 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Blocks {
-    @SuppressWarnings("deprecation")
-    public static void setBlock1_8_1_13_2(World world, int x, int y, int z, Material material, byte data) {
-        int blockId = material.getId();
-        try {
-            Object o = CraftUtils.getHandle(world).getClass().getMethod("getChunkAt", int.class, int.class).invoke(CraftUtils.getHandle(world), x >> 4, z >> 4);
-            new Chunk(o).sections[y >> 4].setType(x & 15, y & 15, z & 15, Objects.requireNonNull(getByCombinedId(blockId + (data << 12))));
-        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-            e.printStackTrace();
-        }
+    public static void setBlockOld(World world, int x, int y, int z, int blockId, byte data) {
+        Chunk.wrap(world.getChunkAt(x >> 4, z >> 4)).sections[y >> 4].setType(x & 15, y & 15, z & 15, getByCombinedId(blockId + (data << 12)));
+    }
+
+    public static int getCombinedId(@NotNull BlockData blockData) {
+        return (int) Ref.forName(ReflectionUtil.getNMSPackage() + ".Block")
+                .getMethod("getCombinedId", Ref.forName(ReflectionUtil.getNMSPackage() + ".IBlockData").getClazz())
+                .invoke(null, blockData.getState());
     }
 
     public static Object getByCombinedId(int i) {
@@ -45,7 +46,20 @@ public class Blocks {
         return null;
     }
 
-    public static void setBlock1_14(World world, int x, int y, int z, RegionBlockData blockData) {
+    @Nullable
+    public static Material getMaterialById(int i) {
+        Object data = getByCombinedId(i);
+        if (data == null) return null;
+        return getMaterialFromIBlockData(data);
+    }
+
+    @SuppressWarnings("deprecation")
+    public static Material getMaterialFromIBlockData(Object iBlockData) {
+        Object craftBlockData = Ref.getClass(iBlockData.getClass()).getMethod("createCraftBlockData").invokeObj(iBlockData);
+        return (Material) Ref.getClass(craftBlockData.getClass()).getMethod("getMaterial").invokeObj(craftBlockData);
+    }
+
+    public static void setBlockNew(World world, int x, int y, int z, RegionBlockData blockData) {
         org.bukkit.Chunk chunk = world.getBlockAt(x, y, z).getChunk();
         try {
             Chunk.wrap(chunk).setType(Reflection.newRawBlockPosition(x, y, z), blockData.getHandle().getClass().getMethod("getState").invoke(blockData.getHandle()), false);
@@ -54,15 +68,20 @@ public class Blocks {
         }
     }
 
+    @SuppressWarnings("deprecation")
     public static void setBlock(World world, int x, int y, int z, Material material, byte data, RegionBlockData blockData) {
-        if (Compatibility.checkChunk_setType()) {
-            setBlock1_14(world, x, y, z, blockData);
+        if (Compatibility.checkChunkSection()) {
+            if (Compatibility.checkBlockData() && blockData != null) {
+                setBlockOld(world, x, y, z, getCombinedId(blockData), (byte) 0);
+            } else {
+                setBlockOld(world, x, y, z, material.getId(), data);
+            }
         } else {
-            setBlock1_8_1_13_2(world, x, y, z, material, data);
+            setBlockNew(world, x, y, z, blockData);
         }
     }
 
-    @SuppressWarnings({"DuplicatedCode", "unused"})
+    @SuppressWarnings({"DuplicatedCode"}) // unused
     public static void setBlocks(@NotNull CollectionList<Block> blocks, Material material, byte data, BiBiConsumer<Integer, Integer, Double> consumer) {
         double start = System.currentTimeMillis();
         Plugin plugin = RegionEdit.getInstance();

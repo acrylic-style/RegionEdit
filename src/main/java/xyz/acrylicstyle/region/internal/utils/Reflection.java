@@ -14,6 +14,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import util.ReflectionHelper;
+import util.reflect.Ref;
 import xyz.acrylicstyle.craftbukkit.v1_8_R3.util.CraftUtils;
 import xyz.acrylicstyle.region.api.RegionEdit;
 import xyz.acrylicstyle.region.internal.block.RegionBlockData;
@@ -81,7 +82,7 @@ public class Reflection {
     public static RegionBlockData getBlockData(@NotNull Block block) {
         if (Compatibility.checkBlockData()) {
             try {
-                return new RegionBlockData(ReflectionHelper.invokeMethod(block.getClass(), block, "getBlockData"));
+                return new RegionBlockData(block, ReflectionHelper.invokeMethod(block.getClass(), block, "getBlockData"));
             } catch (InvocationTargetException | IllegalAccessException | NoSuchMethodException e) {
                 e.printStackTrace();
             }
@@ -89,13 +90,24 @@ public class Reflection {
         return null;
     }
 
+    /**
+     * Returns block data by material.<br />
+     * For 1.8-1.12.2, it returns null.<br />
+     * For 1.13+, it returns block data.
+     */
+    @Nullable
+    public static RegionBlockData createBlockData(@NotNull Location location, @NotNull Material material) {
+        if (!Compatibility.checkBlockData()) return null;
+        Object o = Ref.getClass(Material.class).getMethod("createBlockData").invoke(material);
+        return new RegionBlockData(location.getBlock(), o);
+    }
+
+    @SuppressWarnings("deprecation")
     public static void setBlockData(@NotNull RegionBlockData blockData, boolean applyPhysics) {
         if (!Compatibility.checkBlockData()) return;
-        try {
-            ReflectionHelper.invokeMethod(blockData.getBukkitBlock().getClass(), blockData.getBukkitBlock(), "setBlockData", blockData.getHandle(), applyPhysics);
-        } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
-            e.printStackTrace();
-        }
+        Ref.getClass(blockData.getBukkitBlock().getClass())
+                .getMethod("setTypeAndData", Ref.forName(ReflectionUtil.getNMSPackage() + ".IBlockData").getClazz(), boolean.class)
+                .invokeObj(blockData.getBukkitBlock(), blockData.getState(), applyPhysics);
     }
 
     @SuppressWarnings({"deprecation", "JavaReflectionMemberAccess"})

@@ -11,6 +11,7 @@ import xyz.acrylicstyle.tomeito_api.utils.ReflectionUtil;
 
 public class Compatibility {
     public static BukkitVersion getBukkitVersion() {
+        if (checkPacketPlayOutMapChunk1_16Constructor()) return BukkitVersion.v1_16;
         if (!checkBlock_getData()) return BukkitVersion.UNKNOWN;
         if (!checkOldPlayer_sendBlockChange()) return BukkitVersion.UNKNOWN; // There are no known versions of Bukkit API that doesn't have this method.
         if (!checkPlayerInteractEvent_getHand()) return BukkitVersion.v1_8; // returns false in 1.8
@@ -36,11 +37,23 @@ public class Compatibility {
     /**
      * Checks compatibility for nms.PacketPlayOutMapChunk constructor (1.8).<br />
      * For 1.8, it returns true.<br />
-     * For 1.9+, it returns false.
+     * For 1.9-1.15.2, it returns false.
      */
-    public static boolean checkPacketPlayOutMapChunkOldConstructor() {
+    public static boolean checkPacketPlayOutMapChunk1_8Constructor() {
         try {
             return ReflectionHelper.findConstructor(ReflectionUtil.getNMSClass("PacketPlayOutMapChunk"), ReflectionUtil.getNMSClass("Chunk"), boolean.class, int.class) != null;
+        } catch (ClassNotFoundException ignored) {}
+        return false;
+    }
+
+    /**
+     * Checks compatibility for nms.PacketPlayOutMapChunk constructor (1.16).<br />
+     * For 1.16+, it returns true.
+     * Otherwise it returns false.
+     */
+    public static boolean checkPacketPlayOutMapChunk1_16Constructor() {
+        try {
+            return ReflectionHelper.findConstructor(ReflectionUtil.getNMSClass("PacketPlayOutMapChunk"), ReflectionUtil.getNMSClass("Chunk"), int.class, boolean.class) != null;
         } catch (ClassNotFoundException ignored) {}
         return false;
     }
@@ -73,7 +86,7 @@ public class Compatibility {
 
     /**
      * Checks compatibility for {@link Block#getData()}.<br />
-     * Returns true on all known versions.<br />
+     * Returns true on all known versions (1.8-1.15.2).<br />
      * There are no known versions of Bukkit API that doesn't have this method.
      */
     @SuppressWarnings("deprecation")
@@ -115,7 +128,7 @@ public class Compatibility {
 
     /**
      * Checks compatibility for {@link Player#sendBlockChange(Location, int, byte)}.<br />
-     * For 1.8+, it returns true.<br />
+     * For 1.8-1.15.2, it returns true.<br />
      * There are no known versions of Bukkit API that doesn't have this method.
      */
     @SuppressWarnings("deprecation")
@@ -164,6 +177,19 @@ public class Compatibility {
     public static boolean checkLightEngine() {
         try {
             ReflectionUtil.getNMSClass("LightEngine");
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Checks compatibility for ChunkSection.<br />
+     * @return always true?
+     */
+    public static boolean checkChunkSection() {
+        try {
+            ReflectionUtil.getNMSClass("ChunkSection");
             return true;
         } catch (ClassNotFoundException e) {
             return false;

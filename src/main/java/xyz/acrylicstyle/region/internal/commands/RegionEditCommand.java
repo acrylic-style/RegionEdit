@@ -53,7 +53,7 @@ public class RegionEditCommand implements CommandExecutor {
                 return true;
             }
             sender.sendMessage(ChatColor.GOLD + "----- Compatibility -----");
-            sender.sendMessage(ChatColor.LIGHT_PURPLE + "Version: " + ChatColor.YELLOW + Compatibility.getBukkitVersion().getName());
+            sender.sendMessage(ChatColor.LIGHT_PURPLE + "Detected Version: " + ChatColor.YELLOW + Compatibility.getBukkitVersion().getName());
             if (Compatibility.checkPlayerInventory_getItemInHand()) {
                 sender.sendMessage(ChatColor.GREEN + " ✔ " + ChatColor.YELLOW + "Found Inventory#getItemInHand (1.8 - 1.12.2)");
             } else {
@@ -94,10 +94,15 @@ public class RegionEditCommand implements CommandExecutor {
             } else {
                 sender.sendMessage(ChatColor.RED + " ✖ " + ChatColor.YELLOW + "Not Found nms.Chunk#markDirty() (1.8)");
             }
-            if (Compatibility.checkPacketPlayOutMapChunkOldConstructor()) {
+            if (Compatibility.checkPacketPlayOutMapChunk1_8Constructor()) {
                 sender.sendMessage(ChatColor.GREEN + " ✔ " + ChatColor.YELLOW + "Found old nms.PacketPlayOutMapChunk constructor (1.8)");
             } else {
                 sender.sendMessage(ChatColor.RED + " ✖ " + ChatColor.YELLOW + "Not Found old nms.PacketPlayOutMapChunk constructor (1.9+)");
+            }
+            if (Compatibility.checkPacketPlayOutMapChunk1_16Constructor()) {
+                sender.sendMessage(ChatColor.GREEN + " ✔ " + ChatColor.YELLOW + "Found new nms.PacketPlayOutMapChunk constructor (1.16+)");
+            } else {
+                sender.sendMessage(ChatColor.RED + " ✖ " + ChatColor.YELLOW + "Not Found new nms.PacketPlayOutMapChunk constructor (1.8-1.15.2)");
             }
             if (Compatibility.checkOldChunkSectionConstructor()) {
                 sender.sendMessage(ChatColor.GREEN + " ✔ " + ChatColor.YELLOW + "Found old nms.ChunkSection constructor (1.8 - 1.13.2)");
@@ -120,7 +125,7 @@ public class RegionEditCommand implements CommandExecutor {
                 sender.sendMessage(ChatColor.RED + " ✖ " + ChatColor.YELLOW + "Not Found STATIONARY_WATER in Material enum (1.13+)");
             }
             sender.sendMessage(ChatColor.GOLD + "-------------------------");
-            if (Compatibility.checkChunk_setType()) {
+            if (!Compatibility.checkChunkSection()) {
                 sender.sendMessage(ChatColor.YELLOW + " - Modify blocks using " + ChatColor.DARK_PURPLE + "Chunk#setType");
             } else {
                 sender.sendMessage(ChatColor.YELLOW + " - Modify blocks using " + ChatColor.LIGHT_PURPLE + "ChunkSection#setType");
@@ -128,7 +133,7 @@ public class RegionEditCommand implements CommandExecutor {
             if (Compatibility.checkLightEngine()) {
                 sender.sendMessage(ChatColor.YELLOW + " - Does " + ChatColor.RED + "not " + ChatColor.YELLOW + "perform light update");
             } else {
-                sender.sendMessage(ChatColor.YELLOW + " - Does perform light update");
+                sender.sendMessage(ChatColor.YELLOW + " - " + ChatColor.GREEN + "Does " + ChatColor.YELLOW + "perform light update");
             }
             if (Compatibility.checkNewPlayer_sendBlockChange()) {
                 sender.sendMessage(ChatColor.YELLOW + " - Uses new Player#sendBlockChange to send block changes");

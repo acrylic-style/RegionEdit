@@ -15,7 +15,7 @@ public class DrainTabCompleter extends TabCompleterHelper {
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length == 0) return list;
         if (args.length == 1) return filterArgsList(list, args[0]);
-        if (args.length == 2) return filterArgsList(Arrays.asList("kelp", "lava", "seagrass"), args[1]);
+        if (args.length == 2) return filterArgsList(Arrays.asList("water", "kelp", "lava", "seagrass"), args[1]);
         return emptyList;
     }
 

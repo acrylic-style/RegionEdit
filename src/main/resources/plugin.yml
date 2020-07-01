@@ -1,6 +1,6 @@
 name: RegionEdit
 main: xyz.acrylicstyle.region.RegionEditPlugin
-version: 0.1.8
+version: 0.1.9
 author: acrylic-style
 api-version: "1.13"
 softdepend:
@@ -11,73 +11,73 @@ commands:
     aliases: ["/sel", ";"]
   "/set":
     description: ""
-    permission: regions.set
+    permission: regionedit.set
     permission-message: "&cYou don't have permission. Are you in a right mode?"
   "/cut":
     description: ""
-    permission: regions.cut
+    permission: regionedit.cut
     permission-message: "&cYou don't have permission. Are you in a right mode?"
   "/replace":
     description: ""
     aliases: ["/rep"]
-    permission: regions.replace
+    permission: regionedit.replace
     permission-message: "&cYou don't have permission. Are you in a right mode?"
   "/limit":
     description: ""
-    permission: regions.limit
+    permission: regionedit.limit
     permission-message: "&cYou don't have permission. Are you in a right mode?"
   "/drain":
     description: ""
-    permission: regions.drain
+    permission: regionedit.drain
     permission-message: "&cYou don't have permission. Are you in a right mode?"
   "/pos1":
     description: ""
-    permission: regions.selection
+    permission: regionedit.selection
     permission-message: "&cYou don't have permission. Are you in a right mode?"
   "/hpos1":
     description: ""
-    permission: regions.selection
+    permission: regionedit.selection
     permission-message: "&cYou don't have permission. Are you in a right mode?"
   "/pos2":
     description: ""
-    permission: regions.selection
+    permission: regionedit.selection
     permission-message: "&cYou don't have permission. Are you in a right mode?"
   "/hpos2":
     description: ""
-    permission: regions.selection
+    permission: regionedit.selection
     permission-message: "&cYou don't have permission. Are you in a right mode?"
   "/expand":
     description: ""
-    permission: regions.selection
+    permission: regionedit.selection
     permission-message: "&cYou don't have permission. Are you in a right mode?"
   "/chunk":
     description: ""
-    permission: regions.selection
+    permission: regionedit.selection
     permission-message: "&cYou don't have permission. Are you in a right mode?"
   "/undo":
     description: ""
-    permission: regions.undo
+    permission: regionedit.undo
     permission-message: "&cYou don't have permission. Are you in a right mode?"
   "/redo":
     description: ""
-    permission: regions.redo
+    permission: regionedit.redo
     permission-message: "&cYou don't have permission. Are you in a right mode?"
   "/cancel":
     description: ""
-    permission: regions.cancel
+    permission: regionedit.cancel
     permission-message: "&cYou don't have permission. Are you in a right mode?"
   regionedit:
     description: "RegionEdit"
     aliases: ["/re", "re", "/regionedit"]
   "/help":
     description: ""
-    permission: regions.help
+    permission: regionedit.help
     permission-message: "&cYou don't have permission. Are you in a right mode?"
   "/fast":
     description: ""
-    permission: regions.fast
+    permission: regionedit.fast
     permission-message: "&cYou don't have permission. Are you in a right mode?"
   "/unstuck":
     description: ""
-    permission: regions.unstuck
+    permission: regionedit.unstuck
     permission-message: "&cYou don't have permission. Are you in a right mode?"

@@ -223,8 +223,13 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
 
     public static final Collection<UUID, CollectionList<Integer>> playerTasks = new Collection<>();
 
-    public static void setBlocks(Player player, @NotNull CollectionList<Block> blocks, Material material, byte data) {
+    public static void setBlocks(Player player, @NotNull CollectionList<Block> blocks, final Material material, final byte data) {
         double start = System.currentTimeMillis();
+        if (Compatibility.checkChunkSection()) {
+            Log.info("Using ChunkSection#setType");
+        } else {
+            Log.info("Using Chunk#setType");
+        }
         CollectionList<xyz.acrylicstyle.region.api.block.Block> blocks2 = blocks.map(RegionBlock::new);
         if (!playerTasks.containsKey(player.getUniqueId())) playerTasks.add(player.getUniqueId(), new CollectionList<>());
         Plugin plugin = RegionEdit.getInstance();
@@ -241,7 +246,7 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
                     @Override
                     public void run() {
                         if (tasks.get(taskId) == OperationStatus.CANCELLED) return;
-                        block.setTypeAndData(material, data, Reflection.getBlockData(block.getLocation().getBlock()), true);
+                        block.setTypeAndData(material, data, Reflection.createBlockData(block.getLocation(), material), true);
                     }
                 }.runTaskLater(plugin, i0.get() % RegionEditPlugin.blocksPerTick == 0 ? i.getAndIncrement() : i.get())).start();
             } else {
@@ -249,7 +254,7 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
                 int y = block.getLocation().getBlockY();
                 int z = block.getLocation().getBlockZ();
                 World world = block.getLocation().getWorld();
-                Blocks.setBlock(world, x, y, z, material, data, block.getBlockData());
+                Blocks.setBlock(world, x, y, z, material, data, Reflection.createBlockData(block.getLocation(), material));
             }
             i0.incrementAndGet();
         });
@@ -281,7 +286,7 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
                 blocks.forEach(b -> entries.add(new AbstractMap.SimpleEntry<>(b.getChunk().getX(), b.getChunk().getZ())));
                 blocks.forEach(b -> {
                     for (Player p : Bukkit.getOnlinePlayers())
-                        Reflection.sendBlockChange(p, b.getLocation(), material, data, Reflection.getBlockData(b));
+                        Reflection.sendBlockChange(p, b.getLocation(), material, data, Reflection.createBlockData(b.getLocation(), material));
                     Reflection.notify(b.getWorld(), b, Reflection.newRawBlockPosition(b.getLocation().getBlockX(), b.getLocation().getBlockY(), b.getLocation().getBlockZ()));
                     Reflection.markDirty(b.getChunk());
                 });
@@ -316,7 +321,7 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
                     @Override
                     public void run() {
                         if (tasks.get(taskId) == OperationStatus.CANCELLED) return;
-                        block.setTypeAndData(block.getType(), block.getData(), Reflection.getBlockData(block.getLocation().getBlock()), true);
+                        block.setTypeAndData(block.getType(), block.getData(), Reflection.createBlockData(block.getLocation(), block.getType()), true);
                     }
                 }.runTaskLater(plugin, i0.get() % RegionEditPlugin.blocksPerTick == 0 ? i.getAndIncrement() : i.get())).start();
                 i0.incrementAndGet();
@@ -326,7 +331,7 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
                 int z = block.getLocation().getBlockZ();
                 World world = block.getLocation().getWorld();
                 new Thread(() -> {
-                    Blocks.setBlock(world, x, y, z, block.getType(), block.getData(), (RegionBlockData) block.getBlockData());
+                    Blocks.setBlock(world, x, y, z, block.getType(), block.getData(), Reflection.createBlockData(block.getLocation(), block.getType()));
                     i0.incrementAndGet();
                 }).start();
             }

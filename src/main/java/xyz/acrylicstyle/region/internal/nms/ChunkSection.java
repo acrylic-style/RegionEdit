@@ -1,6 +1,8 @@
 package xyz.acrylicstyle.region.internal.nms;
 
+import util.ReflectionHelper;
 import xyz.acrylicstyle.region.internal.utils.Compatibility;
+import xyz.acrylicstyle.tomeito_api.utils.Log;
 import xyz.acrylicstyle.tomeito_api.utils.ReflectionUtil;
 
 import java.lang.reflect.InvocationTargetException;
@@ -35,15 +37,14 @@ public class ChunkSection {
         }
     }
 
-    public void setType(int x, int y, int z, Object blockData) {
+    public Object setType(int x, int y, int z, Object blockData) {
         try {
-            ReflectionUtil.getNMSClass("ChunkSection")
+            return ReflectionUtil.getNMSClass("ChunkSection")
                     .getMethod("setType", int.class, int.class, int.class, ReflectionUtil.getNMSClass("IBlockData"))
                     .invoke(o, x, y, z, blockData);
         } catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException | ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
-        chunk.save();
     }
 
     public Object getNMSClass() {

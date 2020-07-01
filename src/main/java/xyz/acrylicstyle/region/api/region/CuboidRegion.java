@@ -15,7 +15,7 @@ public class CuboidRegion implements RegionSelection, Cloneable {
     /**
      * Constructs new CuboidRegion.<br />
      * Locations must be y < 255 and y > 0.<br />
-     * Location can be null, but if <b>both</b> locations was null, it fails.
+     * Location can be null, but you should not create instance that <b>both</b> locations are null.
      * @param loc1 Location (position) 1
      * @param loc2 Location (position) 2
      */

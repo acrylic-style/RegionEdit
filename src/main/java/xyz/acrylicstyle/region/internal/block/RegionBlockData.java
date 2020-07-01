@@ -14,13 +14,17 @@ import java.util.Objects;
 
 public class RegionBlockData implements BlockData {
     @NotNull
+    private final Block block;
+    @NotNull
     private final Object data;
 
-    public RegionBlockData(@NotNull Object o) {
+    public RegionBlockData(@NotNull Block block, @NotNull Object o) {
+        this.block = block;
         this.data = o;
     }
 
     public RegionBlockData(@NotNull Block block) {
+        this.block = block;
         this.data = Objects.requireNonNull(Reflection.getBlockData(block));
     }
 
@@ -36,7 +40,7 @@ public class RegionBlockData implements BlockData {
     @Override
     @NotNull
     public xyz.acrylicstyle.region.api.block.Block getBlock() {
-        return RegionBlock.wrap((Block) data);
+        return RegionBlock.wrap(block);
     }
 
     /**
@@ -45,7 +49,7 @@ public class RegionBlockData implements BlockData {
     @Override
     @NotNull
     public Block getBukkitBlock() {
-        return (Block) data;
+        return block;
     }
 
     /**
@@ -55,7 +59,7 @@ public class RegionBlockData implements BlockData {
     @NotNull
     public String getAsString() {
         try {
-            return (String) ReflectionHelper.invokeMethod(ReflectionUtil.getOBCClass("CraftBlockData"), data, "getAsString");
+            return (String) ReflectionHelper.invokeMethod(ReflectionUtil.getOBCClass("block.data.CraftBlockData"), data, "getAsString");
         } catch (InvocationTargetException | IllegalAccessException | NoSuchMethodException | ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -68,7 +72,7 @@ public class RegionBlockData implements BlockData {
     @NotNull
     public String getAsString(boolean paramBoolean) {
         try {
-            return (String) ReflectionHelper.invokeMethod(ReflectionUtil.getOBCClass("CraftBlockData"), data, "getAsString", paramBoolean);
+            return (String) ReflectionHelper.invokeMethod(ReflectionUtil.getOBCClass("block.data.CraftBlockData"), data, "getAsString", paramBoolean);
         } catch (InvocationTargetException | IllegalAccessException | NoSuchMethodException | ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -81,7 +85,7 @@ public class RegionBlockData implements BlockData {
     @NotNull
     public Material getMaterial() {
         try {
-            return (Material) ReflectionHelper.invokeMethod(ReflectionUtil.getOBCClass("CraftBlockData"), data, "getMaterial");
+            return (Material) ReflectionHelper.invokeMethod(ReflectionUtil.getOBCClass("block.data.CraftBlockData"), data, "getMaterial");
         } catch (InvocationTargetException | IllegalAccessException | NoSuchMethodException | ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -94,21 +98,18 @@ public class RegionBlockData implements BlockData {
     @NotNull
     public Object getState() {
         try {
-            return ReflectionHelper.invokeMethod(ReflectionUtil.getOBCClass("CraftBlockData"), data, "getState");
+            return ReflectionHelper.invokeMethod(ReflectionUtil.getOBCClass("block.data.CraftBlockData"), data, "getState");
         } catch (InvocationTargetException | IllegalAccessException | NoSuchMethodException | ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     @NotNull
     public BlockData merge(@NotNull BlockData paramBlockData) {
         try {
-            return new RegionBlockData(ReflectionHelper.invokeMethod(
-                    ReflectionUtil.getOBCClass("CraftBlockData"),
+            return new RegionBlockData(block, ReflectionHelper.invokeMethod(
+                    ReflectionUtil.getOBCClass("block.data.CraftBlockData"),
                     data,
                     "merge",
                     ((RegionBlockData) paramBlockData).getHandle())
@@ -125,7 +126,7 @@ public class RegionBlockData implements BlockData {
     public boolean matches(@NotNull BlockData paramBlockData) {
         try {
             return (boolean) ReflectionHelper.invokeMethod(
-                    ReflectionUtil.getOBCClass("CraftBlockData"),
+                    ReflectionUtil.getOBCClass("block.data.CraftBlockData"),
                     data,
                     "matches",
                     ((RegionBlockData) paramBlockData).getHandle()
