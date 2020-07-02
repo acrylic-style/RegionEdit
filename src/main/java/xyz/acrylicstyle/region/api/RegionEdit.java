@@ -14,6 +14,7 @@ import xyz.acrylicstyle.region.api.manager.HistoryManager;
 import xyz.acrylicstyle.region.api.player.UserSession;
 import xyz.acrylicstyle.tomeito_api.utils.Callback;
 
+import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
 
@@ -105,6 +106,9 @@ public interface RegionEdit extends Plugin {
         }
         return blocks;
     }
+
+    @Nullable
+    Map.Entry<Material, Byte> resolveMaterial(@NotNull String id);
 
     @NotNull
     UserSession getUserSession(@NotNull UUID uuid);

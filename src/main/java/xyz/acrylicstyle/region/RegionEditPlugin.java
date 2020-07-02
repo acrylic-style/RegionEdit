@@ -1,6 +1,10 @@
 package xyz.acrylicstyle.region;
 
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -16,25 +20,45 @@ import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import util.Collection;
 import util.CollectionList;
+import util.ICollectionList;
+import util.javascript.JavaScript;
 import xyz.acrylicstyle.minecraft.BlockPosition;
 import xyz.acrylicstyle.region.api.RegionEdit;
 import xyz.acrylicstyle.region.api.exception.RegionEditException;
-import xyz.acrylicstyle.region.internal.block.RegionBlock;
-import xyz.acrylicstyle.region.internal.block.RegionBlockData;
-import xyz.acrylicstyle.region.internal.manager.HistoryManagerImpl;
 import xyz.acrylicstyle.region.api.operation.OperationStatus;
 import xyz.acrylicstyle.region.api.player.UserSession;
 import xyz.acrylicstyle.region.api.region.CuboidRegion;
 import xyz.acrylicstyle.region.api.region.RegionSelection;
 import xyz.acrylicstyle.region.api.selection.SelectionMode;
-import xyz.acrylicstyle.region.internal.commands.*;
+import xyz.acrylicstyle.region.internal.block.Blocks;
+import xyz.acrylicstyle.region.internal.block.RegionBlock;
 import xyz.acrylicstyle.region.internal.command.CommandDescription;
 import xyz.acrylicstyle.region.internal.command.CommandDescriptionManager;
+import xyz.acrylicstyle.region.internal.commands.CancelCommand;
+import xyz.acrylicstyle.region.internal.commands.ChunkCommand;
+import xyz.acrylicstyle.region.internal.commands.CutCommand;
+import xyz.acrylicstyle.region.internal.commands.DrainCommand;
+import xyz.acrylicstyle.region.internal.commands.ExpandCommand;
+import xyz.acrylicstyle.region.internal.commands.FastCommand;
+import xyz.acrylicstyle.region.internal.commands.HPos1Command;
+import xyz.acrylicstyle.region.internal.commands.HPos2Command;
+import xyz.acrylicstyle.region.internal.commands.HelpCommand;
+import xyz.acrylicstyle.region.internal.commands.LimitCommand;
+import xyz.acrylicstyle.region.internal.commands.Pos1Command;
+import xyz.acrylicstyle.region.internal.commands.Pos2Command;
+import xyz.acrylicstyle.region.internal.commands.RedoCommand;
+import xyz.acrylicstyle.region.internal.commands.RegionEditCommand;
+import xyz.acrylicstyle.region.internal.commands.ReplaceCommand;
+import xyz.acrylicstyle.region.internal.commands.SelectionCommand;
+import xyz.acrylicstyle.region.internal.commands.SetCommand;
+import xyz.acrylicstyle.region.internal.commands.UndoCommand;
+import xyz.acrylicstyle.region.internal.commands.UnstuckCommand;
+import xyz.acrylicstyle.region.internal.manager.HistoryManagerImpl;
 import xyz.acrylicstyle.region.internal.nms.Chunk;
 import xyz.acrylicstyle.region.internal.player.UserSessionImpl;
-import xyz.acrylicstyle.region.internal.block.Blocks;
 import xyz.acrylicstyle.region.internal.tabCompleters.BlocksTabCompleter;
 import xyz.acrylicstyle.region.internal.tabCompleters.DrainTabCompleter;
 import xyz.acrylicstyle.region.internal.tabCompleters.RegionEditTabCompleter;
@@ -45,8 +69,14 @@ import xyz.acrylicstyle.region.internal.utils.Reflection;
 import xyz.acrylicstyle.tomeito_api.TomeitoAPI;
 import xyz.acrylicstyle.tomeito_api.utils.Log;
 
-import java.util.*;
+import java.util.AbstractMap;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 
 /**
  * Internal usage only
@@ -194,6 +224,28 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
     public static String loc2Str(Location location) {
         if (location == null) return "null";
         return String.format(ChatColor.LIGHT_PURPLE + "%d, %d, %d" + ChatColor.YELLOW, location.getBlockX(), location.getBlockY(), location.getBlockZ());
+    }
+
+    @SuppressWarnings("UnstableApiUsage")
+    @Override
+    public @Nullable Map.Entry<Material, Byte> resolveMaterial(@NotNull String id) {
+        if (id.matches("^\\d+|\\d+:\\d+$")) {
+            String[] arr = id.split(":");
+            int data;
+            if (arr.length != 1) {
+                data = Integer.parseInt(arr[1]);
+            } else {
+                data = 0;
+            }
+            return new AbstractMap.SimpleImmutableEntry<>(Blocks.getMaterialById(Integer.parseInt(id)), (byte) data);
+        } else {
+            CollectionList<String> materials = ICollectionList.asList(Material.values()).filter(Material::isBlock).map(Enum::name).map((Function<String, String>) String::toLowerCase);
+            if (!materials.contains(id.split(":")[0].toLowerCase())) {
+                return null;
+            }
+            int data = JavaScript.parseInt((id + ":0").split(":")[1], 10);
+            return new AbstractMap.SimpleImmutableEntry<>(Material.getMaterial(Objects.requireNonNull(materials.filter(s -> s.equalsIgnoreCase((id + ":0").split(":")[0])).first()).toUpperCase()), (byte) data);
+        }
     }
 
     @Override

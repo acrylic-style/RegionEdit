@@ -2,11 +2,7 @@ package xyz.acrylicstyle.region.internal.commands;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
-import util.CollectionList;
-import util.ICollectionList;
-import util.javascript.JavaScript;
 import xyz.acrylicstyle.region.RegionEditPlugin;
 import xyz.acrylicstyle.region.api.RegionEdit;
 import xyz.acrylicstyle.region.api.exception.RegionEditException;
@@ -14,13 +10,10 @@ import xyz.acrylicstyle.region.api.region.CuboidRegion;
 import xyz.acrylicstyle.region.api.region.RegionSelection;
 import xyz.acrylicstyle.region.internal.utils.Reflection;
 import xyz.acrylicstyle.tomeito_api.command.PlayerCommandExecutor;
-import xyz.acrylicstyle.tomeito_api.utils.Callback;
 
-import java.util.Objects;
-import java.util.function.Function;
+import java.util.Map;
 
 public class ReplaceCommand extends PlayerCommandExecutor {
-    @SuppressWarnings("UnstableApiUsage")
     @Override
     public void onCommand(Player player, String[] args) {
         if (!RegionEditPlugin.regionSelection.getOrDefault(player.getUniqueId(), new CuboidRegion(null, null)).isValid()) {
@@ -33,45 +26,38 @@ public class ReplaceCommand extends PlayerCommandExecutor {
             player.sendMessage(ChatColor.YELLOW + "Replace blocks.");
             return;
         }
-        String beforeMaterial = (args[0].replaceFirst("!", "") + ":").split(":")[0].toUpperCase();
-        String afterMaterial = (args[1].replaceFirst("!", "") + ":").split(":")[0].toUpperCase();
-        CollectionList<String> materials = ICollectionList.asList(Material.values()).filter(Material::isBlock).map(Enum::name).map((Function<String, String>) String::toLowerCase);
-        if (!materials.contains(beforeMaterial.toLowerCase())) {
-            player.sendMessage(ChatColor.RED + "Error: Invalid block: " + beforeMaterial.toLowerCase());
+        Map.Entry<Material, Byte> entry1 = RegionEdit.getInstance().resolveMaterial(args[0]);
+        Map.Entry<Material, Byte> entry2 = RegionEdit.getInstance().resolveMaterial(args[1]);
+        if (entry1 == null) {
+            player.sendMessage(ChatColor.RED + "Error: Invalid block #1: " + args[0].toLowerCase());
             player.sendMessage(ChatColor.LIGHT_PURPLE + "Usage: /replace <before> <after>");
             player.sendMessage(ChatColor.YELLOW + "Replace blocks.");
             return;
         }
-        if (!materials.contains(afterMaterial.toLowerCase())) {
-            player.sendMessage(ChatColor.RED + "Error: Invalid block: " + afterMaterial.toLowerCase());
+        if (entry2 == null) {
+            player.sendMessage(ChatColor.RED + "Error: Invalid block #2: " + args[1].toLowerCase());
             player.sendMessage(ChatColor.LIGHT_PURPLE + "Usage: /replace <before> <after>");
             player.sendMessage(ChatColor.YELLOW + "Replace blocks.");
             return;
         }
-        int beforeData = JavaScript.parseInt((args[0] + ":0").split(":")[1], 10);
-        int afterData = JavaScript.parseInt((args[1] + ":0").split(":")[1], 10);
-        Material before = Material.getMaterial(Objects.requireNonNull(materials.filter(s -> s.equalsIgnoreCase(beforeMaterial)).first()).toUpperCase());
-        Material after = Material.getMaterial(Objects.requireNonNull(materials.filter(s -> s.equalsIgnoreCase(afterMaterial)).first()).toUpperCase());
+        int data1 = entry1.getValue();
+        int data2 = entry2.getValue();
+        Material material1 = entry1.getKey();
+        Material material2 = entry2.getKey();
         RegionSelection regionSelection = RegionEditPlugin.regionSelection.get(player.getUniqueId());
         if (regionSelection instanceof CuboidRegion) {
             CuboidRegion region = (CuboidRegion) regionSelection;
+            assert region.getLocation() != null;
             if (args[0].startsWith("!")) {
-                assert region.getLocation() != null;
-                RegionEdit.getBlocksInvertAsync(region.getLocation(), region.getLocation2(), before, new Callback<CollectionList<Block>>() {
-                    @Override
-                    public void done(CollectionList<Block> blocks, Throwable throwable) {
-                        RegionEdit.getInstance().getHistoryManager().resetPointer(player.getUniqueId());
-                        RegionEditPlugin.setBlocks(player, blocks, after, (byte) afterData);
-                    }
+                RegionEdit.getBlocksInvertAsync(region.getLocation(), region.getLocation2(), material1, (blocks, throwable) -> {
+                    blocks = blocks.filter(block -> Reflection.getData(block) != (byte) data1);
+                    RegionEdit.getInstance().getHistoryManager().resetPointer(player.getUniqueId());
+                    RegionEditPlugin.setBlocks(player, blocks, material2, (byte) data2);
                 });
             } else {
-                assert region.getLocation() != null;
-                RegionEdit.getBlocksAsync(region.getLocation(), region.getLocation2(), before, block -> Reflection.getData(block) == (byte) beforeData, new Callback<CollectionList<Block>>() {
-                    @Override
-                    public void done(CollectionList<Block> blocks, Throwable throwable) {
-                        RegionEdit.getInstance().getHistoryManager().resetPointer(player.getUniqueId());
-                        RegionEditPlugin.setBlocks(player, blocks, after, (byte) afterData);
-                    }
+                RegionEdit.getBlocksAsync(region.getLocation(), region.getLocation2(), material1, block -> Reflection.getData(block) == (byte) data1, (blocks, throwable) -> {
+                    RegionEdit.getInstance().getHistoryManager().resetPointer(player.getUniqueId());
+                    RegionEditPlugin.setBlocks(player, blocks, material2, (byte) data2);
                 });
             }
         } else {
