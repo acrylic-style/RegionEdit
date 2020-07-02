@@ -18,8 +18,8 @@ public class RegionEditCommand implements CommandExecutor {
             return true;
         }
         if (args[0].equalsIgnoreCase("help")) {
-            if (!sender.hasPermission("regions.help")) {
-                sender.sendMessage(ChatColor.GREEN + "You don't have following permission: " + ChatColor.YELLOW + "regions.help");
+            if (!sender.hasPermission("regionedit.help")) {
+                sender.sendMessage(ChatColor.GREEN + "You don't have following permission: " + ChatColor.YELLOW + "regionedit.help");
                 return true;
             }
             if (args.length == 1) {
@@ -39,8 +39,8 @@ public class RegionEditCommand implements CommandExecutor {
             sender.sendMessage(description.getPermissionsAsString());
             description.getDescription().forEach(s -> sender.sendMessage(ChatColor.YELLOW + s));
         } else if (args[0].equalsIgnoreCase("commands")) {
-            if (!sender.hasPermission("regions.help")) {
-                sender.sendMessage(ChatColor.GREEN + "You don't have following permission: " + ChatColor.YELLOW + "regions.help");
+            if (!sender.hasPermission("regionedit.help")) {
+                sender.sendMessage(ChatColor.GREEN + "You don't have following permission: " + ChatColor.YELLOW + "regionedit.help");
                 return true;
             }
             HelpCommand.showHelp(sender, args.length != 1 ? args[1] : null);
@@ -48,8 +48,8 @@ public class RegionEditCommand implements CommandExecutor {
             sender.sendMessage(ChatColor.LIGHT_PURPLE + "Region Edit " + ChatColor.YELLOW + "v" + RegionEdit.getInstance().getDescription().getVersion());
             sender.sendMessage(ChatColor.GREEN + "Authors: " + ICollectionList.asList(RegionEdit.getInstance().getDescription().getAuthors()).join(ChatColor.YELLOW + ", " + ChatColor.GREEN));
         } else if (args[0].equalsIgnoreCase("compatibility")) {
-            if (!sender.hasPermission("regions.compatibility")) {
-                sender.sendMessage(ChatColor.GREEN + "You don't have following permission: " + ChatColor.YELLOW + "regions.compatibility");
+            if (!sender.hasPermission("regionedit.compatibility")) {
+                sender.sendMessage(ChatColor.GREEN + "You don't have following permission: " + ChatColor.YELLOW + "regionedit.compatibility");
                 return true;
             }
             sender.sendMessage(ChatColor.GOLD + "----- Compatibility -----");
@@ -142,8 +142,8 @@ public class RegionEditCommand implements CommandExecutor {
             }
             sender.sendMessage(ChatColor.GOLD + "-------------------------");
         } else if (args[0].equalsIgnoreCase("reload")) {
-            if (!sender.hasPermission("regions.reload")) {
-                sender.sendMessage(ChatColor.GREEN + "You don't have following permission: " + ChatColor.YELLOW + "regions.reload");
+            if (!sender.hasPermission("regionedit.reload")) {
+                sender.sendMessage(ChatColor.GREEN + "You don't have following permission: " + ChatColor.YELLOW + "regionedit.reload");
                 return true;
             }
             RegionEdit.getInstance().reloadConfig();

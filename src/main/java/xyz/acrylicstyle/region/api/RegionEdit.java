@@ -107,6 +107,12 @@ public interface RegionEdit extends Plugin {
         return blocks;
     }
 
+    @NotNull
+    Material getWandItem();
+
+    @NotNull
+    Material getNavigationItem();
+
     @Nullable
     Map.Entry<Material, Byte> resolveMaterial(@NotNull String id);
 

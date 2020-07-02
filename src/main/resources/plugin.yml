@@ -1,14 +1,18 @@
 name: RegionEdit
 main: xyz.acrylicstyle.region.RegionEditPlugin
-version: 0.1.11
+version: 0.1.12
 author: acrylic-style
-api-version: "1.13"
+api-version: "1.13" # we do not want to use legacy material on 1.13+
 softdepend:
   - TomeitoLib
 commands:
   sel:
     description: "Clears region selection."
     aliases: ["/sel", ";"]
+  "/wand":
+    description: "gives player a RegionEdit wand"
+    permission: regionedit.wand
+    permission-message: "&cYou don't have permission. Are you in a right mode?"
   "/set":
     description: ""
     permission: regionedit.set
@@ -48,7 +52,7 @@ commands:
     permission-message: "&cYou don't have permission. Are you in a right mode?"
   "/expand":
     description: ""
-    permission: regionedit.selection
+    permission: regionedit.expand
     permission-message: "&cYou don't have permission. Are you in a right mode?"
   "/chunk":
     description: ""

@@ -4,6 +4,7 @@ import org.bukkit.Location;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import util.CollectionList;
+import xyz.acrylicstyle.tomeito_api.TomeitoAPI;
 
 /**
  * Cuboid region to specify pos1, and pos2 (cube)
@@ -32,9 +33,7 @@ public class CuboidRegion implements RegionSelection, Cloneable {
      * {@inheritDoc}
      */
     @Override
-    public Location getLocation() {
-        return loc1;
-    }
+    public Location getLocation() { return loc1; }
 
     /**
      * {@inheritDoc}
@@ -44,7 +43,7 @@ public class CuboidRegion implements RegionSelection, Cloneable {
     public CuboidRegion clone() {
         try {
             return (CuboidRegion) super.clone();
-        } catch (CloneNotSupportedException e) {
+        } catch (CloneNotSupportedException e) { // impossible
             return new CuboidRegion(loc1, loc2);
         }
     }
@@ -54,45 +53,30 @@ public class CuboidRegion implements RegionSelection, Cloneable {
      */
     @NotNull
     @Override
-    public CollectionList<Location> getLocations() {
-        return new CollectionList<>(loc1, loc2);
-    }
+    public CollectionList<Location> getLocations() { return new CollectionList<>(loc1, loc2); }
 
     /**
      * Returns location #2. (pos2)
      * @return Location #2. (pos2)
      */
-    public Location getLocation2() {
-        return loc2;
-    }
+    public Location getLocation2() { return loc2; }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public boolean isValid() {
-        return getLocation() != null && getLocation2() != null;
-    }
+    public boolean isValid() { return getLocation() != null && getLocation2() != null; }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public boolean isInside(Location location) {
-        double x = location.getX();
-        double y = location.getY();
-        double z = location.getZ();
-        double x1 = loc1.getX();
-        double y1 = loc1.getY();
-        double z1 = loc1.getZ();
-        double x2 = loc2.getX();
-        double y2 = loc2.getY();
-        double z2 = loc2.getZ();
-        if ((x > x1) && (x < x2)) {
-            if ((y > y1) && (y < y2)) {
-                return (z > z1) && (z < z2);
-            }
-        }
-        return false;
-    }
+    public boolean isInside(Location location) { return TomeitoAPI.inside(location, loc1, loc2); }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @NotNull
+    public CuboidRegion deepClone() { return new CuboidRegion(loc1.clone(), loc2.clone()); }
 }

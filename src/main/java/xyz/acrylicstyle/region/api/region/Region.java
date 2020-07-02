@@ -2,8 +2,9 @@ package xyz.acrylicstyle.region.api.region;
 
 import org.bukkit.Location;
 import org.jetbrains.annotations.NotNull;
+import util.DeepCloneable;
 
-public interface Region extends Cloneable {
+public interface Region extends Cloneable, DeepCloneable {
     /**
      * Get Location.
      * @return Location.
@@ -16,4 +17,11 @@ public interface Region extends Cloneable {
      */
     @NotNull
     Region clone();
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @NotNull
+    Region deepClone();
 }

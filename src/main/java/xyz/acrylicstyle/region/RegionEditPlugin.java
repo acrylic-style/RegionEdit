@@ -56,6 +56,7 @@ import xyz.acrylicstyle.region.internal.commands.SelectionCommand;
 import xyz.acrylicstyle.region.internal.commands.SetCommand;
 import xyz.acrylicstyle.region.internal.commands.UndoCommand;
 import xyz.acrylicstyle.region.internal.commands.UnstuckCommand;
+import xyz.acrylicstyle.region.internal.commands.WandCommand;
 import xyz.acrylicstyle.region.internal.manager.HistoryManagerImpl;
 import xyz.acrylicstyle.region.internal.nms.Chunk;
 import xyz.acrylicstyle.region.internal.player.UserSessionImpl;
@@ -102,6 +103,7 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
         Bukkit.getPluginManager().registerEvents(this, this);
         Log.info("Registering commands");
         TomeitoAPI.registerCommand("regionedit", new RegionEditCommand());
+        TomeitoAPI.registerCommand("/wand", new WandCommand());
         TomeitoAPI.registerCommand("/help", new HelpCommand());
         TomeitoAPI.registerCommand("sel", new SelectionCommand());
         TomeitoAPI.registerCommand("/set", new SetCommand());
@@ -126,27 +128,31 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
         Bukkit.getPluginCommand("/replace").setTabCompleter(new ReplaceBlocksTabCompleter());
         Bukkit.getPluginCommand("/drain").setTabCompleter(new DrainTabCompleter());
         Log.info("Registering command help");
-        commandDescriptionManager.add("//help", new CommandDescription("//help [page]", "regions.help", "Shows all RegionEdit commands."));
+        commandDescriptionManager.add("//help", new CommandDescription("//help [page]", "regionedit.help", "Shows all RegionEdit commands."));
+        commandDescriptionManager.add("/re", new CommandDescription("/re <help/version/reload/commands/compatibility>",
+                Arrays.asList("regionedit.compatibility", "regionedit.reload", "regionedit.help"),
+                "Displays information about RegionEdit."));
         commandDescriptionManager.add("/;", new CommandDescription("//sel [cuboid]", "", "Clears selection or switches selection mode."));
         commandDescriptionManager.add("//sel", new CommandDescription("//sel [cuboid]", "", "Clears selection or switches selection mode."));
-        commandDescriptionManager.add("//limit", new CommandDescription("//limit [number]", "regions.limit", "Limits blocks per ticks"));
-        commandDescriptionManager.add("//pos1", new CommandDescription("//pos1", "regions.selection", "Set position 1 at player's location."));
-        commandDescriptionManager.add("//pos2", new CommandDescription("//pos2", "regions.selection", "Set position 2 at player's location."));
-        commandDescriptionManager.add("//hpos1", new CommandDescription("//hpos1", "regions.selection", "Set position 1 at block player's is looking at."));
-        commandDescriptionManager.add("//hpos2", new CommandDescription("//hpos2", "regions.selection", "Set position 2 at block player's is looking at."));
-        commandDescriptionManager.add("//cut", new CommandDescription("//cut", "regions.cut", "Removes blocks at specified region."));
-        commandDescriptionManager.add("//replace", new CommandDescription("//replace [before] [after]", "regions.replace", "Replace blocks at specified region."));
-        commandDescriptionManager.add("//set", new CommandDescription("//set [block]", "regions.set", "Places blocks at specified region."));
-        commandDescriptionManager.add("//undo", new CommandDescription("//undo", "regions.undo", "Rollbacks action."));
-        commandDescriptionManager.add("//redo", new CommandDescription("//redo", "regions.redo", "Rollbacks undo action."));
-        commandDescriptionManager.add("//drain", new CommandDescription("//drain [radius] [lava]", "regions.drain", "Drains water near you."));
+        commandDescriptionManager.add("//limit", new CommandDescription("//limit [number]", "regionedit.limit", "Limits blocks per ticks"));
+        commandDescriptionManager.add("//pos1", new CommandDescription("//pos1", "regionedit.selection", "Set position 1 at player's location."));
+        commandDescriptionManager.add("//pos2", new CommandDescription("//pos2", "regionedit.selection", "Set position 2 at player's location."));
+        commandDescriptionManager.add("//hpos1", new CommandDescription("//hpos1", "regionedit.selection", "Set position 1 at block player's is looking at."));
+        commandDescriptionManager.add("//hpos2", new CommandDescription("//hpos2", "regionedit.selection", "Set position 2 at block player's is looking at."));
+        commandDescriptionManager.add("//cut", new CommandDescription("//cut", "regionedit.cut", "Removes blocks at specified region."));
+        commandDescriptionManager.add("//replace", new CommandDescription("//replace [before] [after]", "regionedit.replace", "Replace blocks at specified region."));
+        commandDescriptionManager.add("//set", new CommandDescription("//set [block]", "regionedit.set", "Places blocks at specified region."));
+        commandDescriptionManager.add("//undo", new CommandDescription("//undo", "regionedit.undo", "Rollbacks action."));
+        commandDescriptionManager.add("//redo", new CommandDescription("//redo", "regionedit.redo", "Rollbacks undo action."));
+        commandDescriptionManager.add("//drain", new CommandDescription("//drain [radius] [lava]", "regionedit.drain", "Drains water near you."));
         commandDescriptionManager.add("//cancel", new CommandDescription("//cancel [task id/all]",
-                Arrays.asList("regions.cancel", "regions.cancel.a -> self", "regions.cancel.b -> others", "regions.cancel.c -> all"),
+                Arrays.asList("regionedit.cancel", "regionedit.cancel.a -> self", "regionedit.cancel.b -> others", "regionedit.cancel.c -> all"),
                 "Cancels current operation."));
-        commandDescriptionManager.add("//expand", new CommandDescription("//expand <<<number> <up/down/east/south/west/north>>/<vert>>", "regions.selection", "Expands selection area by <number>."));
-        commandDescriptionManager.add("//fast", new CommandDescription("//fast", "regions.fast", "Toggles fast mode.", "Fast mode disables some physics on operation."));
-        commandDescriptionManager.add("//unstuck", new CommandDescription("//unstuck", "regions.unstuck", "Get out of stuck."));
-        commandDescriptionManager.add("//chunk", new CommandDescription("//chunk", "regions.selection", "Selects an entire chunk."));
+        commandDescriptionManager.add("//expand", new CommandDescription("//expand <<<number> <up/down/east/south/west/north>>/<vert>>", "regionedit.expand", "Expands selection area by <number>."));
+        commandDescriptionManager.add("//fast", new CommandDescription("//fast", "regionedit.fast", "Toggles fast mode.", "Fast mode disables some physics on operation."));
+        commandDescriptionManager.add("//unstuck", new CommandDescription("//unstuck", "regionedit.unstuck", "Get out of stuck."));
+        commandDescriptionManager.add("//chunk", new CommandDescription("//chunk", "regionedit.selection", "Selects an entire chunk."));
+        commandDescriptionManager.add("//wand", new CommandDescription("//wand", "regionedit.wand", "Gives player a wand (item) to get started with RegionEdit."));
         selectionItem = Material.getMaterial(this.getConfig().getString("selection_item", Compatibility.getGoldenAxe().name()));
         navigationItem = Material.getMaterial(this.getConfig().getString("navigation_item", "COMPASS"));
         for (Player p : Bukkit.getOnlinePlayers()) onPlayerJoin(new PlayerJoinEvent(p, ""));
@@ -224,6 +230,16 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
     public static String loc2Str(Location location) {
         if (location == null) return "null";
         return String.format(ChatColor.LIGHT_PURPLE + "%d, %d, %d" + ChatColor.YELLOW, location.getBlockX(), location.getBlockY(), location.getBlockZ());
+    }
+
+    @Override
+    public @NotNull Material getWandItem() {
+        return selectionItem;
+    }
+
+    @Override
+    public @NotNull Material getNavigationItem() {
+        return navigationItem;
     }
 
     @SuppressWarnings("UnstableApiUsage")

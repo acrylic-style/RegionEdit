@@ -29,4 +29,11 @@ public interface RegionSelection extends Region {
      * @param location An any location
      */
     boolean isInside(Location location);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @NotNull
+    RegionSelection deepClone();
 }
