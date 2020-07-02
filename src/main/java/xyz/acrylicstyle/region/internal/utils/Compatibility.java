@@ -197,6 +197,15 @@ public class Compatibility {
     }
 
     /**
+     * Checks compatibility for Material#getMaterial(int).
+     * For 1.8 - 1.12.2, it returns true.<br />
+     * For 1.13+, it returns false.
+     */
+    public static boolean checkMaterial_getMaterial_I() {
+        return ReflectionHelper.findMethod(Material.class, "getMaterial", int.class) != null;
+    }
+
+    /**
      * Checks if stationary_water exists in Material enum.<br />
      * For 1.8 - 1.12.2, it returns true.</br >
      * For 1.13+, it returns false.

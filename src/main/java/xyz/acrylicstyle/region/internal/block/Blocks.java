@@ -47,10 +47,15 @@ public class Blocks {
     }
 
     @Nullable
+    @SuppressWarnings("deprecation")
     public static Material getMaterialById(int i) {
-        Object data = getByCombinedId(i);
-        if (data == null) return null;
-        return getMaterialFromIBlockData(data);
+        if (Compatibility.checkMaterial_getMaterial_I()) {
+            return Material.getMaterial(i);
+        } else {
+            Object data = getByCombinedId(i);
+            if (data == null) return null;
+            return getMaterialFromIBlockData(data);
+        }
     }
 
     @SuppressWarnings("deprecation")
