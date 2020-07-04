@@ -16,9 +16,10 @@ public class Pos1Command extends PlayerCommandExecutor {
     public void onCommand(Player player, String[] args) {
         SelectionMode selectionMode = RegionEditPlugin.selectionMode.getOrDefault(player.getUniqueId(), SelectionMode.CUBOID);
         if (selectionMode == SelectionMode.CUBOID) {
-            CuboidRegion cuboidRegion = (CuboidRegion) RegionEditPlugin.regionSelection.getOrDefault(player.getUniqueId(), new CuboidRegion(player.getLocation(), player.getLocation()));
-            if (!cuboidRegion.getLocation2().getWorld().equals(player.getWorld())) cuboidRegion = new CuboidRegion(player.getLocation(), null);
-            CuboidRegion reg = new CuboidRegion(player.getLocation(), cuboidRegion.getLocation2());
+            Location loc = player.getLocation().getBlock().getLocation();
+            CuboidRegion cuboidRegion = (CuboidRegion) RegionEditPlugin.regionSelection.getOrDefault(player.getUniqueId(), new CuboidRegion(loc, loc));
+            if (!cuboidRegion.getLocation2().getWorld().equals(player.getWorld())) cuboidRegion = new CuboidRegion(loc, null);
+            CuboidRegion reg = new CuboidRegion(loc, cuboidRegion.getLocation2());
             RegionEditPlugin.regionSelection.add(player.getUniqueId(), reg);
             assert reg.getLocation() != null;
             CollectionList<Block> blocks = RegionEdit.getBlocks(reg.getLocation(), reg.getLocation2(), null, null);
