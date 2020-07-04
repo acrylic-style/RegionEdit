@@ -26,7 +26,7 @@ public interface RegionEdit extends Plugin {
         return service.getProvider();
     }
 
-    static void getBlocksAsync(@NotNull Location loc1, @NotNull Location loc2, Material block, Function<Block, Boolean> filterFunction, @NotNull Callback<CollectionList<Block>> callback) {
+    static void getBlocksAsync(@NotNull Location loc1, @NotNull Location loc2, @Nullable Material block, @Nullable Function<Block, Boolean> filterFunction, @NotNull Callback<CollectionList<Block>> callback) {
         new Thread(() -> callback.done(getBlocks(loc1, loc2, block, filterFunction), null)).start();
     }
 

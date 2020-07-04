@@ -40,6 +40,7 @@ import xyz.acrylicstyle.region.internal.command.CommandDescriptionManager;
 import xyz.acrylicstyle.region.internal.commands.CancelCommand;
 import xyz.acrylicstyle.region.internal.commands.ChunkCommand;
 import xyz.acrylicstyle.region.internal.commands.CutCommand;
+import xyz.acrylicstyle.region.internal.commands.DistributionCommand;
 import xyz.acrylicstyle.region.internal.commands.DrainCommand;
 import xyz.acrylicstyle.region.internal.commands.ExpandCommand;
 import xyz.acrylicstyle.region.internal.commands.FastCommand;
@@ -104,6 +105,7 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
         Log.info("Registering commands");
         TomeitoAPI.registerCommand("regionedit", new RegionEditCommand());
         TomeitoAPI.registerCommand("/wand", new WandCommand());
+        TomeitoAPI.registerCommand("/distr", new DistributionCommand());
         TomeitoAPI.registerCommand("/help", new HelpCommand());
         TomeitoAPI.registerCommand("sel", new SelectionCommand());
         TomeitoAPI.registerCommand("/set", new SetCommand());
@@ -153,6 +155,7 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
         commandDescriptionManager.add("//unstuck", new CommandDescription("//unstuck", "regionedit.unstuck", "Get out of stuck."));
         commandDescriptionManager.add("//chunk", new CommandDescription("//chunk", "regionedit.selection", "Selects an entire chunk."));
         commandDescriptionManager.add("//wand", new CommandDescription("//wand", "regionedit.wand", "Gives player a wand (item) to get started with RegionEdit."));
+        commandDescriptionManager.add("//distr", new CommandDescription("//distr [--exclude=blocks,separated,by,comma]", "regionedit.distr", "Shows block distribution."));
         selectionItem = Material.getMaterial(this.getConfig().getString("selection_item", Compatibility.getGoldenAxe().name()));
         navigationItem = Material.getMaterial(this.getConfig().getString("navigation_item", "COMPASS"));
         for (Player p : Bukkit.getOnlinePlayers()) onPlayerJoin(new PlayerJoinEvent(p, ""));

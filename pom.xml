@@ -6,7 +6,7 @@
 
     <groupId>xyz.acrylicstyle</groupId>
     <artifactId>RegionEdit</artifactId>
-    <version>0.1.12</version>
+    <version>0.1.13</version>
     <build>
         <finalName>RegionEdit</finalName>
         <plugins>
@@ -63,13 +63,8 @@
     <dependencies>
         <dependency>
             <groupId>xyz.acrylicstyle</groupId>
-            <artifactId>Util</artifactId>
-            <version>0.11.12</version>
-        </dependency>
-        <dependency>
-            <groupId>xyz.acrylicstyle</groupId>
             <artifactId>api</artifactId>
-            <version>0.5.3</version>
+            <version>0.5.8</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
