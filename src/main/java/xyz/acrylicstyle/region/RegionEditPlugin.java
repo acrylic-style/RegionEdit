@@ -6,6 +6,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -15,6 +16,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -29,6 +31,7 @@ import xyz.acrylicstyle.minecraft.BlockPosition;
 import xyz.acrylicstyle.region.api.RegionEdit;
 import xyz.acrylicstyle.region.api.exception.RegionEditException;
 import xyz.acrylicstyle.region.api.operation.OperationStatus;
+import xyz.acrylicstyle.region.api.player.SuperPickaxeMode;
 import xyz.acrylicstyle.region.api.player.UserSession;
 import xyz.acrylicstyle.region.api.region.CuboidRegion;
 import xyz.acrylicstyle.region.api.region.RegionSelection;
@@ -42,6 +45,7 @@ import xyz.acrylicstyle.region.internal.commands.ChunkCommand;
 import xyz.acrylicstyle.region.internal.commands.CutCommand;
 import xyz.acrylicstyle.region.internal.commands.DistributionCommand;
 import xyz.acrylicstyle.region.internal.commands.DrainCommand;
+import xyz.acrylicstyle.region.internal.commands.DrawSelCommand;
 import xyz.acrylicstyle.region.internal.commands.ExpandCommand;
 import xyz.acrylicstyle.region.internal.commands.FastCommand;
 import xyz.acrylicstyle.region.internal.commands.HPos1Command;
@@ -55,6 +59,7 @@ import xyz.acrylicstyle.region.internal.commands.RegionEditCommand;
 import xyz.acrylicstyle.region.internal.commands.ReplaceCommand;
 import xyz.acrylicstyle.region.internal.commands.SelectionCommand;
 import xyz.acrylicstyle.region.internal.commands.SetCommand;
+import xyz.acrylicstyle.region.internal.commands.SuperPickaxeCommand;
 import xyz.acrylicstyle.region.internal.commands.UndoCommand;
 import xyz.acrylicstyle.region.internal.commands.UnstuckCommand;
 import xyz.acrylicstyle.region.internal.commands.WandCommand;
@@ -98,7 +103,12 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
 
     @Override
     public void onEnable() {
-        if (Compatibility.getBukkitVersion() == BukkitVersion.UNKNOWN) Log.warn("You are using an unknown bukkit version. Proceed with caution.");
+        if (Compatibility.getBukkitVersion() == BukkitVersion.UNKNOWN) {
+            Log.as("RegionEdit").warning("You are using an unknown/unsupported bukkit version.");
+            Log.as("RegionEdit").warning("Disabling plugin as this plugin will very likely break.");
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
         Log.info("Registering events");
         Bukkit.getServicesManager().register(RegionEdit.class, this, this, ServicePriority.Normal);
         Bukkit.getPluginManager().registerEvents(this, this);
@@ -124,6 +134,8 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
         TomeitoAPI.registerCommand("/fast", new FastCommand());
         TomeitoAPI.registerCommand("/unstuck", new UnstuckCommand());
         TomeitoAPI.registerCommand("/chunk", new ChunkCommand());
+        TomeitoAPI.registerCommand("/drawsel", new DrawSelCommand());
+        TomeitoAPI.registerCommand("/sp", new SuperPickaxeCommand());
         Log.info("Registering tab completers");
         Bukkit.getPluginCommand("regionedit").setTabCompleter(new RegionEditTabCompleter());
         Bukkit.getPluginCommand("/set").setTabCompleter(new BlocksTabCompleter());
@@ -156,19 +168,39 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
         commandDescriptionManager.add("//chunk", new CommandDescription("//chunk", "regionedit.selection", "Selects an entire chunk."));
         commandDescriptionManager.add("//wand", new CommandDescription("//wand", "regionedit.wand", "Gives player a wand (item) to get started with RegionEdit."));
         commandDescriptionManager.add("//distr", new CommandDescription("//distr [--exclude=blocks,separated,by,comma]", "regionedit.distr", "Shows block distribution."));
+        commandDescriptionManager.add("//", new CommandDescription("/sp <area <radius>/single/drop <radius>/off>", "regionedit.superpickaxe", "Toggles super pickaxe mode."));
+        commandDescriptionManager.add("//drawsel", new CommandDescription("//drawsel", "regionedit.drawsel", "Toggles draws selection mode"));
         selectionItem = Material.getMaterial(this.getConfig().getString("selection_item", Compatibility.getGoldenAxe().name()));
         navigationItem = Material.getMaterial(this.getConfig().getString("navigation_item", "COMPASS"));
+        Log.info("Detected server version: " + Compatibility.getBukkitVersion().getName());
         for (Player p : Bukkit.getOnlinePlayers()) onPlayerJoin(new PlayerJoinEvent(p, ""));
+        /*
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                sessions
+                        .clone()
+                        .filter(session -> session.isDrawSelection() && session.getSelectionMode() == SelectionMode.CUBOID && session.getCuboidRegion().isValid())
+                        .toList((u, s) -> u)
+                        .map(Bukkit::getPlayer)
+                        .nonNull()
+                        .toMap(p -> p, p -> getUserSession(p))
+                        .forEach((player, session) -> {
+                            session.getCuboidRegion().
+                        });
+            }
+        }.runTaskTimer(this, 10, 10);
+        */
     }
 
-    @EventHandler(priority = EventPriority.MONITOR)
+    @EventHandler(priority = EventPriority.LOW)
     public void onPlayerJoin(PlayerJoinEvent e) {
         if (!sessions.containsKey(e.getPlayer().getUniqueId())) sessions.add(e.getPlayer().getUniqueId(), new UserSessionImpl(e.getPlayer().getUniqueId()));
     }
 
     @EventHandler
     public void onBlockBreak(BlockBreakEvent e) {
-        if (e.getPlayer().hasPermission("regions.selection") && Reflection.getItemInHand(e.getPlayer()).getType() == selectionItem) {
+        if (e.getPlayer().hasPermission("regionedit.selection") && Reflection.getItemInHand(e.getPlayer()).getType() == selectionItem) {
             e.setCancelled(true);
             SelectionMode selectionMode = RegionEditPlugin.selectionMode.getOrDefault(e.getPlayer().getUniqueId(), SelectionMode.CUBOID);
             if (selectionMode == SelectionMode.CUBOID) {
@@ -185,7 +217,7 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
         EquipmentSlot slot = Reflection.getHand(e);
         if (slot != null && slot != EquipmentSlot.HAND) return;
         if (e.getAction() == Action.RIGHT_CLICK_BLOCK) {
-            if (e.getPlayer().hasPermission("regions.selection") && Reflection.getItemInHand(e.getPlayer()).getType() == selectionItem) {
+            if (e.getPlayer().hasPermission("regionedit.selection") && Reflection.getItemInHand(e.getPlayer()).getType() == selectionItem) {
                 e.setCancelled(true);
                 SelectionMode selectionMode = RegionEditPlugin.selectionMode.getOrDefault(e.getPlayer().getUniqueId(), SelectionMode.CUBOID);
                 if (selectionMode == SelectionMode.CUBOID) {
@@ -198,7 +230,40 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
             }
         }
         if (e.getAction() == Action.LEFT_CLICK_BLOCK || e.getAction() == Action.LEFT_CLICK_AIR) {
-            if (e.getPlayer().hasPermission("regions.navigation") && Reflection.getItemInHand(e.getPlayer()).getType() == navigationItem) {
+            UserSession session = getUserSession(e.getPlayer());
+            if (e.getClickedBlock() != null) {
+                if (Reflection.getItemInHand(e.getPlayer()).getType().name().endsWith("PICKAXE") && e.getPlayer().hasPermission("regionedit.superpickaxe")) {
+                    if (session.getSuperPickaxeMode() == SuperPickaxeMode.AREA) {
+                        final Material type = e.getClickedBlock().getType();
+                        final byte data = Reflection.getData(e.getClickedBlock());
+                        World world = e.getClickedBlock().getWorld();
+                        RegionEdit.getNearbyBlocksAsync(e.getClickedBlock().getLocation(), getUserSession(e.getPlayer()).getSuperPickaxeRadius(), (blocks, e1) -> {
+                            blocks = blocks.filter(block -> block.getType() == type && Reflection.getData(block) == data);
+                            blocks.forEach(block -> Blocks.setBlockSendBlockChange(world, block.getX(), block.getY(), block.getZ(), Material.AIR, (byte) 0, Reflection.createBlockData(block.getLocation(), Material.AIR)));
+                            Blocks.sendBlockChanges(blocks, type, data);
+                        });
+                    } else if (session.getSuperPickaxeMode() == SuperPickaxeMode.SINGLE) {
+                        e.getClickedBlock().breakNaturally();
+                    } else if (session.getSuperPickaxeMode() == SuperPickaxeMode.AREA_DROP) {
+                        final Material type = e.getClickedBlock().getType();
+                        final byte data = Reflection.getData(e.getClickedBlock());
+                        World world = e.getClickedBlock().getWorld();
+                        RegionEdit.getNearbyBlocksAsync(e.getClickedBlock().getLocation(), getUserSession(e.getPlayer()).getSuperPickaxeRadius(), (blocks, e1) -> {
+                            blocks = blocks.filter(block -> block.getType() == type && Reflection.getData(block) == data);
+                            blocks.forEach(block -> {
+                                Bukkit.getScheduler().runTask(RegionEdit.getInstance(), () -> {
+                                    Item item = world.spawn(block.getLocation(), Item.class);
+                                    item.setItemStack(data == 0 ? new ItemStack(type) : new ItemStack(type, 1, data));
+                                    item.setPickupDelay(0);
+                                });
+                                Blocks.setBlock(world, block.getX(), block.getY(), block.getZ(), Material.AIR, (byte) 0, Reflection.createBlockData(block.getLocation(), Material.AIR));
+                            });
+                            Blocks.sendBlockChanges(blocks, type, data);
+                        });
+                    }
+                }
+            }
+            if (e.getPlayer().hasPermission("regionedit.navigation") && Reflection.getItemInHand(e.getPlayer()).getType() == navigationItem) {
                 Block block = e.getPlayer().getTargetBlock((Set<Material>) null, 500);
                 e.setCancelled(true);
                 if (block == null || block.getType() == Material.AIR) {

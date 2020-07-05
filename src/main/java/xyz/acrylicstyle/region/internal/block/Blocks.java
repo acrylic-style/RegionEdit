@@ -1,6 +1,7 @@
 package xyz.acrylicstyle.region.internal.block;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -86,6 +87,41 @@ public class Blocks {
         }
     }
 
+    public static void setBlockSendBlockChange(World world, int x, int y, int z, Material material, byte data, RegionBlockData blockData) {
+        setBlock(world, x, y, z, material, data, blockData);
+        CollectionList<Map.Entry<Integer, Integer>> chunks = new CollectionList<>();
+        Location loc = new Location(world, x, y, z);
+        Bukkit.getScheduler().runTaskAsynchronously(RegionEdit.getInstance(), () -> {
+            for (Player p : Bukkit.getOnlinePlayers()) {
+                Reflection.sendBlockChange(p, loc, material, data, blockData);
+            }
+            Reflection.notify(world, loc.getBlock(), Reflection.newRawBlockPosition(x, y, z));
+            chunks.add(new AbstractMap.SimpleEntry<>(x >> 4, z >> 4));
+            chunks.unique().forEach(e -> {
+                Chunk chunk = Chunk.wrap(world.getChunkAt(e.getKey(), e.getValue()));
+                chunk.initLighting();
+                for (Player p : Bukkit.getOnlinePlayers()) Reflection.sendChunk(p, chunk);
+            });
+        });
+    }
+
+    public static void sendBlockChanges(CollectionList<Block> blocks, Material type, byte data) {
+        Bukkit.getScheduler().runTaskAsynchronously(RegionEdit.getInstance(), () -> {
+            CollectionList<Map.Entry<Integer, Integer>> chunks = new CollectionList<>();
+            blocks.forEach(b -> {
+                for (Player p : Bukkit.getOnlinePlayers())
+                    Reflection.sendBlockChange(p, b.getLocation(), type, data, Reflection.getBlockData(b));
+                Reflection.notify(b.getWorld(), b, Reflection.newRawBlockPosition(b.getLocation().getBlockX(), b.getLocation().getBlockY(), b.getLocation().getBlockZ()));
+                chunks.add(new AbstractMap.SimpleEntry<>(b.getChunk().getX(), b.getChunk().getZ()));
+            });
+            chunks.unique().forEach(entry -> {
+                Chunk chunk = Chunk.wrap(Objects.requireNonNull(blocks.first()).getWorld().getChunkAt(entry.getKey(), entry.getValue()));
+                chunk.initLighting();
+                for (Player p : Bukkit.getOnlinePlayers()) Reflection.sendChunk(p, chunk);
+            });
+        });
+    }
+
     @SuppressWarnings({"DuplicatedCode"}) // unused
     public static void setBlocks(@NotNull CollectionList<Block> blocks, Material material, byte data, BiBiConsumer<Integer, Integer, Double> consumer) {
         double start = System.currentTimeMillis();
@@ -101,7 +137,6 @@ public class Blocks {
             Blocks.setBlock(world, x, y, z, material, data, block.getBlockData());
             i0.incrementAndGet();
         });
-        CollectionList<Map.Entry<Integer, Integer>> chunks = new CollectionList<>();
         new BukkitRunnable() {
             @Override
             public void run() {
@@ -110,16 +145,7 @@ public class Blocks {
                     public void run() {
                         while (true) {
                             if (i0.get() >= blocks.size()) {
-                                blocks.forEach(b -> {
-                                    for (Player p : Bukkit.getOnlinePlayers()) Reflection.sendBlockChange(p, b.getLocation(), material, data, Reflection.getBlockData(b));
-                                    Reflection.notify(b.getWorld(), b, Reflection.newRawBlockPosition(b.getLocation().getBlockX(), b.getLocation().getBlockY(), b.getLocation().getBlockZ()));
-                                    chunks.add(new AbstractMap.SimpleEntry<>(b.getChunk().getX(), b.getChunk().getZ()));
-                                });
-                                chunks.unique().forEach(e -> {
-                                    Chunk chunk = Chunk.wrap(Objects.requireNonNull(blocks.first()).getWorld().getChunkAt(e.getKey(), e.getValue()));
-                                    chunk.initLighting();
-                                    for (Player p : Bukkit.getOnlinePlayers()) Reflection.sendChunk(p, chunk);
-                                });
+                                sendBlockChanges(blocks, material, data);
                                 break;
                             }
                         }

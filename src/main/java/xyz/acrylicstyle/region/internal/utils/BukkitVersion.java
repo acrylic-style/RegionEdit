@@ -27,7 +27,7 @@ public enum BukkitVersion {
         return bukkitVersions;
     }
 
-    public boolean atLeast(BukkitVersion bukkitVersion) {
+    public boolean atLeast(@NotNull BukkitVersion bukkitVersion) {
         return bukkitVersions.contains(bukkitVersion);
     }
 

@@ -12,81 +12,91 @@ commands:
   "/wand":
     description: "gives player a RegionEdit wand"
     permission: regionedit.wand
-    permission-message: "&cYou don't have permission. Are you in a right mode?"
+    permission-message: "You don't have permission to do that."
   "/set":
     description: ""
     permission: regionedit.set
-    permission-message: "&cYou don't have permission. Are you in a right mode?"
+    permission-message: "You don't have permission to do that."
   "/cut":
     description: ""
     permission: regionedit.cut
-    permission-message: "&cYou don't have permission. Are you in a right mode?"
+    permission-message: "You don't have permission to do that."
   "/replace":
     description: ""
     aliases: ["/rep"]
     permission: regionedit.replace
-    permission-message: "&cYou don't have permission. Are you in a right mode?"
+    permission-message: "You don't have permission to do that."
   "/limit":
     description: ""
     permission: regionedit.limit
-    permission-message: "&cYou don't have permission. Are you in a right mode?"
+    permission-message: "You don't have permission to do that."
   "/drain":
     description: ""
     permission: regionedit.drain
-    permission-message: "&cYou don't have permission. Are you in a right mode?"
+    permission-message: "You don't have permission to do that."
   "/pos1":
     description: ""
     permission: regionedit.selection
-    permission-message: "&cYou don't have permission. Are you in a right mode?"
+    permission-message: "You don't have permission to do that."
   "/hpos1":
     description: ""
     permission: regionedit.selection
-    permission-message: "&cYou don't have permission. Are you in a right mode?"
+    permission-message: "You don't have permission to do that."
   "/pos2":
     description: ""
     permission: regionedit.selection
-    permission-message: "&cYou don't have permission. Are you in a right mode?"
+    permission-message: "You don't have permission to do that."
   "/hpos2":
     description: ""
     permission: regionedit.selection
-    permission-message: "&cYou don't have permission. Are you in a right mode?"
+    permission-message: "You don't have permission to do that."
   "/expand":
     description: ""
     permission: regionedit.expand
-    permission-message: "&cYou don't have permission. Are you in a right mode?"
+    permission-message: "You don't have permission to do that."
   "/chunk":
     description: ""
     permission: regionedit.selection
-    permission-message: "&cYou don't have permission. Are you in a right mode?"
+    permission-message: "You don't have permission to do that."
   "/undo":
     description: ""
     permission: regionedit.undo
-    permission-message: "&cYou don't have permission. Are you in a right mode?"
+    permission-message: "You don't have permission to do that."
   "/redo":
     description: ""
     permission: regionedit.redo
-    permission-message: "&cYou don't have permission. Are you in a right mode?"
+    permission-message: "You don't have permission to do that."
   "/cancel":
     description: ""
     permission: regionedit.cancel
-    permission-message: "&cYou don't have permission. Are you in a right mode?"
+    permission-message: "You don't have permission to do that."
   regionedit:
     description: "RegionEdit"
     aliases: ["/re", "re", "/regionedit"]
   "/help":
     description: ""
     permission: regionedit.help
-    permission-message: "&cYou don't have permission. Are you in a right mode?"
+    permission-message: "You don't have permission to do that."
   "/fast":
     description: ""
     permission: regionedit.fast
-    permission-message: "&cYou don't have permission. Are you in a right mode?"
+    permission-message: "You don't have permission to do that."
   "/unstuck":
     description: ""
     permission: regionedit.unstuck
-    permission-message: "&cYou don't have permission. Are you in a right mode?"
+    permission-message: "You don't have permission to do that."
   "/distr":
     aliases: ["/distribution"]
     description: "shows distribution of the blocks"
     permission: regionedit.distr
-    permission-message: "&cYou don't have permission. Are you in a right mode?"
+    permission-message: "You don't have permission to do that."
+  "/sp":
+    aliases: ["/superpickaxe", "/", "sp"]
+    description: "Toggles super pickaxe"
+    permission: regionedit.superpickaxe
+    permission-message: "You don't have permission to do that."
+  "/drawsel":
+    aliases: ["/drawselection", "drawsel"]
+    description: "Toggles draw selection mode"
+    permission: regionedit.drawsel
+    permission-message: "You don't have permission to do that."

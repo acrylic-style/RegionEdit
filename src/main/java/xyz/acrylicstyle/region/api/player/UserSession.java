@@ -2,6 +2,7 @@ package xyz.acrylicstyle.region.api.player;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Range;
 import xyz.acrylicstyle.region.api.exception.RegionEditException;
 import xyz.acrylicstyle.region.api.region.CuboidRegion;
 import xyz.acrylicstyle.region.api.region.RegionSelection;
@@ -64,11 +65,26 @@ public interface UserSession {
      */
     void setFastMode(boolean flag);
 
-    boolean isSuperPickaxeEnabled();
+    @NotNull
+    SuperPickaxeMode getSuperPickaxeMode();
 
     /**
      * Set super pickaxe mode to specified flag.
-     * @param flag Enable Super Pickaxe
+     * @param mode super pickaxe mode
      */
-    void setSuperPickaxe(boolean flag);
+    void setSuperPickaxeMode(@NotNull SuperPickaxeMode mode);
+
+    @Range(from = 1, to = Integer.MAX_VALUE)
+    int getSuperPickaxeRadius();
+
+    /**
+     * Set super pickaxe radius.
+     * @param radius the radius
+     * @throws RegionEditException when radius is <1 or >10
+     */
+    void setSuperPickaxeRadius(int radius) throws RegionEditException;
+
+    boolean isDrawSelection();
+
+    void setDrawSelection(boolean flag);
 }

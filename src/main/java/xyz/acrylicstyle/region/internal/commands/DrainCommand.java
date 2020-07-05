@@ -22,6 +22,10 @@ public class DrainCommand extends PlayerCommandExecutor {
                 return;
             }
             radius = Integer.parseInt(args[0]);
+            if (radius <= 0) {
+                player.sendMessage(ChatColor.RED + "Invalid radius: " + radius);
+                return;
+            }
             if (args.length >= 2) {
                 if (args[1].equalsIgnoreCase("lava")) type = BlockType.LAVA;
                 if (args[1].equalsIgnoreCase("kelp")) {

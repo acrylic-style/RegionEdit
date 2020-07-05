@@ -21,7 +21,7 @@ public class DrainTabCompleter extends TabCompleterHelper {
 
     private List<String> create100List() {
         List<String> list = new ArrayList<>();
-        for (int i = 0; i < 100; i++) list.add("" + i);
+        for (int i = 1; i <= 100; i++) list.add("" + i);
         return list;
     }
 }

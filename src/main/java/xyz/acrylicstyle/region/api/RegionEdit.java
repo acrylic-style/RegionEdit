@@ -16,18 +16,34 @@ import xyz.acrylicstyle.tomeito_api.utils.Callback;
 
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.function.Function;
 
+/**
+ * All methods common to RegionEdit operations.<br />
+ * Static methods aren't required to load RegionEdit plugin.
+ */
 public interface RegionEdit extends Plugin {
+    ThreadPoolExecutor pool = (ThreadPoolExecutor) Executors.newFixedThreadPool(4);
+
+    /**
+     * Obtain the RegionEdit instance. This
+     * method requires the RegionEdit plugin
+     * to work or it will throw error.
+     *
+     * @throws NullPointerException when the RegionEdit plugin wasn't found
+     * @return RegionEdit instance
+     */
     @NotNull
-    static RegionEdit getInstance() {
+    static RegionEdit getInstance() throws NullPointerException {
         RegisteredServiceProvider<RegionEdit> service = Bukkit.getServicesManager().getRegistration(RegionEdit.class);
         if (service == null) throw new NullPointerException();
         return service.getProvider();
     }
 
     static void getBlocksAsync(@NotNull Location loc1, @NotNull Location loc2, @Nullable Material block, @Nullable Function<Block, Boolean> filterFunction, @NotNull Callback<CollectionList<Block>> callback) {
-        new Thread(() -> callback.done(getBlocks(loc1, loc2, block, filterFunction), null)).start();
+        pool.execute(() -> callback.done(getBlocks(loc1, loc2, block, filterFunction), null));
     }
 
     @NotNull
@@ -65,7 +81,7 @@ public interface RegionEdit extends Plugin {
     }
 
     static void getBlocksInvertAsync(@NotNull Location loc1, @NotNull Location loc2, Material block, @NotNull Callback<CollectionList<Block>> callback) {
-        new Thread(() -> callback.done(getBlocksInvert(loc1, loc2, block), null)).start();
+        pool.execute(() -> callback.done(getBlocksInvert(loc1, loc2, block), null));
     }
 
     @NotNull
@@ -91,7 +107,7 @@ public interface RegionEdit extends Plugin {
     }
 
     static void getNearbyBlocksAsync(@NotNull Location location, int radius, @NotNull Callback<CollectionList<Block>> callback) {
-        new Thread(() -> callback.done(getNearbyBlocks(location, radius), null)).start();
+        pool.execute(() -> callback.done(getNearbyBlocks(location, radius), null));
     }
 
     @NotNull
