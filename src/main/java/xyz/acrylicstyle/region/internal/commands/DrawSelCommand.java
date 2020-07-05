@@ -10,14 +10,14 @@ public class DrawSelCommand extends PlayerCommandExecutor {
     @Override
     public void onCommand(Player player, String[] args) {
         UserSession session = RegionEdit.getInstance().getUserSession(player);
-        if (session.isDrawSelection()) {
+        if (!session.isDrawSelection()) {
             player.sendMessage(ChatColor.GREEN + "Turned on drawsel mode.");
             player.sendMessage(ChatColor.LIGHT_PURPLE + "This mode allows you to highlight selected");
             player.sendMessage(ChatColor.LIGHT_PURPLE + "cuboid area without having to install mods.");
-            session.setDrawSelection(false);
+            session.setDrawSelection(true);
         } else {
             player.sendMessage(ChatColor.GREEN + "Turned off drawsel mode.");
-            session.setDrawSelection(true);
+            session.setDrawSelection(false);
         }
     }
 }

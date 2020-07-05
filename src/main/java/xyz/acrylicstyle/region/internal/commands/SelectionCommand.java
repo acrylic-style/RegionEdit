@@ -12,6 +12,7 @@ public class SelectionCommand extends PlayerCommandExecutor {
     public void onCommand(Player player, String[] args) {
         if (args.length == 0) {
             RegionEditPlugin.regionSelection.remove(player.getUniqueId());
+            RegionEditPlugin.sessions.get(player.getUniqueId()).sendCUIEvent();
             player.sendMessage(ChatColor.GREEN + "Selection cleared.");
             return;
         }

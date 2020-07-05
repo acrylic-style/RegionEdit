@@ -1,6 +1,7 @@
 package xyz.acrylicstyle.region.api.region;
 
 import org.bukkit.Location;
+import org.bukkit.block.Block;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import util.CollectionList;
@@ -79,4 +80,24 @@ public class CuboidRegion implements RegionSelection, Cloneable {
     @Override
     @NotNull
     public CuboidRegion deepClone() { return new CuboidRegion(loc1.clone(), loc2.clone()); }
+
+    @Override
+    public long getSize() {
+        int x1 = loc1.getX() > loc2.getX() ? (int) loc2.getX() : (int) loc1.getX();
+        int y1 = loc1.getY() > loc2.getY() ? (int) loc2.getY() : (int) loc1.getY();
+        int z1 = loc1.getZ() > loc2.getZ() ? (int) loc2.getZ() : (int) loc1.getZ();
+
+        int x2 = ((int) loc1.getX()) == x1 ? (int) loc2.getX() : (int) loc1.getX();
+        int y2 = ((int) loc1.getY()) == y1 ? (int) loc2.getY() : (int) loc1.getY();
+        int z2 = ((int) loc1.getZ()) == z1 ? (int) loc2.getZ() : (int) loc1.getZ();
+        long size = 0;
+        for (int x = x1; x <= x2; x++) {
+            for (int y = y1; y <= y2; y++) {
+                for (int z = z1; z <= z2; z++) {
+                    size++;
+                }
+            }
+        }
+        return size;
+    }
 }

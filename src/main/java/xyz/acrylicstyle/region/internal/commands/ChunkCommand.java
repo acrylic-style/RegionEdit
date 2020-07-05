@@ -24,6 +24,7 @@ public class ChunkCommand extends PlayerCommandExecutor {
             int Z = chunk.getZ() * 16;
             CuboidRegion reg = new CuboidRegion(new Location(world, X, 0, Z), new Location(world, X+15, 255, Z+15));
             RegionEditPlugin.regionSelection.add(player.getUniqueId(), reg);
+            RegionEditPlugin.sessions.get(player.getUniqueId()).sendCUIEvent();
             assert reg.getLocation() != null;
             CollectionList<Block> blocks = RegionEdit.getBlocks(reg.getLocation(), reg.getLocation2(), null, null);
             player.sendMessage(ChatColor.GREEN + "Selected region "

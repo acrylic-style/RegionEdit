@@ -24,4 +24,16 @@ public interface Region extends Cloneable, DeepCloneable {
     @Override
     @NotNull
     Region deepClone();
+
+    /**
+     * Get the size of region.
+     * @return the region size
+     */
+    long getSize();
+
+    /**
+     * Get the size of region.
+     * @return the region size
+     */
+    default long size() { return getSize(); }
 }

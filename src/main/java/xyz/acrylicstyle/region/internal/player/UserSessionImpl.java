@@ -1,7 +1,14 @@
 package xyz.acrylicstyle.region.internal.player;
 
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import util.CollectionList;
+import util.ICollectionList;
+import util.Validate;
+import xyz.acrylicstyle.mcutil.lang.MCVersion;
 import xyz.acrylicstyle.region.RegionEditPlugin;
 import xyz.acrylicstyle.region.api.exception.RegionEditException;
 import xyz.acrylicstyle.region.api.player.SuperPickaxeMode;
@@ -9,13 +16,23 @@ import xyz.acrylicstyle.region.api.player.UserSession;
 import xyz.acrylicstyle.region.api.region.CuboidRegion;
 import xyz.acrylicstyle.region.api.region.RegionSelection;
 import xyz.acrylicstyle.region.api.selection.SelectionMode;
+import xyz.acrylicstyle.shared.NMSAPI;
+import xyz.acrylicstyle.shared.OBCAPI;
+import xyz.acrylicstyle.tomeito_api.utils.Log;
 
+import java.util.Objects;
 import java.util.UUID;
 
 public class UserSessionImpl implements UserSession {
+    private final RegionEditPlugin plugin;
     private final UUID uuid;
 
-    public UserSessionImpl(UUID uuid) { this.uuid = uuid; }
+    public UserSessionImpl(@NotNull RegionEditPlugin plugin, @NotNull UUID uuid) {
+        Validate.notNull(plugin, "plugin cannot be null");
+        Validate.notNull(uuid, "uuid cannot be null");
+        this.plugin = plugin;
+        this.uuid = uuid;
+    }
 
     @Override
     @NotNull
@@ -90,4 +107,74 @@ public class UserSessionImpl implements UserSession {
 
     @Override
     public void setDrawSelection(boolean flag) { this.drawSelection = flag; }
+
+    private boolean cuiSupport = false;
+
+    @Override
+    public void handleCUIInitialization() {
+        Log.info("Enabling CUI for " + uuid.toString());
+        this.cuiSupport = true;
+    }
+
+    @Override
+    public void sendCUIEvent() {
+        if (!cuiSupport) return;
+        Player player = getPlayer();
+        if (player == null) return;
+        if (getSelectionMode() == SelectionMode.CUBOID) {
+            sendCuboidRegion();
+        }
+    }
+
+    private String getPoint(int id, Location loc, long size) {
+        return "p|" + id + "|" + loc.getBlockX() + "|" + loc.getBlockY() + "|" + loc.getBlockZ() + "|" + size;
+    }
+
+    private void sendCuboidRegion() {
+        if (!cuiSupport) return;
+        Player player = getPlayer();
+        if (player == null) return;
+        CuboidRegion region = Objects.requireNonNull(getCuboidRegion());
+        player.sendPluginMessage(plugin, getCUIChannel(), "s|cuboid".getBytes());
+        if (!region.isValid()) return;
+        assert region.getLocation() != null;
+        assert region.getLocation2() != null;
+        player.sendPluginMessage(plugin, getCUIChannel(), getPoint(0, region.getLocation(), 1).getBytes());
+        player.sendPluginMessage(plugin, getCUIChannel(), getPoint(1, region.getLocation2(), region.size()).getBytes());
+    }
+
+    @Override
+    public @Nullable Player getPlayer() { return Bukkit.getPlayer(uuid); }
+
+    @Override
+    public boolean hasCUISupport() { return this.cuiSupport; }
+
+    @Override
+    public void setCUISupport(boolean flag) { this.cuiSupport = flag; }
+
+    private int protocolVersion = 1;
+
+    @Override
+    public int getProtocolVersion() {
+        Player player = getPlayer();
+        if (player == null) return protocolVersion;
+        NMSAPI ep = NMSAPI.getEmptyNMSAPI(OBCAPI.getEmptyOBCAPI(player, "entity.CraftPlayer").getHandle(), "EntityPlayer");
+        NMSAPI pc = NMSAPI.getEmptyNMSAPI(ep.getField("playerConnection"), "PlayerConnection");
+        NMSAPI nm = NMSAPI.getEmptyNMSAPI(pc.getField("networkManager"), "NetworkManager");
+        protocolVersion = (int) nm.invoke("getVersion");
+        return protocolVersion;
+    }
+
+    @Override
+    public @NotNull MCVersion getMinecraftVersion() {
+        CollectionList<MCVersion> list = ICollectionList.asList(MCVersion.getByProtocolVersion(protocolVersion));
+        return list.filter(v -> !v.isSnapshot()).size() == 0 // if non-snapshot version wasn't found
+                ? Objects.requireNonNull(list.first()) // return the last version anyway
+                : Objects.requireNonNull(list.filter(v -> !v.isSnapshot()).first()); // return non-snapshot version instead
+    }
+
+    @Override
+    public @NotNull String getCUIChannel() {
+        return getMinecraftVersion().isModern() ? RegionEditPlugin.CUI : RegionEditPlugin.CUI_LEGACY;
+    }
 }

@@ -27,6 +27,22 @@ import java.util.function.Function;
 public interface RegionEdit extends Plugin {
     ThreadPoolExecutor pool = (ThreadPoolExecutor) Executors.newFixedThreadPool(4);
 
+    static void drawParticleLine(@NotNull Player player, @NotNull Location _from, @NotNull Location _to) {
+        /*
+        Location from = _from.clone();
+        Location to = _to.clone();
+        if (!from.getWorld().equals(to.getWorld())) throw new IllegalArgumentException("Cannot draw particle line between 2 worlds");
+        double distance = Math.min(_from.distance(to), 50);
+        Vector direction = _from.clone().subtract(to).toVector();
+        Log.info("From: " + from);
+        for (double i = 0; i < distance; i += 0.1) {
+            Location particle = _from.clone().add(direction.normalize().multiply(i));
+            Log.info("P: " + particle);
+            player.playEffect(particle, Effect.SNOW_SHOVEL, null);
+        }
+         */
+    }
+
     /**
      * Obtain the RegionEdit instance. This
      * method requires the RegionEdit plugin

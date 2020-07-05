@@ -23,11 +23,11 @@ public class Pos2Command extends PlayerCommandExecutor {
                 cuboidRegion = new CuboidRegion(null, loc);
             CuboidRegion reg = new CuboidRegion(cuboidRegion.getLocation(), loc);
             RegionEditPlugin.regionSelection.add(player.getUniqueId(), reg);
+            RegionEditPlugin.sessions.get(player.getUniqueId()).sendCUIEvent();
             assert reg.getLocation() != null;
-            CollectionList<Block> blocks = RegionEdit.getBlocks(reg.getLocation(), reg.getLocation2(), null, null);
             player.sendMessage(ChatColor.GREEN + "Selected region "
                     + ChatColor.YELLOW + "(" + loc2Str(reg.getLocation()) + " -> " + loc2Str(reg.getLocation2()) + ") "
-                    + ChatColor.LIGHT_PURPLE + "(" + blocks.size() + " blocks)");
+                    + ChatColor.LIGHT_PURPLE + "(" + reg.size() + " blocks)");
         }
     }
 

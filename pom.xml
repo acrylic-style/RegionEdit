@@ -6,7 +6,7 @@
 
     <groupId>xyz.acrylicstyle</groupId>
     <artifactId>RegionEdit</artifactId>
-    <version>0.1.14</version>
+    <version>0.1.15</version>
     <build>
         <finalName>RegionEdit</finalName>
         <plugins>
@@ -78,6 +78,11 @@
             <artifactId>bukkit</artifactId>
             <version>1.8-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>xyz.acrylicstyle</groupId>
+            <artifactId>minecraft-util</artifactId>
+            <version>0.0.5</version>
         </dependency>
     </dependencies>
 </project>

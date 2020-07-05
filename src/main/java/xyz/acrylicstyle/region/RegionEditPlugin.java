@@ -13,6 +13,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.EquipmentSlot;
@@ -63,6 +64,7 @@ import xyz.acrylicstyle.region.internal.commands.SuperPickaxeCommand;
 import xyz.acrylicstyle.region.internal.commands.UndoCommand;
 import xyz.acrylicstyle.region.internal.commands.UnstuckCommand;
 import xyz.acrylicstyle.region.internal.commands.WandCommand;
+import xyz.acrylicstyle.region.internal.listener.CUIChannelListener;
 import xyz.acrylicstyle.region.internal.manager.HistoryManagerImpl;
 import xyz.acrylicstyle.region.internal.nms.Chunk;
 import xyz.acrylicstyle.region.internal.player.UserSessionImpl;
@@ -89,6 +91,9 @@ import java.util.function.Function;
  * Internal usage only
  */
 public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener {
+    public static final String CUI = "worldedit:cui";
+    public static final String CUI_LEGACY = "WECUI";
+
     private Material selectionItem = null;
     private Material navigationItem = null;
 
@@ -109,6 +114,10 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
+        Bukkit.getMessenger().registerIncomingPluginChannel(this, CUI, new CUIChannelListener(this));
+        Bukkit.getMessenger().registerOutgoingPluginChannel(this, CUI);
+        Bukkit.getMessenger().registerIncomingPluginChannel(this, CUI_LEGACY, new CUIChannelListener(this));
+        Bukkit.getMessenger().registerOutgoingPluginChannel(this, CUI_LEGACY);
         Log.info("Registering events");
         Bukkit.getServicesManager().register(RegionEdit.class, this, this, ServicePriority.Normal);
         Bukkit.getPluginManager().registerEvents(this, this);
@@ -178,24 +187,30 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
         new BukkitRunnable() {
             @Override
             public void run() {
+                //noinspection RedundantCast
                 sessions
                         .clone()
                         .filter(session -> session.isDrawSelection() && session.getSelectionMode() == SelectionMode.CUBOID && session.getCuboidRegion().isValid())
                         .toList((u, s) -> u)
-                        .map(Bukkit::getPlayer)
+                        .map((Function<UUID, Player>) Bukkit::getPlayer)
                         .nonNull()
                         .toMap(p -> p, p -> getUserSession(p))
                         .forEach((player, session) -> {
-                            session.getCuboidRegion().
+                            RegionEdit.drawParticleLine(player, Objects.requireNonNull(session.getCuboidRegion().getLocation()), session.getCuboidRegion().getLocation2());
                         });
             }
         }.runTaskTimer(this, 10, 10);
         */
     }
 
+    @EventHandler
+    public void onAsyncPlayerPreLogin(AsyncPlayerPreLoginEvent e) {
+        if (sessions.containsKey(e.getUniqueId())) sessions.get(e.getUniqueId()).setCUISupport(false);
+    }
+
     @EventHandler(priority = EventPriority.LOW)
     public void onPlayerJoin(PlayerJoinEvent e) {
-        if (!sessions.containsKey(e.getPlayer().getUniqueId())) sessions.add(e.getPlayer().getUniqueId(), new UserSessionImpl(e.getPlayer().getUniqueId()));
+        if (!sessions.containsKey(e.getPlayer().getUniqueId())) sessions.add(e.getPlayer().getUniqueId(), new UserSessionImpl(this, e.getPlayer().getUniqueId()));
     }
 
     @EventHandler
@@ -282,6 +297,7 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
 
     private void selectRegion(@NotNull CuboidRegion reg, @NotNull Player player) {
         regionSelection.add(player.getUniqueId(), reg);
+        getUserSession(player).sendCUIEvent();
         showCurrentRegion(player);
     }
 
@@ -335,8 +351,8 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
     @Override
     @NotNull
     public UserSession getUserSession(@NotNull final UUID uuid) {
-        if (!sessions.containsKey(uuid)) sessions.add(uuid, new UserSessionImpl(uuid));
-        return sessions.getOrDefault(uuid, new UserSessionImpl(uuid));
+        if (!sessions.containsKey(uuid)) sessions.add(uuid, new UserSessionImpl(this, uuid));
+        return sessions.get(uuid);
     }
 
     @Override
@@ -374,7 +390,7 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
         final int taskId = RegionEditPlugin.taskId.getAndIncrement();
         playerTasks.get(player.getUniqueId()).add(taskId);
         tasks.add(taskId, OperationStatus.RUNNING);
-        final boolean fastMode = sessions.getOrDefault(player.getUniqueId(), new UserSessionImpl(player.getUniqueId())).isFastMode();
+        final boolean fastMode = sessions.get(player.getUniqueId()).isFastMode();
         player.sendMessage("" + ChatColor.RED + blocks.size() + ChatColor.GREEN + " blocks affected. " + ChatColor.LIGHT_PURPLE + " (Task ID: " + taskId + ")");
         blocks.map(RegionBlock::wrap).forEach(block -> {
             if (!fastMode) {
@@ -449,7 +465,7 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
         final int taskId = RegionEditPlugin.taskId.getAndIncrement();
         playerTasks.get(player.getUniqueId()).add(taskId);
         tasks.add(taskId, OperationStatus.RUNNING);
-        final boolean fastMode = sessions.getOrDefault(player.getUniqueId(), new UserSessionImpl(player.getUniqueId())).isFastMode();
+        final boolean fastMode = sessions.get(player.getUniqueId()).isFastMode();
         player.sendMessage("" + ChatColor.RED + blocks.size() + ChatColor.GREEN + " blocks affected. " + ChatColor.LIGHT_PURPLE + " (Task ID: " + taskId + ")");
         blocks.forEach((loc, block) -> {
             if (!fastMode) {

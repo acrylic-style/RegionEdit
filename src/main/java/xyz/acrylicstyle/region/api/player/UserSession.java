@@ -1,8 +1,10 @@
 package xyz.acrylicstyle.region.api.player;
 
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
+import xyz.acrylicstyle.mcutil.lang.MCVersion;
 import xyz.acrylicstyle.region.api.exception.RegionEditException;
 import xyz.acrylicstyle.region.api.region.CuboidRegion;
 import xyz.acrylicstyle.region.api.region.RegionSelection;
@@ -87,4 +89,38 @@ public interface UserSession {
     boolean isDrawSelection();
 
     void setDrawSelection(boolean flag);
+
+    void handleCUIInitialization();
+
+    void sendCUIEvent();
+
+    /**
+     * Get the player who holds this session.
+     * @return the player, null if logged out
+     */
+    @Nullable
+    Player getPlayer();
+
+    boolean hasCUISupport();
+
+    void setCUISupport(boolean flag);
+
+    /**
+     * Get protocol version of this player, if offline, it returns the latest cached value.
+     * @return the (cached) protocol version
+     */
+    int getProtocolVersion();
+
+    /**
+     * Try to get minecraft version of this player.<br />
+     * The value may be inaccurate if multiple versions
+     * has the same protocol version.<br />
+     * If the player is offline, it returns the latest cached value.
+     * @return the minecraft version
+     */
+    @NotNull
+    MCVersion getMinecraftVersion();
+
+    @NotNull
+    String getCUIChannel();
 }

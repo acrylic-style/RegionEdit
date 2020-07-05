@@ -29,6 +29,7 @@ public class HPos1Command extends PlayerCommandExecutor {
             if (!cuboidRegion.getLocation2().getWorld().equals(player.getWorld())) cuboidRegion = new CuboidRegion(location, null);
             CuboidRegion reg = new CuboidRegion(location, cuboidRegion.getLocation2());
             RegionEditPlugin.regionSelection.add(player.getUniqueId(), reg);
+            RegionEditPlugin.sessions.get(player.getUniqueId()).sendCUIEvent();
             assert reg.getLocation() != null;
             CollectionList<Block> blocks = RegionEdit.getBlocks(reg.getLocation(), reg.getLocation2(), null, null);
             player.sendMessage(ChatColor.GREEN + "Selected region "
