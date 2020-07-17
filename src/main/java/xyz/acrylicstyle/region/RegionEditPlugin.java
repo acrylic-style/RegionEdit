@@ -114,10 +114,6 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
-        Bukkit.getMessenger().registerIncomingPluginChannel(this, CUI, new CUIChannelListener(this));
-        Bukkit.getMessenger().registerOutgoingPluginChannel(this, CUI);
-        Bukkit.getMessenger().registerIncomingPluginChannel(this, CUI_LEGACY, new CUIChannelListener(this));
-        Bukkit.getMessenger().registerOutgoingPluginChannel(this, CUI_LEGACY);
         Log.info("Registering events");
         Bukkit.getServicesManager().register(RegionEdit.class, this, this, ServicePriority.Normal);
         Bukkit.getPluginManager().registerEvents(this, this);
@@ -181,7 +177,12 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
         commandDescriptionManager.add("//drawsel", new CommandDescription("//drawsel", "regionedit.drawsel", "Toggles draws selection mode"));
         selectionItem = Material.getMaterial(this.getConfig().getString("selection_item", Compatibility.getGoldenAxe().name()));
         navigationItem = Material.getMaterial(this.getConfig().getString("navigation_item", "COMPASS"));
-        Log.info("Detected server version: " + Compatibility.getBukkitVersion().getName());
+        BukkitVersion version = Compatibility.getBukkitVersion();
+        Log.info("Detected server version: " + version.getName());
+        Bukkit.getMessenger().registerIncomingPluginChannel(this, CUI, new CUIChannelListener(this));
+        Bukkit.getMessenger().registerOutgoingPluginChannel(this, CUI);
+        if (!version.atLeast(BukkitVersion.v1_13)) Bukkit.getMessenger().registerIncomingPluginChannel(this, CUI_LEGACY, new CUIChannelListener(this));
+        if (!version.atLeast(BukkitVersion.v1_13)) Bukkit.getMessenger().registerOutgoingPluginChannel(this, CUI_LEGACY);
         for (Player p : Bukkit.getOnlinePlayers()) onPlayerJoin(new PlayerJoinEvent(p, ""));
         /*
         new BukkitRunnable() {
