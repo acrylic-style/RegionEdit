@@ -11,6 +11,10 @@ import xyz.acrylicstyle.tomeito_api.TomeitoAPI;
  * Cuboid region to specify pos1, and pos2 (cube)
  */
 public class CuboidRegion implements RegionSelection, Cloneable {
+    private long cachedSize = 0;
+    private Location lastLoc1;
+    private Location lastLoc2;
+
     private final Location loc1;
     private final Location loc2;
 
@@ -83,21 +87,26 @@ public class CuboidRegion implements RegionSelection, Cloneable {
 
     @Override
     public long getSize() {
-        int x1 = loc1.getX() > loc2.getX() ? (int) loc2.getX() : (int) loc1.getX();
-        int y1 = loc1.getY() > loc2.getY() ? (int) loc2.getY() : (int) loc1.getY();
-        int z1 = loc1.getZ() > loc2.getZ() ? (int) loc2.getZ() : (int) loc1.getZ();
+        if (lastLoc1 != loc1 || lastLoc2 != loc2) {
+            lastLoc1 = loc1;
+            lastLoc2 = loc2;
+            int x1 = loc1.getX() > loc2.getX() ? (int) loc2.getX() : (int) loc1.getX();
+            int y1 = loc1.getY() > loc2.getY() ? (int) loc2.getY() : (int) loc1.getY();
+            int z1 = loc1.getZ() > loc2.getZ() ? (int) loc2.getZ() : (int) loc1.getZ();
 
-        int x2 = ((int) loc1.getX()) == x1 ? (int) loc2.getX() : (int) loc1.getX();
-        int y2 = ((int) loc1.getY()) == y1 ? (int) loc2.getY() : (int) loc1.getY();
-        int z2 = ((int) loc1.getZ()) == z1 ? (int) loc2.getZ() : (int) loc1.getZ();
-        long size = 0;
-        for (int x = x1; x <= x2; x++) {
-            for (int y = y1; y <= y2; y++) {
-                for (int z = z1; z <= z2; z++) {
-                    size++;
+            int x2 = ((int) loc1.getX()) == x1 ? (int) loc2.getX() : (int) loc1.getX();
+            int y2 = ((int) loc1.getY()) == y1 ? (int) loc2.getY() : (int) loc1.getY();
+            int z2 = ((int) loc1.getZ()) == z1 ? (int) loc2.getZ() : (int) loc1.getZ();
+            long size = 0;
+            for (int x = x1; x <= x2; x++) {
+                for (int y = y1; y <= y2; y++) {
+                    for (int z = z1; z <= z2; z++) {
+                        size++;
+                    }
                 }
             }
-        }
-        return size;
+            cachedSize = size;
+            return size;
+        } else return cachedSize;
     }
 }
