@@ -306,10 +306,9 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
         CuboidRegion reg = (CuboidRegion) regionSelection.get(player.getUniqueId());
         assert reg.getLocation() != null;
         assert reg.getLocation2() != null;
-        CollectionList<Block> blocks = RegionEdit.getBlocks(reg.getLocation(), reg.getLocation2(), null, null);
         player.sendMessage(ChatColor.GREEN + "Selected region "
                 + ChatColor.YELLOW + "(" + loc2Str(reg.getLocation()) + " -> " + loc2Str(reg.getLocation2()) + ") "
-                + ChatColor.LIGHT_PURPLE + "(" + blocks.size() + " blocks)");
+                + ChatColor.LIGHT_PURPLE + "(" + reg.size() + " blocks)");
     }
 
     public static String loc2Str(Location location) {
