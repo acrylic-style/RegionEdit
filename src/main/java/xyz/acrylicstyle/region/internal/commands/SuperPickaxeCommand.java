@@ -2,6 +2,7 @@ package xyz.acrylicstyle.region.internal.commands;
 
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
+import xyz.acrylicstyle.region.RegionEditPlugin;
 import xyz.acrylicstyle.region.api.RegionEdit;
 import xyz.acrylicstyle.region.api.player.SuperPickaxeMode;
 import xyz.acrylicstyle.region.api.player.UserSession;
@@ -15,7 +16,7 @@ public class SuperPickaxeCommand extends PlayerCommandExecutor {
         if (args.length != 0) {
             if (args[0].equalsIgnoreCase("area")) {
                 if (args.length == 1) {
-                    player.sendMessage(ChatColor.RED + "/sp area <radius>");
+                    player.sendMessage(ChatColor.RED + "/" + RegionEditPlugin.COMMAND_PREFIX + "sp area <radius>");
                     return;
                 }
                 int radius = radiusCheck(player, args[1]);
@@ -28,7 +29,7 @@ public class SuperPickaxeCommand extends PlayerCommandExecutor {
                 player.sendMessage(ChatColor.GREEN + "Super pickaxe mode was set to " + ChatColor.GOLD + "single " + ChatColor.GREEN + "mode.");
             } else if (args[0].equalsIgnoreCase("drop") || args[0].equalsIgnoreCase("area+drop")) {
                 if (args.length == 1) {
-                    player.sendMessage(ChatColor.RED + "/sp drop <radius>");
+                    player.sendMessage(ChatColor.RED + "/" + RegionEditPlugin.COMMAND_PREFIX + "sp drop <radius>");
                     return;
                 }
                 int radius = radiusCheck(player, args[1]);
@@ -41,13 +42,13 @@ public class SuperPickaxeCommand extends PlayerCommandExecutor {
                 player.sendMessage(ChatColor.GREEN + "Turned off super pickaxe.");
             } else {
                 player.sendMessage(ChatColor.LIGHT_PURPLE + "Super Pickaxe commands:");
-                player.sendMessage(ChatColor.GREEN + "/sp " + ChatColor.GOLD + "area " + ChatColor.YELLOW + "<radius> "
+                player.sendMessage(ChatColor.GREEN + "/" + RegionEditPlugin.COMMAND_PREFIX + "sp " + ChatColor.GOLD + "area " + ChatColor.YELLOW + "<radius> "
                         + ChatColor.GRAY + "- " + ChatColor.AQUA + "Breaks blocks in specified radius. Does not drop items.");
-                player.sendMessage(ChatColor.GREEN + "/sp " + ChatColor.GOLD + "single "
+                player.sendMessage(ChatColor.GREEN + "/" + RegionEditPlugin.COMMAND_PREFIX + "sp " + ChatColor.GOLD + "single "
                         + ChatColor.GRAY + "- " + ChatColor.AQUA + "Breaks single block, and drops item.");
-                player.sendMessage(ChatColor.GREEN + "/sp " + ChatColor.GOLD + "drop " + ChatColor.YELLOW + "<radius> "
+                player.sendMessage(ChatColor.GREEN + "/" + RegionEditPlugin.COMMAND_PREFIX + "sp " + ChatColor.GOLD + "drop " + ChatColor.YELLOW + "<radius> "
                         + ChatColor.GRAY + "- " + ChatColor.AQUA + "Similar to area mode, but it also drops the items.");
-                player.sendMessage(ChatColor.GREEN + "/sp " + ChatColor.GOLD + "off "
+                player.sendMessage(ChatColor.GREEN + "/" + RegionEditPlugin.COMMAND_PREFIX + "sp " + ChatColor.GOLD + "off "
                         + ChatColor.GRAY + "- " + ChatColor.AQUA + "Turn off super pickaxe.");
             }
             return;

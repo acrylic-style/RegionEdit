@@ -1,5 +1,6 @@
 package xyz.acrylicstyle.region.api;
 
+import net.querz.nbt.tag.CompoundTag;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -12,6 +13,8 @@ import org.jetbrains.annotations.Nullable;
 import util.CollectionList;
 import xyz.acrylicstyle.region.api.manager.HistoryManager;
 import xyz.acrylicstyle.region.api.player.UserSession;
+import xyz.acrylicstyle.region.api.schematic.Schematic;
+import xyz.acrylicstyle.region.api.schematic.SchematicFormat;
 import xyz.acrylicstyle.tomeito_api.utils.Callback;
 
 import java.util.Map;
@@ -138,6 +141,9 @@ public interface RegionEdit extends Plugin {
         }
         return blocks;
     }
+
+    @NotNull
+    Schematic createSchematic(@NotNull SchematicFormat format, @NotNull CompoundTag tag);
 
     @NotNull
     Material getWandItem();

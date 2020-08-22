@@ -11,7 +11,7 @@ public class LimitCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender player, Command command, String label, String[] args) {
         if (args.length == 0 || !TypeUtil.isInt(args[0])) {
-            player.sendMessage(ChatColor.LIGHT_PURPLE + "Usage: /limit <number>");
+            player.sendMessage(ChatColor.LIGHT_PURPLE + "Usage: /" + RegionEditPlugin.COMMAND_PREFIX + "limit <number>");
             player.sendMessage(ChatColor.YELLOW + "Limits blocks per ticks.");
             player.sendMessage(ChatColor.GREEN + "Current limit is " + ChatColor.RED + RegionEditPlugin.blocksPerTick + ChatColor.GREEN + ".");
             return true;
@@ -19,7 +19,7 @@ public class LimitCommand implements CommandExecutor {
         int blocks = Integer.parseInt(args[0]);
         if (blocks <= 0) {
             player.sendMessage(ChatColor.RED + "Error: Number cannot be lower than 1.");
-            player.sendMessage(ChatColor.LIGHT_PURPLE + "Usage: /limit <number>");
+            player.sendMessage(ChatColor.LIGHT_PURPLE + "Usage: /" + RegionEditPlugin.COMMAND_PREFIX + "limit <number>");
             player.sendMessage(ChatColor.YELLOW + "Limits blocks per ticks.");
             return true;
         }

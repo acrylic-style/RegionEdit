@@ -17,7 +17,7 @@ public class DrainCommand extends PlayerCommandExecutor {
         BlockType type = BlockType.WATER;
         if (args.length != 0) {
             if (!TypeUtil.isInt(args[0])) {
-                player.sendMessage(ChatColor.LIGHT_PURPLE + "//drain [radius: 10] [lava/kelp/seagrass]");
+                player.sendMessage(ChatColor.LIGHT_PURPLE + "/" + RegionEditPlugin.COMMAND_PREFIX + "drain [radius: 10] [lava/kelp/seagrass]");
                 player.sendMessage(ChatColor.YELLOW + "Drains water/lava near you.");
                 return;
             }

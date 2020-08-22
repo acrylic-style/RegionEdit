@@ -6,7 +6,7 @@
 
     <groupId>xyz.acrylicstyle</groupId>
     <artifactId>RegionEdit</artifactId>
-    <version>0.1.16</version>
+    <version>0.1.17</version>
     <build>
         <finalName>RegionEdit</finalName>
         <plugins>
@@ -29,9 +29,6 @@
                         <goals>
                             <goal>shade</goal>
                         </goals>
-                        <configuration>
-                            <minimizeJar>true</minimizeJar>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
@@ -59,6 +56,10 @@
             <id>spigot-repo</id>
             <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
         </repository>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
     </repositories>
     <dependencies>
         <dependency>
@@ -83,6 +84,21 @@
             <groupId>xyz.acrylicstyle</groupId>
             <artifactId>minecraft-util</artifactId>
             <version>0.0.5</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.Querz</groupId>
+            <artifactId>NBT</artifactId>
+            <version>5.5</version>
+        </dependency>
+        <dependency>
+            <groupId>xyz.acrylicstyle</groupId>
+            <artifactId>NMSAPI-abstract</artifactId>
+            <version>0.1.47d</version>
+        </dependency>
+        <dependency>
+            <groupId>xyz.acrylicstyle</groupId>
+            <artifactId>NMSAPI-1.8.8</artifactId>
+            <version>0.1.40</version>
         </dependency>
     </dependencies>
 </project>

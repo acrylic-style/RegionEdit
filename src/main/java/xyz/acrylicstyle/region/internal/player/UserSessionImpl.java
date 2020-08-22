@@ -10,6 +10,7 @@ import util.ICollectionList;
 import util.Validate;
 import xyz.acrylicstyle.mcutil.lang.MCVersion;
 import xyz.acrylicstyle.region.RegionEditPlugin;
+import xyz.acrylicstyle.region.api.block.state.BlockState;
 import xyz.acrylicstyle.region.api.exception.RegionEditException;
 import xyz.acrylicstyle.region.api.player.SuperPickaxeMode;
 import xyz.acrylicstyle.region.api.player.UserSession;
@@ -23,7 +24,7 @@ import xyz.acrylicstyle.tomeito_api.utils.Log;
 import java.util.Objects;
 import java.util.UUID;
 
-public class UserSessionImpl implements UserSession {
+public final class UserSessionImpl implements UserSession {
     private final RegionEditPlugin plugin;
     private final UUID uuid;
 
@@ -157,6 +158,7 @@ public class UserSessionImpl implements UserSession {
 
     @Override
     public int getProtocolVersion() {
+        if (protocolVersion != 1) return protocolVersion;
         Player player = getPlayer();
         if (player == null) return protocolVersion;
         NMSAPI ep = NMSAPI.getEmptyNMSAPI(OBCAPI.getEmptyOBCAPI(player, "entity.CraftPlayer").getHandle(), "EntityPlayer");
@@ -168,14 +170,22 @@ public class UserSessionImpl implements UserSession {
 
     @Override
     public @NotNull MCVersion getMinecraftVersion() {
-        CollectionList<MCVersion> list = ICollectionList.asList(MCVersion.getByProtocolVersion(protocolVersion));
+        CollectionList<MCVersion> list = ICollectionList.asList(MCVersion.getByProtocolVersion(getProtocolVersion()));
         return list.filter(v -> !v.isSnapshot()).size() == 0 // if non-snapshot version wasn't found
                 ? Objects.requireNonNull(list.first()) // return the last version anyway
-                : Objects.requireNonNull(list.filter(v -> !v.isSnapshot()).first()); // return non-snapshot version instead
+                : Objects.requireNonNull(list.filter(v -> !v.isSnapshot()).first()); // or return non-snapshot version if any
     }
 
     @Override
     public @NotNull String getCUIChannel() {
         return getMinecraftVersion().isModern() ? RegionEditPlugin.CUI : RegionEditPlugin.CUI_LEGACY;
     }
+
+    private CollectionList<BlockState> clipboard = null;
+
+    @Override
+    public @Nullable CollectionList<BlockState> getClipboard() { return clipboard; }
+
+    @Override
+    public void setClipboard(@Nullable CollectionList<BlockState> blocks) { this.clipboard = blocks; }
 }

@@ -65,17 +65,17 @@ public class Blocks {
         return (Material) Ref.getClass(craftBlockData.getClass()).getMethod("getMaterial").invokeObj(craftBlockData);
     }
 
-    public static void setBlockNew(World world, int x, int y, int z, RegionBlockData blockData) {
+    public static void setBlockNew(World world, int x, int y, int z, @Nullable RegionBlockData blockData) {
         org.bukkit.Chunk chunk = world.getBlockAt(x, y, z).getChunk();
         try {
-            Chunk.wrap(chunk).setType(Reflection.newRawBlockPosition(x, y, z), blockData.getHandle().getClass().getMethod("getState").invoke(blockData.getHandle()), false);
+            Chunk.wrap(chunk).setType(Reflection.newRawBlockPosition(x, y, z), blockData == null ? null : blockData.getHandle().getClass().getMethod("getState").invoke(blockData.getHandle()), false);
         } catch (ReflectiveOperationException e) {
             e.printStackTrace();
         }
     }
 
     @SuppressWarnings("deprecation")
-    public static void setBlock(World world, int x, int y, int z, Material material, byte data, RegionBlockData blockData) {
+    public static void setBlock(World world, int x, int y, int z, Material material, byte data, @Nullable RegionBlockData blockData) {
         if (Compatibility.checkChunkSection()) {
             if (Compatibility.checkBlockData() && blockData != null) {
                 setBlockOld(world, x, y, z, getCombinedId(blockData), (byte) 0);

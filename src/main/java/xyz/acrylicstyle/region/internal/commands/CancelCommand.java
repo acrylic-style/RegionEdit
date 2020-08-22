@@ -44,7 +44,7 @@ public class CancelCommand extends PlayerCommandExecutor {
             return;
         }
         if (!TypeUtil.isInt(args[0])) {
-            player.sendMessage(ChatColor.LIGHT_PURPLE + "Usage: /cancel [task id / all]");
+            player.sendMessage(ChatColor.LIGHT_PURPLE + "Usage: /" + RegionEditPlugin.COMMAND_PREFIX + "cancel [task id / all]");
             player.sendMessage(ChatColor.YELLOW + "Cancels the operation.");
             return;
         }

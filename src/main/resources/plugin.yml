@@ -1,14 +1,14 @@
 name: RegionEdit
 main: xyz.acrylicstyle.region.RegionEditPlugin
-version: 0.1.16
+version: 0.1.17
 author: acrylic-style
 api-version: "1.13" # we do not want to use legacy material on 1.13+
 depend:
   - TomeitoLib
 commands:
-  sel:
+  "/sel":
     description: "Clears region selection."
-    aliases: ["/sel", ";"]
+    aliases: ["sel", ";"]
   "/wand":
     description: "gives player a RegionEdit wand"
     permission: regionedit.wand
@@ -99,4 +99,13 @@ commands:
     aliases: ["/drawselection", "drawsel"]
     description: "Toggles draw selection mode"
     permission: regionedit.drawsel
+    permission-message: "You don't have permission to do that."
+  "/schem":
+    aliases: ["/schematic"]
+    description: "Manages schematics."
+    permission: regionedit.schem
+    permission-message: "You don't have permission to do that."
+  "/paste":
+    description: "Pastes blocks in the clipboard."
+    permission: regionedit.paste
     permission-message: "You don't have permission to do that."

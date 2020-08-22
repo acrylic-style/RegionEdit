@@ -22,7 +22,7 @@ public class ReplaceCommand extends PlayerCommandExecutor {
         }
         if (args.length < 2) {
             player.sendMessage(ChatColor.RED + "Error: Not enough arguments.");
-            player.sendMessage(ChatColor.LIGHT_PURPLE + "Usage: /replace <before> <after>");
+            player.sendMessage(ChatColor.LIGHT_PURPLE + "Usage: /" + RegionEditPlugin.COMMAND_PREFIX + "replace <before> <after>");
             player.sendMessage(ChatColor.YELLOW + "Replace blocks.");
             return;
         }
@@ -30,13 +30,13 @@ public class ReplaceCommand extends PlayerCommandExecutor {
         Map.Entry<Material, Byte> entry2 = RegionEdit.getInstance().resolveMaterial(args[1]);
         if (entry1 == null) {
             player.sendMessage(ChatColor.RED + "Error: Invalid block #1: " + args[0].toLowerCase());
-            player.sendMessage(ChatColor.LIGHT_PURPLE + "Usage: /replace <before> <after>");
+            player.sendMessage(ChatColor.LIGHT_PURPLE + "Usage: /" + RegionEditPlugin.COMMAND_PREFIX + "replace <before> <after>");
             player.sendMessage(ChatColor.YELLOW + "Replace blocks.");
             return;
         }
         if (entry2 == null) {
             player.sendMessage(ChatColor.RED + "Error: Invalid block #2: " + args[1].toLowerCase());
-            player.sendMessage(ChatColor.LIGHT_PURPLE + "Usage: /replace <before> <after>");
+            player.sendMessage(ChatColor.LIGHT_PURPLE + "Usage: /" + RegionEditPlugin.COMMAND_PREFIX + "replace <before> <after>");
             player.sendMessage(ChatColor.YELLOW + "Replace blocks.");
             return;
         }

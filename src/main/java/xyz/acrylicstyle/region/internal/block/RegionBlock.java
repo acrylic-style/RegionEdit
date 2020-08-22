@@ -10,7 +10,6 @@ import xyz.acrylicstyle.region.api.block.Block;
 import xyz.acrylicstyle.region.api.block.BlockData;
 import xyz.acrylicstyle.region.internal.utils.Compatibility;
 import xyz.acrylicstyle.region.internal.utils.Reflection;
-import xyz.acrylicstyle.tomeito_api.utils.Log;
 
 import java.lang.reflect.InvocationTargetException;
 
@@ -104,7 +103,7 @@ public class RegionBlock implements Block, Cloneable {
     @SuppressWarnings("deprecation")
     public void setTypeAndData(@NotNull Material material, byte b, boolean applyPhysics) {
         if (Compatibility.checkBlockData()) return;
-        Log.info("Using legacy method");
+        // Log.info("Using legacy method");
         location.getBlock().setType(material, applyPhysics);
         location.getBlock().setData(b, applyPhysics);
     }

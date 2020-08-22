@@ -19,14 +19,14 @@ public class HelpCommand implements CommandExecutor {
         int page = 1;
         if (pageStr != null) {
             if (!TypeUtil.isInt(pageStr)) {
-                sender.sendMessage(ChatColor.LIGHT_PURPLE + "//help [page]");
+                sender.sendMessage(ChatColor.LIGHT_PURPLE + "/" + RegionEditPlugin.COMMAND_PREFIX + "help [page]");
                 sender.sendMessage(ChatColor.YELLOW + "Shows all RegionEdit commands.");
                 return;
             }
             page = Integer.parseInt(pageStr);
             if (page < 1) {
                 sender.sendMessage(ChatColor.RED + "Error: Help Page cannot be lower than 1.");
-                sender.sendMessage(ChatColor.LIGHT_PURPLE + "//help [page]");
+                sender.sendMessage(ChatColor.LIGHT_PURPLE + "/" + RegionEditPlugin.COMMAND_PREFIX + "help [page]");
                 sender.sendMessage(ChatColor.YELLOW + "Shows all RegionEdit commands.");
                 return;
             }

@@ -1,5 +1,6 @@
 package xyz.acrylicstyle.region;
 
+import net.querz.nbt.tag.CompoundTag;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -36,6 +37,8 @@ import xyz.acrylicstyle.region.api.player.SuperPickaxeMode;
 import xyz.acrylicstyle.region.api.player.UserSession;
 import xyz.acrylicstyle.region.api.region.CuboidRegion;
 import xyz.acrylicstyle.region.api.region.RegionSelection;
+import xyz.acrylicstyle.region.api.schematic.Schematic;
+import xyz.acrylicstyle.region.api.schematic.SchematicFormat;
 import xyz.acrylicstyle.region.api.selection.SelectionMode;
 import xyz.acrylicstyle.region.internal.block.Blocks;
 import xyz.acrylicstyle.region.internal.block.RegionBlock;
@@ -53,11 +56,13 @@ import xyz.acrylicstyle.region.internal.commands.HPos1Command;
 import xyz.acrylicstyle.region.internal.commands.HPos2Command;
 import xyz.acrylicstyle.region.internal.commands.HelpCommand;
 import xyz.acrylicstyle.region.internal.commands.LimitCommand;
+import xyz.acrylicstyle.region.internal.commands.PasteCommand;
 import xyz.acrylicstyle.region.internal.commands.Pos1Command;
 import xyz.acrylicstyle.region.internal.commands.Pos2Command;
 import xyz.acrylicstyle.region.internal.commands.RedoCommand;
 import xyz.acrylicstyle.region.internal.commands.RegionEditCommand;
 import xyz.acrylicstyle.region.internal.commands.ReplaceCommand;
+import xyz.acrylicstyle.region.internal.commands.SchematicCommand;
 import xyz.acrylicstyle.region.internal.commands.SelectionCommand;
 import xyz.acrylicstyle.region.internal.commands.SetCommand;
 import xyz.acrylicstyle.region.internal.commands.SuperPickaxeCommand;
@@ -68,6 +73,8 @@ import xyz.acrylicstyle.region.internal.listener.CUIChannelListener;
 import xyz.acrylicstyle.region.internal.manager.HistoryManagerImpl;
 import xyz.acrylicstyle.region.internal.nms.Chunk;
 import xyz.acrylicstyle.region.internal.player.UserSessionImpl;
+import xyz.acrylicstyle.region.internal.schematic.SchematicLegacy;
+import xyz.acrylicstyle.region.internal.schematic.SchematicNew;
 import xyz.acrylicstyle.region.internal.tabCompleters.BlocksTabCompleter;
 import xyz.acrylicstyle.region.internal.tabCompleters.DrainTabCompleter;
 import xyz.acrylicstyle.region.internal.tabCompleters.RegionEditTabCompleter;
@@ -91,6 +98,7 @@ import java.util.function.Function;
  * Internal usage only
  */
 public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener {
+    public static final String COMMAND_PREFIX = "/";
     public static final String CUI = "worldedit:cui";
     public static final String CUI_LEGACY = "WECUI";
 
@@ -119,62 +127,66 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
         Bukkit.getPluginManager().registerEvents(this, this);
         Log.info("Registering commands");
         TomeitoAPI.registerCommand("regionedit", new RegionEditCommand());
-        TomeitoAPI.registerCommand("/wand", new WandCommand());
-        TomeitoAPI.registerCommand("/distr", new DistributionCommand());
-        TomeitoAPI.registerCommand("/help", new HelpCommand());
-        TomeitoAPI.registerCommand("sel", new SelectionCommand());
-        TomeitoAPI.registerCommand("/set", new SetCommand());
-        TomeitoAPI.registerCommand("/limit", new LimitCommand());
-        TomeitoAPI.registerCommand("/pos1", new Pos1Command());
-        TomeitoAPI.registerCommand("/pos2", new Pos2Command());
-        TomeitoAPI.registerCommand("/replace", new ReplaceCommand());
-        TomeitoAPI.registerCommand("/hpos1", new HPos1Command());
-        TomeitoAPI.registerCommand("/hpos2", new HPos2Command());
-        TomeitoAPI.registerCommand("/cut", new CutCommand());
-        TomeitoAPI.registerCommand("/undo", new UndoCommand());
-        TomeitoAPI.registerCommand("/redo", new RedoCommand());
-        TomeitoAPI.registerCommand("/cancel", new CancelCommand());
-        TomeitoAPI.registerCommand("/drain", new DrainCommand());
-        TomeitoAPI.registerCommand("/expand", new ExpandCommand());
-        TomeitoAPI.registerCommand("/fast", new FastCommand());
-        TomeitoAPI.registerCommand("/unstuck", new UnstuckCommand());
-        TomeitoAPI.registerCommand("/chunk", new ChunkCommand());
-        TomeitoAPI.registerCommand("/drawsel", new DrawSelCommand());
-        TomeitoAPI.registerCommand("/sp", new SuperPickaxeCommand());
+        TomeitoAPI.registerCommand(COMMAND_PREFIX + "wand", new WandCommand());
+        TomeitoAPI.registerCommand(COMMAND_PREFIX + "distr", new DistributionCommand());
+        TomeitoAPI.registerCommand(COMMAND_PREFIX + "help", new HelpCommand());
+        TomeitoAPI.registerCommand(COMMAND_PREFIX + "sel", new SelectionCommand());
+        TomeitoAPI.registerCommand(COMMAND_PREFIX + "set", new SetCommand());
+        TomeitoAPI.registerCommand(COMMAND_PREFIX + "limit", new LimitCommand());
+        TomeitoAPI.registerCommand(COMMAND_PREFIX + "pos1", new Pos1Command());
+        TomeitoAPI.registerCommand(COMMAND_PREFIX + "pos2", new Pos2Command());
+        TomeitoAPI.registerCommand(COMMAND_PREFIX + "replace", new ReplaceCommand());
+        TomeitoAPI.registerCommand(COMMAND_PREFIX + "hpos1", new HPos1Command());
+        TomeitoAPI.registerCommand(COMMAND_PREFIX + "hpos2", new HPos2Command());
+        TomeitoAPI.registerCommand(COMMAND_PREFIX + "cut", new CutCommand());
+        TomeitoAPI.registerCommand(COMMAND_PREFIX + "undo", new UndoCommand());
+        TomeitoAPI.registerCommand(COMMAND_PREFIX + "redo", new RedoCommand());
+        TomeitoAPI.registerCommand(COMMAND_PREFIX + "cancel", new CancelCommand());
+        TomeitoAPI.registerCommand(COMMAND_PREFIX + "drain", new DrainCommand());
+        TomeitoAPI.registerCommand(COMMAND_PREFIX + "expand", new ExpandCommand());
+        TomeitoAPI.registerCommand(COMMAND_PREFIX + "fast", new FastCommand());
+        TomeitoAPI.registerCommand(COMMAND_PREFIX + "unstuck", new UnstuckCommand());
+        TomeitoAPI.registerCommand(COMMAND_PREFIX + "chunk", new ChunkCommand());
+        TomeitoAPI.registerCommand(COMMAND_PREFIX + "drawsel", new DrawSelCommand());
+        TomeitoAPI.registerCommand(COMMAND_PREFIX + "sp", new SuperPickaxeCommand());
+        TomeitoAPI.registerCommand(COMMAND_PREFIX + "schem", new SchematicCommand());
+        TomeitoAPI.registerCommand(COMMAND_PREFIX + "paste", new PasteCommand());
         Log.info("Registering tab completers");
         Bukkit.getPluginCommand("regionedit").setTabCompleter(new RegionEditTabCompleter());
-        Bukkit.getPluginCommand("/set").setTabCompleter(new BlocksTabCompleter());
-        Bukkit.getPluginCommand("/replace").setTabCompleter(new ReplaceBlocksTabCompleter());
-        Bukkit.getPluginCommand("/drain").setTabCompleter(new DrainTabCompleter());
+        Bukkit.getPluginCommand(COMMAND_PREFIX + "set").setTabCompleter(new BlocksTabCompleter());
+        Bukkit.getPluginCommand(COMMAND_PREFIX + "replace").setTabCompleter(new ReplaceBlocksTabCompleter());
+        Bukkit.getPluginCommand(COMMAND_PREFIX + "drain").setTabCompleter(new DrainTabCompleter());
         Log.info("Registering command help");
         commandDescriptionManager.add("//help", new CommandDescription("//help [page]", "regionedit.help", "Shows all RegionEdit commands."));
         commandDescriptionManager.add("/re", new CommandDescription("/re <help/version/reload/commands/compatibility>",
                 Arrays.asList("regionedit.compatibility", "regionedit.reload", "regionedit.help"),
                 "Displays information about RegionEdit."));
-        commandDescriptionManager.add("/;", new CommandDescription("//sel [cuboid]", "", "Clears selection or switches selection mode."));
-        commandDescriptionManager.add("//sel", new CommandDescription("//sel [cuboid]", "", "Clears selection or switches selection mode."));
-        commandDescriptionManager.add("//limit", new CommandDescription("//limit [number]", "regionedit.limit", "Limits blocks per ticks"));
-        commandDescriptionManager.add("//pos1", new CommandDescription("//pos1", "regionedit.selection", "Set position 1 at player's location."));
-        commandDescriptionManager.add("//pos2", new CommandDescription("//pos2", "regionedit.selection", "Set position 2 at player's location."));
-        commandDescriptionManager.add("//hpos1", new CommandDescription("//hpos1", "regionedit.selection", "Set position 1 at block player's is looking at."));
-        commandDescriptionManager.add("//hpos2", new CommandDescription("//hpos2", "regionedit.selection", "Set position 2 at block player's is looking at."));
-        commandDescriptionManager.add("//cut", new CommandDescription("//cut", "regionedit.cut", "Removes blocks at specified region."));
-        commandDescriptionManager.add("//replace", new CommandDescription("//replace [before] [after]", "regionedit.replace", "Replace blocks at specified region."));
-        commandDescriptionManager.add("//set", new CommandDescription("//set [block]", "regionedit.set", "Places blocks at specified region."));
-        commandDescriptionManager.add("//undo", new CommandDescription("//undo", "regionedit.undo", "Rollbacks action."));
-        commandDescriptionManager.add("//redo", new CommandDescription("//redo", "regionedit.redo", "Rollbacks undo action."));
-        commandDescriptionManager.add("//drain", new CommandDescription("//drain [radius] [lava]", "regionedit.drain", "Drains water near you."));
-        commandDescriptionManager.add("//cancel", new CommandDescription("//cancel [task id/all]",
+        commandDescriptionManager.add("/" + COMMAND_PREFIX + ";", new CommandDescription("/" + COMMAND_PREFIX + "sel [cuboid]", "", "Clears selection or switches selection mode."));
+        commandDescriptionManager.add("/" + COMMAND_PREFIX + "sel", new CommandDescription("/" + COMMAND_PREFIX + "sel [cuboid]", "", "Clears selection or switches selection mode."));
+        commandDescriptionManager.add("/" + COMMAND_PREFIX + "limit", new CommandDescription("/" + COMMAND_PREFIX + "limit [number]", "regionedit.limit", "Limits blocks per ticks"));
+        commandDescriptionManager.add("/" + COMMAND_PREFIX + "pos1", new CommandDescription("/" + COMMAND_PREFIX + "pos1", "regionedit.selection", "Set position 1 at player's location."));
+        commandDescriptionManager.add("/" + COMMAND_PREFIX + "pos2", new CommandDescription("/" + COMMAND_PREFIX + "pos2", "regionedit.selection", "Set position 2 at player's location."));
+        commandDescriptionManager.add("/" + COMMAND_PREFIX + "hpos1", new CommandDescription("/" + COMMAND_PREFIX + "hpos1", "regionedit.selection", "Set position 1 at block player's is looking at."));
+        commandDescriptionManager.add("/" + COMMAND_PREFIX + "hpos2", new CommandDescription("/" + COMMAND_PREFIX + "hpos2", "regionedit.selection", "Set position 2 at block player's is looking at."));
+        commandDescriptionManager.add("/" + COMMAND_PREFIX + "cut", new CommandDescription("/" + COMMAND_PREFIX + "cut", "regionedit.cut", "Removes blocks at specified region."));
+        commandDescriptionManager.add("/" + COMMAND_PREFIX + "replace", new CommandDescription("/" + COMMAND_PREFIX + "replace [before] [after]", "regionedit.replace", "Replace blocks at specified region."));
+        commandDescriptionManager.add("/" + COMMAND_PREFIX + "set", new CommandDescription("/" + COMMAND_PREFIX + "set [block]", "regionedit.set", "Places blocks at specified region."));
+        commandDescriptionManager.add("/" + COMMAND_PREFIX + "undo", new CommandDescription("/" + COMMAND_PREFIX + "undo", "regionedit.undo", "Rollbacks action."));
+        commandDescriptionManager.add("/" + COMMAND_PREFIX + "redo", new CommandDescription("/" + COMMAND_PREFIX + "redo", "regionedit.redo", "Rollbacks undo action."));
+        commandDescriptionManager.add("/" + COMMAND_PREFIX + "drain", new CommandDescription("/" + COMMAND_PREFIX + "drain [radius] [lava]", "regionedit.drain", "Drains water near you."));
+        commandDescriptionManager.add("/" + COMMAND_PREFIX + "cancel", new CommandDescription("/" + COMMAND_PREFIX + "cancel [task id/all]",
                 Arrays.asList("regionedit.cancel", "regionedit.cancel.a -> self", "regionedit.cancel.b -> others", "regionedit.cancel.c -> all"),
                 "Cancels current operation."));
-        commandDescriptionManager.add("//expand", new CommandDescription("//expand <<<number> <up/down/east/south/west/north>>/<vert>>", "regionedit.expand", "Expands selection area by <number>."));
-        commandDescriptionManager.add("//fast", new CommandDescription("//fast", "regionedit.fast", "Toggles fast mode.", "Fast mode disables some physics on operation."));
-        commandDescriptionManager.add("//unstuck", new CommandDescription("//unstuck", "regionedit.unstuck", "Get out of stuck."));
-        commandDescriptionManager.add("//chunk", new CommandDescription("//chunk", "regionedit.selection", "Selects an entire chunk."));
-        commandDescriptionManager.add("//wand", new CommandDescription("//wand", "regionedit.wand", "Gives player a wand (item) to get started with RegionEdit."));
-        commandDescriptionManager.add("//distr", new CommandDescription("//distr [--exclude=blocks,separated,by,comma]", "regionedit.distr", "Shows block distribution."));
-        commandDescriptionManager.add("//", new CommandDescription("/sp <area <radius>/single/drop <radius>/off>", "regionedit.superpickaxe", "Toggles super pickaxe mode."));
-        commandDescriptionManager.add("//drawsel", new CommandDescription("//drawsel", "regionedit.drawsel", "Toggles draws selection mode"));
+        commandDescriptionManager.add("/" + COMMAND_PREFIX + "expand", new CommandDescription("/" + COMMAND_PREFIX + "expand <<<number> <up/down/east/south/west/north>>/<vert>>", "regionedit.expand", "Expands selection area by <number>."));
+        commandDescriptionManager.add("/" + COMMAND_PREFIX + "fast", new CommandDescription("/" + COMMAND_PREFIX + "fast", "regionedit.fast", "Toggles fast mode.", "Fast mode disables some physics on operation."));
+        commandDescriptionManager.add("/" + COMMAND_PREFIX + "unstuck", new CommandDescription("/" + COMMAND_PREFIX + "unstuck", "regionedit.unstuck", "Get out of stuck."));
+        commandDescriptionManager.add("/" + COMMAND_PREFIX + "chunk", new CommandDescription("/" + COMMAND_PREFIX + "chunk", "regionedit.selection", "Selects an entire chunk."));
+        commandDescriptionManager.add("/" + COMMAND_PREFIX + "wand", new CommandDescription("/" + COMMAND_PREFIX + "wand", "regionedit.wand", "Gives player a wand (item) to get started with RegionEdit."));
+        commandDescriptionManager.add("/" + COMMAND_PREFIX + "distr", new CommandDescription("/" + COMMAND_PREFIX + "distr [--exclude=blocks,separated,by,comma]", "regionedit.distr", "Shows block distribution."));
+        commandDescriptionManager.add("/" + COMMAND_PREFIX + "sp", new CommandDescription("/" + COMMAND_PREFIX + "sp <area <radius>/single/drop <radius>/off>", "regionedit.superpickaxe", "Toggles super pickaxe mode."));
+        commandDescriptionManager.add("/" + COMMAND_PREFIX + "drawsel", new CommandDescription("/" + COMMAND_PREFIX + "drawsel", "regionedit.drawsel", "Toggles draws selection mode"));
+        commandDescriptionManager.add("/" + COMMAND_PREFIX + "schem", new CommandDescription("/" + COMMAND_PREFIX + "schem <load|list>", "regionedit.schem", "Manages schematics."));
+        commandDescriptionManager.add("/" + COMMAND_PREFIX + "paste", new CommandDescription("/" + COMMAND_PREFIX + "paste", "regionedit.paste", "Pastes blocks in the clipboard."));
         selectionItem = Material.getMaterial(this.getConfig().getString("selection_item", Compatibility.getGoldenAxe().name()));
         navigationItem = Material.getMaterial(this.getConfig().getString("navigation_item", "COMPASS"));
         BukkitVersion version = Compatibility.getBukkitVersion();
@@ -314,6 +326,15 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
     public static String loc2Str(Location location) {
         if (location == null) return "null";
         return String.format(ChatColor.LIGHT_PURPLE + "%d, %d, %d" + ChatColor.YELLOW, location.getBlockX(), location.getBlockY(), location.getBlockZ());
+    }
+
+    @Override
+    public @NotNull Schematic createSchematic(@NotNull SchematicFormat format, @NotNull CompoundTag tag) {
+        switch (format) {
+            case LEGACY: return new SchematicLegacy(tag);
+            case MODERN: return new SchematicNew(tag);
+            default: throw new RuntimeException(format.name() + " has missing mapping!");
+        }
     }
 
     @Override

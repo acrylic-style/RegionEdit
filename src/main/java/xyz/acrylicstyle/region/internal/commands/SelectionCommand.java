@@ -22,7 +22,7 @@ public class SelectionCommand extends PlayerCommandExecutor {
             player.sendMessage(ChatColor.YELLOW + "Left click: Position #1");
             player.sendMessage(ChatColor.YELLOW + "Right click: Position #2");
         } else {
-            player.sendMessage(ChatColor.LIGHT_PURPLE + "Usage: /sel [cuboid]");
+            player.sendMessage(ChatColor.LIGHT_PURPLE + "Usage: /" + RegionEditPlugin.COMMAND_PREFIX + "sel [cuboid]");
             player.sendMessage(ChatColor.YELLOW + "Clears the selection or switch to the other selection mode.");
         }
     }

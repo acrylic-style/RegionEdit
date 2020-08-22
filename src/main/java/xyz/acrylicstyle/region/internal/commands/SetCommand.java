@@ -22,14 +22,14 @@ public class SetCommand extends PlayerCommandExecutor {
         }
         if (args.length == 0) {
             player.sendMessage(ChatColor.RED + "Error: Not enough arguments.");
-            player.sendMessage(ChatColor.LIGHT_PURPLE + "Usage: //set <block>");
+            player.sendMessage(ChatColor.LIGHT_PURPLE + "Usage: /" + RegionEditPlugin.COMMAND_PREFIX + "set <block>");
             player.sendMessage(ChatColor.YELLOW + "Set blocks.");
             return;
         }
         Map.Entry<Material, Byte> entry = RegionEdit.getInstance().resolveMaterial(args[0]);
         if (entry == null) {
             player.sendMessage(ChatColor.RED + "Error: Invalid block: " + (args[0] + ":").split(":")[0].toLowerCase());
-            player.sendMessage(ChatColor.LIGHT_PURPLE + "Usage: //set <block>");
+            player.sendMessage(ChatColor.LIGHT_PURPLE + "Usage: /" + RegionEditPlugin.COMMAND_PREFIX + "set <block>");
             player.sendMessage(ChatColor.YELLOW + "Set blocks.");
             return;
         }

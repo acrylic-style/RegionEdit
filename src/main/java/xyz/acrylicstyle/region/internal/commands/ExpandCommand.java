@@ -28,7 +28,7 @@ public class ExpandCommand extends PlayerCommandExecutor {
             return;
         }
         if (args.length <= 1) {
-            player.sendMessage(ChatColor.LIGHT_PURPLE + "//expand <number> <up/down/east/south/west/north>");
+            player.sendMessage(ChatColor.LIGHT_PURPLE + "/" + RegionEditPlugin.COMMAND_PREFIX + "expand <number> <up/down/east/south/west/north>");
             player.sendMessage(ChatColor.YELLOW + "Expands selection area by <number>.");
             return;
         }
@@ -43,12 +43,12 @@ public class ExpandCommand extends PlayerCommandExecutor {
         }
         if (!TypeUtil.isInt(args[0])) {
             player.sendMessage(ChatColor.RED + "Error: Number must be integer.");
-            player.sendMessage(ChatColor.LIGHT_PURPLE + "//expand <number> <up/down/east/south/west/north>");
+            player.sendMessage(ChatColor.LIGHT_PURPLE + "/" + RegionEditPlugin.COMMAND_PREFIX + "expand <number> <up/down/east/south/west/north>");
             player.sendMessage(ChatColor.YELLOW + "Expands selection area by <number>.");
             return;
         }
         if (!Arrays.asList("up", "down", "east", "south", "west", "north").contains(args[1].toLowerCase())) {
-            player.sendMessage(ChatColor.LIGHT_PURPLE + "//expand <number> <up/down/east/south/west/north>");
+            player.sendMessage(ChatColor.LIGHT_PURPLE + "/" + RegionEditPlugin.COMMAND_PREFIX + "expand <number> <up/down/east/south/west/north>");
             player.sendMessage(ChatColor.YELLOW + "Expands selection area by <number>.");
             return;
         }
