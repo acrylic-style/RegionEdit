@@ -112,7 +112,11 @@ public class UserSessionImpl implements UserSession {
 
     @Override
     public void handleCUIInitialization() {
-        Log.info("Enabling CUI for " + uuid.toString());
+        handleCUIInitialization(false);
+    }
+
+    public void handleCUIInitialization(boolean log) {
+        if (log) Log.info("Enabling CUI for " + uuid.toString());
         this.cuiSupport = true;
     }
 
@@ -136,11 +140,8 @@ public class UserSessionImpl implements UserSession {
         if (player == null) return;
         CuboidRegion region = Objects.requireNonNull(getCuboidRegion());
         player.sendPluginMessage(plugin, getCUIChannel(), "s|cuboid".getBytes());
-        if (!region.isValid()) return;
-        assert region.getLocation() != null;
-        assert region.getLocation2() != null;
-        player.sendPluginMessage(plugin, getCUIChannel(), getPoint(0, region.getLocation(), 1).getBytes());
-        player.sendPluginMessage(plugin, getCUIChannel(), getPoint(1, region.getLocation2(), region.size()).getBytes());
+        if (region.getLocation() != null) player.sendPluginMessage(plugin, getCUIChannel(), getPoint(0, region.getLocation(), 1).getBytes());
+        if (region.getLocation2() != null) player.sendPluginMessage(plugin, getCUIChannel(), getPoint(1, region.getLocation2(), region.getLocation() == null ? 1 : region.size()).getBytes());
     }
 
     @Override

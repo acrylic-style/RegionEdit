@@ -5,6 +5,7 @@ import org.bukkit.plugin.messaging.PluginMessageListener;
 import xyz.acrylicstyle.region.RegionEditPlugin;
 import xyz.acrylicstyle.region.api.RegionEdit;
 import xyz.acrylicstyle.region.api.player.UserSession;
+import xyz.acrylicstyle.tomeito_api.utils.Log;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -19,6 +20,7 @@ public class CUIChannelListener implements PluginMessageListener {
     @Override
     public void onPluginMessageReceived(String channel, Player player, byte[] message) {
         UserSession session = plugin.getUserSession(player);
+        Log.as("RegionEdit").info("Enabling CUI support for " + player.getName() + " (Handshake received)");
         session.handleCUIInitialization();
         session.sendCUIEvent();
     }
