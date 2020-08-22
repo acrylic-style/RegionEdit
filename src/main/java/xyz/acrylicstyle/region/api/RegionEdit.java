@@ -160,5 +160,6 @@ public interface RegionEdit extends Plugin {
 
     void setBlocksPerTick(int blocks);
 
+    @NotNull
     HistoryManager getHistoryManager();
 }

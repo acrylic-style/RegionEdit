@@ -338,7 +338,7 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
             } else {
                 data = 0;
             }
-            return new AbstractMap.SimpleImmutableEntry<>(Blocks.getMaterialById(Integer.parseInt(id)), (byte) data);
+            return new AbstractMap.SimpleImmutableEntry<>(Blocks.getMaterialById(Integer.parseInt(arr[0])), (byte) data);
         } else {
             CollectionList<String> materials = ICollectionList.asList(Material.values()).filter(Material::isBlock).map(Enum::name).map((Function<String, String>) String::toLowerCase);
             if (!materials.contains(id.split(":")[0].toLowerCase())) {
@@ -368,7 +368,7 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
     }
 
     @Override
-    public HistoryManagerImpl getHistoryManager() { return historyManager; }
+    public @NotNull HistoryManagerImpl getHistoryManager() { return historyManager; }
 
     // task id : cancelled state
     public static final AtomicInteger taskId = new AtomicInteger();
