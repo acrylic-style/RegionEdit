@@ -37,7 +37,15 @@ public class PasteCommand extends PlayerCommandExecutor {
                 blocks.add(loc, block);
             });
             player.sendMessage(ChatColor.GREEN + "Pasting clipboard... (it may take a while!)");
-            RegionEditPlugin.setBlocks(player, blocks, true);
+            try {
+                RegionEditPlugin.setBlocks(player, blocks, true);
+            } catch (OutOfMemoryError e) {
+                RegionEditPlugin.reserve = null;
+                System.gc();
+                RegionEdit.getInstance().getUserSession(player).setClipboard(null);
+                System.gc();
+                player.sendMessage(ChatColor.RED + "It looks like you tried to paste a lot of blocks. Clipboard has been cleared.");
+            }
         });
     }
 }
