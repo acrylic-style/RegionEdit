@@ -6,106 +6,106 @@ api-version: "1.13" # we do not want to use legacy material on 1.13+
 depend:
   - TomeitoLib
 commands:
-  "/sel":
+  "//sel":
     description: "Clears region selection."
     aliases: ["sel", ";"]
-  "/wand":
+  "//wand":
     description: "gives player a RegionEdit wand"
     permission: regionedit.wand
     permission-message: "You don't have permission to do that."
-  "/set":
+  "//set":
     description: ""
     permission: regionedit.set
     permission-message: "You don't have permission to do that."
-  "/cut":
+  "//cut":
     description: ""
     permission: regionedit.cut
     permission-message: "You don't have permission to do that."
-  "/replace":
+  "//replace":
     description: ""
-    aliases: ["/rep"]
+    aliases: ["//rep"]
     permission: regionedit.replace
     permission-message: "You don't have permission to do that."
-  "/limit":
+  "//limit":
     description: ""
     permission: regionedit.limit
     permission-message: "You don't have permission to do that."
-  "/drain":
+  "//drain":
     description: ""
     permission: regionedit.drain
     permission-message: "You don't have permission to do that."
-  "/pos1":
+  "//pos1":
     description: ""
     permission: regionedit.selection
     permission-message: "You don't have permission to do that."
-  "/hpos1":
+  "//hpos1":
     description: ""
     permission: regionedit.selection
     permission-message: "You don't have permission to do that."
-  "/pos2":
+  "//pos2":
     description: ""
     permission: regionedit.selection
     permission-message: "You don't have permission to do that."
-  "/hpos2":
+  "//hpos2":
     description: ""
     permission: regionedit.selection
     permission-message: "You don't have permission to do that."
-  "/expand":
+  "//expand":
     description: ""
     permission: regionedit.expand
     permission-message: "You don't have permission to do that."
-  "/chunk":
+  "//chunk":
     description: ""
     permission: regionedit.selection
     permission-message: "You don't have permission to do that."
-  "/undo":
+  "//undo":
     description: ""
     permission: regionedit.undo
     permission-message: "You don't have permission to do that."
-  "/redo":
+  "//redo":
     description: ""
     permission: regionedit.redo
     permission-message: "You don't have permission to do that."
-  "/cancel":
+  "//cancel":
     description: ""
     permission: regionedit.cancel
     permission-message: "You don't have permission to do that."
   regionedit:
     description: "RegionEdit"
-    aliases: ["/re", "re", "/regionedit", "worldedit"]
-  "/help":
+    aliases: ["/re", "re", "/regionedit", "worldedit", "//re"]
+  "//help":
     description: ""
     permission: regionedit.help
     permission-message: "You don't have permission to do that."
-  "/fast":
+  "//fast":
     description: ""
     permission: regionedit.fast
     permission-message: "You don't have permission to do that."
-  "/unstuck":
+  "//unstuck":
     description: ""
     permission: regionedit.unstuck
     permission-message: "You don't have permission to do that."
-  "/distr":
+  "//distr":
     aliases: ["/distribution"]
     description: "shows distribution of the blocks"
     permission: regionedit.distr
     permission-message: "You don't have permission to do that."
-  "/sp":
+  "//sp":
     aliases: ["/superpickaxe", "/", "sp"]
     description: "Toggles super pickaxe"
     permission: regionedit.superpickaxe
     permission-message: "You don't have permission to do that."
-  "/drawsel":
+  "//drawsel":
     aliases: ["/drawselection", "drawsel"]
     description: "Toggles draw selection mode"
     permission: regionedit.drawsel
     permission-message: "You don't have permission to do that."
-  "/schem":
+  "//schem":
     aliases: ["/schematic"]
     description: "Manages schematics."
     permission: regionedit.schem
     permission-message: "You don't have permission to do that."
-  "/paste":
+  "//paste":
     description: "Pastes blocks in the clipboard."
     permission: regionedit.paste
     permission-message: "You don't have permission to do that."

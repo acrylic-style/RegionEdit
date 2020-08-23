@@ -100,7 +100,7 @@ import java.util.function.Function;
  */
 public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener {
     public static byte[] reserve = new byte[1024*1024*256];
-    public static final String COMMAND_PREFIX = "/";
+    public static final String COMMAND_PREFIX = "//";
     public static final String CUI = "worldedit:cui";
     public static final String CUI_LEGACY = "WECUI";
 
