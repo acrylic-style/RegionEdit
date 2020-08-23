@@ -86,9 +86,14 @@ public class CuboidRegion implements RegionSelection, Cloneable {
 
     @Override
     public long getSize() {
-        if (lastLoc1 != loc1 || lastLoc2 != loc2) {
-            lastLoc1 = loc1;
-            lastLoc2 = loc2;
+        if (loc1 == null) {
+            if (loc2 == null) return 0;
+            return 1;
+        }
+        if (loc2 == null) return 1;
+        if (!loc1.equals(lastLoc1) || !loc2.equals(lastLoc2)) {
+            lastLoc1 = loc1.clone();
+            lastLoc2 = loc2.clone();
             int x1 = loc1.getX() > loc2.getX() ? (int) loc2.getX() : (int) loc1.getX();
             int y1 = loc1.getY() > loc2.getY() ? (int) loc2.getY() : (int) loc1.getY();
             int z1 = loc1.getZ() > loc2.getZ() ? (int) loc2.getZ() : (int) loc1.getZ();

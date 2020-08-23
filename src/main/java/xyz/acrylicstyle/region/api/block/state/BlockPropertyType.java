@@ -14,7 +14,6 @@ import xyz.acrylicstyle.region.api.block.state.types.EnumStairsShape;
 import java.util.function.Function;
 
 public class BlockPropertyType<T> {
-    @SuppressWarnings("unused") // it's here just to allow raw access to map
     public static final BlockPropertyType<String> STRING = new BlockPropertyType<>(String.class, Function.identity());
     public static final BlockPropertyType<Boolean> BOOLEAN = new BlockPropertyType<>(boolean.class, Boolean::parseBoolean);
     public static final BlockPropertyType<Integer> INTEGER = new BlockPropertyType<>(int.class, Integer::parseInt);

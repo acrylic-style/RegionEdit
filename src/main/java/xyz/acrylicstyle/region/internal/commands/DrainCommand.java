@@ -2,7 +2,9 @@ package xyz.acrylicstyle.region.internal.commands;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import util.CollectionList;
 import xyz.acrylicstyle.region.RegionEditPlugin;
 import xyz.acrylicstyle.region.api.RegionEdit;
 import xyz.acrylicstyle.region.internal.utils.BukkitVersion;
@@ -46,17 +48,19 @@ public class DrainCommand extends PlayerCommandExecutor {
         }
         int finalRadius = radius;
         final BlockType finalType = type;
-        RegionEdit.getNearbyBlocksAsync(player.getLocation(), finalRadius, (blocks, throwable) -> {
-            if (finalType == BlockType.LAVA) {
-                blocks = blocks.filter(block -> block.getType() == Material.LAVA || (Compatibility.checkStationary_Water() && block.getType() == Material.STATIONARY_LAVA));
-            } else if (finalType == BlockType.WATER) {
-                blocks = blocks.filter(block -> block.getType() == Material.WATER || (Compatibility.checkStationary_Water() && block.getType() == Material.STATIONARY_WATER));
-            } else if (finalType == BlockType.KELP) {
-                blocks = blocks.filter(block -> block.getType() == Material.getMaterial("KELP") || block.getType() == Material.getMaterial("KELP_PLANT"));
-            } else {
-                blocks = blocks.filter(block -> block.getType() == Material.getMaterial("SEAGRASS") || block.getType() == Material.getMaterial("TALL_SEAGRASS"));
-            }
-            RegionEdit.getInstance().getHistoryManager().resetPointer(player.getUniqueId());
+        player.sendMessage(ChatColor.GREEN + "Fetching blocks...");
+        RegionEdit.pool.execute(() -> {
+            CollectionList<Block> blocks = RegionEdit.getNearbyBlocks(player.getLocation(), finalRadius, block -> {
+                if (finalType == BlockType.LAVA) {
+                    return block.getType() == Material.LAVA || (Compatibility.checkStationary_Water() && block.getType() == Material.STATIONARY_LAVA);
+                } else if (finalType == BlockType.WATER) {
+                    return block.getType() == Material.WATER || (Compatibility.checkStationary_Water() && block.getType() == Material.STATIONARY_WATER);
+                } else if (finalType == BlockType.KELP) {
+                    return block.getType() == Material.getMaterial("KELP") || block.getType() == Material.getMaterial("KELP_PLANT");
+                } else {
+                    return block.getType() == Material.getMaterial("SEAGRASS") || block.getType() == Material.getMaterial("TALL_SEAGRASS");
+                }
+            });
             RegionEditPlugin.setBlocks(player, blocks, Material.AIR, (byte) 0);
         });
     }

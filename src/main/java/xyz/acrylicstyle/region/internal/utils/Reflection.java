@@ -10,6 +10,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -25,6 +26,8 @@ import xyz.acrylicstyle.tomeito_api.utils.ReflectionUtil;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import static xyz.acrylicstyle.region.internal.nms.NMSClasses.*;
+
 public class Reflection {
     /**
      * Returns get ItemStack in hand.<br />
@@ -37,7 +40,7 @@ public class Reflection {
             return player.getInventory().getItemInHand();
         } else {
             try {
-                return (ItemStack) ReflectionHelper.invokeMethod(player.getInventory().getClass(), player.getInventory(), "getItemInMainHand");
+                return (ItemStack) ReflectionHelper.invokeMethod(PlayerInventory.class, player.getInventory(), "getItemInMainHand");
             } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
                 throw new RuntimeException(e);
             }
@@ -53,9 +56,9 @@ public class Reflection {
     public static EquipmentSlot getHand(PlayerInteractEvent e) {
         if (Compatibility.checkPlayerInteractEvent_getHand()) {
             try {
-                return (EquipmentSlot) ReflectionHelper.invokeMethod(e.getClass(), e, "getHand");
+                return (EquipmentSlot) ReflectionHelper.invokeMethod(PlayerInteractEvent.class, e, "getHand");
             } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException ex) {
-                throw new RuntimeException(ex);
+                return null;
             }
         } else return null;
     }
@@ -119,8 +122,7 @@ public class Reflection {
         } else {
             try {
                 Validate.notNull(blockData, "BlockData cannot be null");
-                Class.forName("org.bukkit.entity.Player")
-                        .getMethod("sendBlockChange", Location.class, Class.forName("org.bukkit.block.data.BlockData"))
+                Player.class.getMethod("sendBlockChange", Location.class, Class.forName("org.bukkit.block.data.BlockData"))
                         .invoke(player, location, blockData.getHandle());
             } catch (ReflectiveOperationException e) {
                 throw new RuntimeException(e); // to avoid console spamming
@@ -131,7 +133,7 @@ public class Reflection {
     public static void markDirty(Chunk chunk) {
         if (!Compatibility.checkChunk_markDirty()) return;
         try {
-            CraftUtils.getHandle(chunk).getClass().getMethod("markDirty").invoke(CraftUtils.getHandle(chunk));
+            Chunk.getMethod("markDirty").invoke(CraftUtils.getHandle(chunk));
         } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             Log.error("Couldn't invoke markDirty method:");
             e.printStackTrace();
@@ -144,11 +146,9 @@ public class Reflection {
             public void run() {
                 if (Compatibility.checkWorld_notify()) {
                     try {
-                        ReflectionUtil
-                                .getNMSClass("World")
-                                .getMethod("notify", ReflectionUtil.getNMSClass("BlockPosition"))
+                        World.getMethod("notify", BlockPosition)
                                 .invoke(CraftUtils.getHandle(bukkitWorld), blockPosition);
-                    } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException | ClassNotFoundException e) {
+                    } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
                         e.printStackTrace();
                     }
                 } else {
@@ -161,11 +161,9 @@ public class Reflection {
                         }
                         method.setAccessible(true);
                         Object iBlockData = method.invoke(block);
-                        ReflectionUtil
-                                .getNMSClass("World")
-                                .getMethod("notify", ReflectionUtil.getNMSClass("BlockPosition"), ReflectionUtil.getNMSClass("IBlockData"), ReflectionUtil.getNMSClass("IBlockData"), int.class)
+                        World.getMethod("notify", BlockPosition, IBlockData, IBlockData, int.class)
                                 .invoke(CraftUtils.getHandle(bukkitWorld), blockPosition, iBlockData, iBlockData, 1);
-                    } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException | ClassNotFoundException e) {
+                    } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
                         Log.error("Couldn't find method/class, or error occurred inside the method:");
                         e.printStackTrace();
                     }
@@ -179,12 +177,8 @@ public class Reflection {
             Object entityPlayer = player.getClass()
                     .getMethod("getHandle")
                     .invoke(player);
-            Object playerConnection = entityPlayer.getClass()
-                    .getField("playerConnection")
-                    .get(entityPlayer);
-            playerConnection.getClass()
-                    .getMethod("sendPacket", ReflectionUtil.getNMSClass("Packet"))
-                    .invoke(playerConnection, new PacketPlayOutMapChunk(chunk).getNMSClass());
+            Object pc = playerConnection.get(entityPlayer);
+            sendPacket.invoke(pc, new PacketPlayOutMapChunk(chunk).getNMSClass());
         } catch (ReflectiveOperationException e) {
             throw new RuntimeException(e);
         }
@@ -192,9 +186,7 @@ public class Reflection {
 
     public static Object newRawBlockPosition(int i0, int i1, int i2) {
         try {
-            return ReflectionUtil
-                    .getNMSClass("BlockPosition")
-                    .getConstructor(double.class, double.class, double.class)
+            return BlockPosition.getConstructor(double.class, double.class, double.class)
                     .newInstance((double) i0, (double) i1, (double) i2);
         } catch (Exception e) {
             throw new RuntimeException(e);

@@ -2,15 +2,19 @@ package xyz.acrylicstyle.region.api;
 
 import net.querz.nbt.tag.CompoundTag;
 import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import util.Collection;
 import util.CollectionList;
+import util.CollectionSet;
 import xyz.acrylicstyle.region.api.manager.HistoryManager;
 import xyz.acrylicstyle.region.api.player.UserSession;
 import xyz.acrylicstyle.region.api.schematic.Schematic;
@@ -22,13 +26,14 @@ import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * All methods common to RegionEdit operations.<br />
  * Static methods aren't required to load RegionEdit plugin.
  */
 public interface RegionEdit extends Plugin {
-    ThreadPoolExecutor pool = (ThreadPoolExecutor) Executors.newFixedThreadPool(4);
+    ThreadPoolExecutor pool = (ThreadPoolExecutor) Executors.newCachedThreadPool();
 
     static void drawParticleLine(@NotNull Player player, @NotNull Location _from, @NotNull Location _to) {
         /*
@@ -140,6 +145,52 @@ public interface RegionEdit extends Plugin {
             }
         }
         return blocks;
+    }
+
+    @NotNull
+    static CollectionList<Block> getNearbyBlocks(@NotNull Location location, int radius, Predicate<Block> predicate) {
+        CollectionList<Block> blocks = new CollectionList<>();
+        for (int x = location.getBlockX() - radius; x <= location.getBlockX() + radius; x++) {
+            for (int y = location.getBlockY() - radius; y <= location.getBlockY() + radius; y++) {
+                for (int z = location.getBlockZ() - radius; z <= location.getBlockZ() + radius; z++) {
+                    Block b = location.getWorld().getBlockAt(x, y, z);
+                    if (predicate.test(b)) blocks.add(b);
+                }
+            }
+        }
+        return blocks;
+    }
+
+    static CollectionSet<Chunk> getChunks(Collection<Location, xyz.acrylicstyle.region.api.block.Block> blocks) {
+        CollectionSet<Chunk> chunks = new CollectionSet<>();
+        blocks.forEach((l, b) -> chunks.add(b.getLocation().getChunk()));
+        return chunks;
+    }
+
+    static CollectionSet<Chunk> getChunks(CollectionList<Block> blocks) {
+        CollectionSet<Chunk> chunks = new CollectionSet<>();
+        blocks.forEach(b -> chunks.add(b.getChunk()));
+        return chunks;
+    }
+
+    static void loadChunks(Collection<Location, xyz.acrylicstyle.region.api.block.Block> blocks) {
+        CollectionSet<Chunk> chunks = getChunks(blocks);
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                chunks.forEach(Chunk::load);
+            }
+        }.runTask(getInstance());
+    }
+
+    static void loadChunks(CollectionList<Block> blocks) {
+        CollectionSet<Chunk> chunks = getChunks(blocks);
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                chunks.forEach(Chunk::load);
+            }
+        }.runTask(getInstance());
     }
 
     @NotNull

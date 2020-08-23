@@ -27,9 +27,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import util.Collection;
 import util.CollectionList;
+import util.CollectionSet;
 import util.ICollectionList;
 import util.javascript.JavaScript;
 import xyz.acrylicstyle.minecraft.BlockPosition;
+import xyz.acrylicstyle.region.api.AsyncCatcher;
 import xyz.acrylicstyle.region.api.RegionEdit;
 import xyz.acrylicstyle.region.api.exception.RegionEditException;
 import xyz.acrylicstyle.region.api.operation.OperationStatus;
@@ -279,6 +281,7 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
                         RegionEdit.getNearbyBlocksAsync(e.getClickedBlock().getLocation(), getUserSession(e.getPlayer()).getSuperPickaxeRadius(), (blocks, e1) -> {
                             blocks = blocks.filter(block -> block.getType() == type && Reflection.getData(block) == data);
                             blocks.forEach(block -> {
+                                if (type == Material.AIR) return;
                                 Bukkit.getScheduler().runTask(RegionEdit.getInstance(), () -> {
                                     Item item = world.spawn(block.getLocation(), Item.class);
                                     item.setItemStack(data == 0 ? new ItemStack(type) : new ItemStack(type, 1, data));
@@ -403,6 +406,7 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
         } else {
             Log.info("Using Chunk#setType");
         }
+        RegionEdit.loadChunks(blocks);
         CollectionList<xyz.acrylicstyle.region.api.block.Block> blocks2 = blocks.map(RegionBlock::new);
         if (!playerTasks.containsKey(player.getUniqueId())) playerTasks.add(player.getUniqueId(), new CollectionList<>());
         Plugin plugin = RegionEdit.getInstance();
@@ -431,7 +435,7 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
             }
             i0.incrementAndGet();
         });
-        CollectionList<Map.Entry<Integer, Integer>> entries = new CollectionList<>();
+        CollectionSet<org.bukkit.Chunk> entries = new CollectionSet<>();
         new BukkitRunnable() {
             @Override
             public void run() {
@@ -442,26 +446,26 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
                         if (fastMode) {
                             while (true) {
                                 if (i0.get() >= blocks.size()) {
-                                    Log.debug("Relighting " + entries.unique().size() + " chunks");
-                                    entries.unique().forEach(e -> {
-                                        Chunk chunk = Chunk.wrap(Objects.requireNonNull(blocks.first()).getWorld().getChunkAt(e.getKey(), e.getValue()));
+                                    Log.debug("Relighting " + entries.size() + " chunks");
+                                    entries.forEach(e -> {
+                                        Chunk chunk = Chunk.wrap(e);
                                         chunk.initLighting();
                                         Reflection.sendChunk(player, chunk);
+                                        Reflection.markDirty(e);
                                     });
                                     break;
                                 }
                             }
                         }
                     }
-                }.runTaskLaterAsynchronously(RegionEdit.getInstance(), 10);
+                }.runTaskLaterAsynchronously(RegionEdit.getInstance(), 5);
                 completeOperation(blocks.size(), taskId, start, player);
                 Log.debug("Updating " + blocks.size() + " blocks");
-                blocks.forEach(b -> entries.add(new AbstractMap.SimpleEntry<>(b.getChunk().getX(), b.getChunk().getZ())));
                 blocks.forEach(b -> {
+                    entries.add(b.getChunk());
                     for (Player p : Bukkit.getOnlinePlayers())
                         Reflection.sendBlockChange(p, b.getLocation(), material, data, Reflection.createBlockData(b.getLocation(), material));
                     Reflection.notify(b.getWorld(), b, Reflection.newRawBlockPosition(b.getLocation().getBlockX(), b.getLocation().getBlockY(), b.getLocation().getBlockZ()));
-                    Reflection.markDirty(b.getChunk());
                 });
             }
         }.runTaskLater(plugin, i.getAndIncrement());
@@ -477,8 +481,14 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
     }
 
     public static void setBlocks(Player player, Collection<Location, xyz.acrylicstyle.region.api.block.Block> blocks) {
+        setBlocks(player, blocks, false);
+    }
+
+    public static void setBlocks(Player player, Collection<Location, xyz.acrylicstyle.region.api.block.Block> blocks, boolean history) {
         double start = System.currentTimeMillis();
-        // historyManager.addEntry(player.getUniqueId(), blocks);
+        AsyncCatcher.setEnabled(false);
+        RegionEdit.loadChunks(blocks);
+        if (history) historyManager.addEntry(player.getUniqueId(), blocks);
         if (!playerTasks.containsKey(player.getUniqueId())) playerTasks.add(player.getUniqueId(), new CollectionList<>());
         Plugin plugin = RegionEdit.getInstance();
         AtomicInteger i0 = new AtomicInteger();
@@ -487,7 +497,7 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
         playerTasks.get(player.getUniqueId()).add(taskId);
         tasks.add(taskId, OperationStatus.RUNNING);
         final boolean fastMode = sessions.get(player.getUniqueId()).isFastMode();
-        player.sendMessage("" + ChatColor.RED + blocks.size() + ChatColor.GREEN + " blocks affected. " + ChatColor.LIGHT_PURPLE + " (Task ID: " + taskId + ")");
+        player.sendMessage("" + ChatColor.RED + blocks.size() + ChatColor.GREEN + " blocks will be affected. " + ChatColor.LIGHT_PURPLE + " (Task ID: " + taskId + ")");
         blocks.forEach((loc, block) -> {
             if (!fastMode) {
                 new Thread(() -> new BukkitRunnable() {
@@ -503,10 +513,10 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
                 int y = block.getLocation().getBlockY();
                 int z = block.getLocation().getBlockZ();
                 World world = block.getLocation().getWorld();
-                new Thread(() -> {
+                pool.execute(() -> {
                     Blocks.setBlock(world, x, y, z, block.getType(), block.getData(), Reflection.createBlockData(block.getLocation(), block.getType()));
                     i0.incrementAndGet();
-                }).start();
+                });
             }
         });
         new BukkitRunnable() {
@@ -519,17 +529,20 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
                             if (i0.get() >= blocks.size()) {
                                 Log.debug("Updating " + blocks.size() + " blocks");
                                 blocks.valuesList().forEach(b -> {
-                                    for (Player p : Bukkit.getOnlinePlayers()) Reflection.sendBlockChange(p, b.getLocation(), b.getType(), b.getData(), Reflection.getBlockData(b.getBukkitBlock()));
+                                    for (Player p : Bukkit.getOnlinePlayers()) {
+                                        pool.execute(() -> Reflection.sendBlockChange(p, b.getLocation(), b.getType(), b.getData(), Reflection.getBlockData(b.getBukkitBlock())));
+                                    }
                                     Reflection.notify(b.getLocation().getWorld(), b.getBukkitBlock(), new BlockPosition(b.getLocation().getBlockX(), b.getLocation().getBlockY(), b.getLocation().getBlockZ()).getHandle());
-                                    Reflection.markDirty(b.getLocation().getChunk());
-                                    new BukkitRunnable() {
-                                        @Override
-                                        public void run() {
-                                            b.getLocation().getChunk().unload();
-                                            b.getLocation().getChunk().load();
-                                        }
-                                    }.runTask(plugin);
                                 });
+                                CollectionSet<org.bukkit.Chunk> chunks = RegionEdit.getChunks(blocks);
+                                Log.debug("Relighting " + chunks.size() + " chunks");
+                                chunks.forEach(chunk -> {
+                                    Chunk c = Chunk.wrap(chunk);
+                                    c.initLighting();
+                                    Reflection.sendChunk(player, c);
+                                    Reflection.markDirty(chunk);
+                                });
+                                AsyncCatcher.setEnabled(true);
                                 break;
                             }
                         }

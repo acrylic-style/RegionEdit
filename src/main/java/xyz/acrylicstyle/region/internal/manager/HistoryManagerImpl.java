@@ -25,12 +25,22 @@ public class HistoryManagerImpl implements HistoryManager {
      */
     @Override
     public void addEntry(@NotNull UUID uuid, @NotNull CollectionList<Block> blocks) {
+        resetPointer(uuid);
         if (!histories.containsKey(uuid)) histories.add(uuid, new CollectionList<>());
         Collection<Location, Block> locationBlockCollection = new Collection<>();
         blocks.forEach(block -> locationBlockCollection.add(block.getLocation(), block));
         Collection<Location, Block> undoBlocks = new Collection<>();
-        blocks.forEach((b) -> undoBlocks.add(b.getLocation(), new RegionBlock(b.getLocation().getBlock())));
+        blocks.forEach(b -> undoBlocks.add(b.getLocation(), new RegionBlock(b.getLocation().getBlock())));
         histories.get(uuid).add(new AbstractMap.SimpleEntry<>(locationBlockCollection, undoBlocks));
+    }
+
+    @Override
+    public void addEntry(@NotNull UUID uuid, @NotNull Collection<Location, Block> blocks) {
+        resetPointer(uuid);
+        if (!histories.containsKey(uuid)) histories.add(uuid, new CollectionList<>());
+        Collection<Location, Block> undoBlocks = new Collection<>();
+        blocks.forEach((l, b) -> undoBlocks.add(l, new RegionBlock(l.getBlock())));
+        histories.get(uuid).add(new AbstractMap.SimpleEntry<>(undoBlocks, blocks));
     }
 
     /**

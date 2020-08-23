@@ -17,6 +17,13 @@ public interface HistoryManager {
     void addEntry(@NotNull UUID player, @NotNull CollectionList<Block> blocks);
 
     /**
+     * Adds a entry into history.
+     * @param player UUID of a player.
+     * @param blocks Blocks before modify
+     */
+    void addEntry(@NotNull UUID player, @NotNull Collection<Location, xyz.acrylicstyle.region.api.block.Block> blocks);
+
+    /**
      * Get location : block pair of history.
      * @param player UUID of a player.
      * @return Blocks
