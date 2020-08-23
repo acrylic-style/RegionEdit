@@ -30,7 +30,6 @@ import util.CollectionList;
 import util.CollectionSet;
 import util.ICollectionList;
 import util.javascript.JavaScript;
-import xyz.acrylicstyle.minecraft.BlockPosition;
 import xyz.acrylicstyle.region.api.AsyncCatcher;
 import xyz.acrylicstyle.region.api.RegionEdit;
 import xyz.acrylicstyle.region.api.exception.RegionEditException;
@@ -100,6 +99,7 @@ import java.util.function.Function;
  * Internal usage only
  */
 public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener {
+    public static byte[] reserve = new byte[1024*1024*256];
     public static final String COMMAND_PREFIX = "/";
     public static final String CUI = "worldedit:cui";
     public static final String CUI_LEGACY = "WECUI";
@@ -465,7 +465,7 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
                     entries.add(b.getChunk());
                     for (Player p : Bukkit.getOnlinePlayers())
                         Reflection.sendBlockChange(p, b.getLocation(), material, data, Reflection.createBlockData(b.getLocation(), material));
-                    Reflection.notify(b.getWorld(), b, Reflection.newRawBlockPosition(b.getLocation().getBlockX(), b.getLocation().getBlockY(), b.getLocation().getBlockZ()));
+                    // if (!fastMode) Reflection.notify(b.getWorld(), b, Reflection.newRawBlockPosition(b.getLocation().getBlockX(), b.getLocation().getBlockY(), b.getLocation().getBlockZ()));
                 });
             }
         }.runTaskLater(plugin, i.getAndIncrement());
@@ -530,9 +530,9 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
                                 Log.debug("Updating " + blocks.size() + " blocks");
                                 blocks.valuesList().forEach(b -> {
                                     for (Player p : Bukkit.getOnlinePlayers()) {
-                                        pool.execute(() -> Reflection.sendBlockChange(p, b.getLocation(), b.getType(), b.getData(), Reflection.getBlockData(b.getBukkitBlock())));
+                                        Reflection.sendBlockChange(p, b.getLocation(), b.getType(), b.getData(), Reflection.getBlockData(b.getBukkitBlock()));
                                     }
-                                    Reflection.notify(b.getLocation().getWorld(), b.getBukkitBlock(), new BlockPosition(b.getLocation().getBlockX(), b.getLocation().getBlockY(), b.getLocation().getBlockZ()).getHandle());
+                                    // Reflection.notify(b.getLocation().getWorld(), b.getBukkitBlock(), new BlockPosition(b.getLocation().getBlockX(), b.getLocation().getBlockY(), b.getLocation().getBlockZ()).getHandle());
                                 });
                                 CollectionSet<org.bukkit.Chunk> chunks = RegionEdit.getChunks(blocks);
                                 Log.debug("Relighting " + chunks.size() + " chunks");
