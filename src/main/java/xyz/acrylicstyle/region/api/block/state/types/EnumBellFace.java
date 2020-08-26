@@ -3,15 +3,16 @@ package xyz.acrylicstyle.region.api.block.state.types;
 import util.reflect.Ref;
 import xyz.acrylicstyle.tomeito_api.utils.ReflectionUtil;
 
-public enum EnumBlockFace implements EnumNMS {
+public enum EnumBellFace implements EnumNMS {
+    FLOOR,
     CEILING,
-    WALL,
-    FLOOR;
+    SINGLE_WALL,
+    DOUBLE_WALL;
 
     private final Object nms;
 
-    EnumBlockFace() {
-        this.nms = Ref.forName(ReflectionUtil.getNMSPackage() + ".BlockPropertyAttachPosition").getField(this.name()).get(null);
+    EnumBellFace() {
+        this.nms = Ref.forName(ReflectionUtil.getNMSPackage() + ".BlockPropertyBellAttach").getField(this.name()).get(null);
     }
 
     @Override

@@ -5,4 +5,5 @@ public enum SuperPickaxeMode {
     AREA,
     SINGLE,
     AREA_DROP,
+    DESTROYER,
 }

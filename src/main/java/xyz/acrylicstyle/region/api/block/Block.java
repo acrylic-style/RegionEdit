@@ -41,7 +41,7 @@ public interface Block {
      * @param blockData Block data
      * @param applyPhysics Applies physics or not
      */
-    void setTypeAndData(@NotNull BlockData blockData, boolean applyPhysics);
+    void setTypeAndData(@NotNull Material material, @Nullable BlockData blockData, boolean applyPhysics);
 
     /**
      * Set type and data.<br />

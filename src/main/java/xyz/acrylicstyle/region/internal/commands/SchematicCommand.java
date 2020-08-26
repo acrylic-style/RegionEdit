@@ -2,7 +2,8 @@ package xyz.acrylicstyle.region.internal.commands;
 
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
-import util.CollectionList;
+import org.jetbrains.annotations.NotNull;
+import util.ICollectionList;
 import util.Watchdog;
 import xyz.acrylicstyle.region.RegionEditPlugin;
 import xyz.acrylicstyle.region.api.RegionEdit;
@@ -35,10 +36,10 @@ public class SchematicCommand extends PlayerCommandExecutor {
                     player.sendMessage(ChatColor.RED + "Schematic " + ChatColor.YELLOW + args[1] + ".schem " + ChatColor.RED + "doesn't exist.");
                     return;
                 }
-                CollectionList<BlockState> blocks = schematic.getBlocks();
-                RegionEdit.getInstance().getUserSession(player).setClipboard(blocks);
+                @NotNull ICollectionList<BlockState> blocks = schematic.getBlocks();
+                RegionEdit.getInstance().getUserSession(player).setClipboard(blocks.clone());
                 player.sendMessage(ChatColor.GREEN + "Loaded schematic " + ChatColor.YELLOW + args[1] + ChatColor.GREEN + ". Run " + ChatColor.GOLD + "//paste " + ChatColor.GREEN + "to paste it.");
-            }, 10000, () -> player.sendMessage(ChatColor.RED + "Loading of the schematic was timed out. (took 10 seconds)")).start();
+            }, 60000, () -> player.sendMessage(ChatColor.RED + "Loading of the schematic was timed out. (took 60 seconds)")).start();
         } else if (args[0].equals("list")) {
             throw new RegionEditException("Not implemented.");
         } else {

@@ -7,9 +7,10 @@ import util.Collection;
 import xyz.acrylicstyle.region.RegionEditPlugin;
 import xyz.acrylicstyle.region.api.AsyncCatcher;
 import xyz.acrylicstyle.region.api.RegionEdit;
-import xyz.acrylicstyle.region.api.block.Block;
+import xyz.acrylicstyle.region.api.block.state.BlockState;
 import xyz.acrylicstyle.region.api.player.UserSession;
-import xyz.acrylicstyle.region.internal.block.RegionBlock;
+import xyz.acrylicstyle.region.api.util.BlockPos;
+import xyz.acrylicstyle.region.api.util.Tuple;
 import xyz.acrylicstyle.tomeito_api.command.PlayerCommandExecutor;
 
 public class PasteCommand extends PlayerCommandExecutor {
@@ -21,26 +22,23 @@ public class PasteCommand extends PlayerCommandExecutor {
             return;
         }
         player.sendMessage(ChatColor.GREEN + "Calculating blocks...");
+        final Location l1 = player.getLocation();
         AsyncCatcher.setEnabled(false);
         RegionEdit.pool.execute(() -> {
-            Collection<Location, Block> blocks = new Collection<>();
-            Location l1 = player.getLocation();
-            session.getClipboard().forEach(state -> { // air run
-                Location l2 = state.getLocation();
-                Location loc = new Location(l1.getWorld(), l1.getBlockX() + l2.getBlockX(), l1.getBlockY() + l2.getBlockY(), l1.getBlockZ() + l2.getBlockZ());
-                new RegionBlock(loc, state.getType(), state.getData(), null);
-            });
+            Collection<BlockPos, BlockState> blocks = new Collection<>();
             session.getClipboard().forEach(state -> {
-                Location l2 = state.getLocation();
-                Location loc = new Location(l1.getWorld(), l1.getBlockX() + l2.getBlockX(), l1.getBlockY() + l2.getBlockY(), l1.getBlockZ() + l2.getBlockZ());
-                RegionBlock block = new RegionBlock(loc, state.getType(), state.getData(), null);
-                blocks.add(loc, block);
+                int x = l1.getBlockX() + state.getLocation().getX();
+                int y = l1.getBlockY() + state.getLocation().getY();
+                int z = l1.getBlockZ() + state.getLocation().getZ();
+                BlockPos loc = new BlockPos(l1.getWorld(), x, y, z);
+                blocks.add(loc, new BlockState(state, new Tuple<>(x, y, z)));
             });
             player.sendMessage(ChatColor.GREEN + "Pasting clipboard... (it may take a while!)");
             try {
                 RegionEditPlugin.setBlocks(player, blocks, true);
             } catch (OutOfMemoryError e) {
-                RegionEditPlugin.reserve = null;
+                RegionEditPlugin.reserve.freeImmediately();
+                blocks.clear();
                 System.gc();
                 RegionEdit.getInstance().getUserSession(player).setClipboard(null);
                 System.gc();

@@ -11,9 +11,10 @@ import xyz.acrylicstyle.region.api.block.BlockData;
 import xyz.acrylicstyle.region.internal.utils.Compatibility;
 import xyz.acrylicstyle.region.internal.utils.Reflection;
 
+import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 
-public class RegionBlock implements Block, Cloneable {
+public class RegionBlock implements Block, Cloneable, Serializable {
     @NotNull
     private final Location location;
     @NotNull
@@ -79,8 +80,8 @@ public class RegionBlock implements Block, Cloneable {
      */
     @Override
     public void setTypeAndData(@NotNull Material material, byte b, BlockData blockData, boolean applyPhysics) {
-        if (Compatibility.checkBlockData() && blockData != null) {
-            setTypeAndData(blockData, applyPhysics);
+        if (Compatibility.checkBlockData()) {
+            setTypeAndData(material, blockData, applyPhysics);
         } else {
             setTypeAndData(material, b, applyPhysics);
         }
@@ -90,10 +91,10 @@ public class RegionBlock implements Block, Cloneable {
      * {@inheritDoc}
      */
     @Override
-    public void setTypeAndData(@NotNull BlockData blockData, boolean applyPhysics) {
+    public void setTypeAndData(@NotNull Material material, @Nullable BlockData blockData, boolean applyPhysics) {
         if (!Compatibility.checkBlockData()) return;
-        location.getBlock().setType(blockData.getMaterial(), applyPhysics);
-        Reflection.setBlockData((RegionBlockData) blockData, applyPhysics);
+        location.getBlock().setType(material, applyPhysics);
+        if (blockData != null) Reflection.setBlockData((RegionBlockData) blockData, applyPhysics);
     }
 
     /**
@@ -103,7 +104,6 @@ public class RegionBlock implements Block, Cloneable {
     @SuppressWarnings("deprecation")
     public void setTypeAndData(@NotNull Material material, byte b, boolean applyPhysics) {
         if (Compatibility.checkBlockData()) return;
-        // Log.info("Using legacy method");
         location.getBlock().setType(material, applyPhysics);
         location.getBlock().setData(b, applyPhysics);
     }

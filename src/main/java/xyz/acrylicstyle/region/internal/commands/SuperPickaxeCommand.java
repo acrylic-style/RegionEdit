@@ -24,6 +24,16 @@ public class SuperPickaxeCommand extends PlayerCommandExecutor {
                 session.setSuperPickaxeMode(SuperPickaxeMode.AREA);
                 session.setSuperPickaxeRadius(radius);
                 player.sendMessage(ChatColor.GREEN + "Super pickaxe mode was set to " + ChatColor.GOLD + "area " + ChatColor.GREEN + "mode and radius to " + ChatColor.YELLOW + radius + ChatColor.GREEN + ".");
+            } else if (args[0].equalsIgnoreCase("destroyer")) {
+                    if (args.length == 1) {
+                        player.sendMessage(ChatColor.RED + "/" + RegionEditPlugin.COMMAND_PREFIX + "sp destroyer <radius>");
+                        return;
+                    }
+                    int radius = radiusCheck(player, args[1]);
+                    if (radius == -1) return;
+                    session.setSuperPickaxeMode(SuperPickaxeMode.DESTROYER);
+                    session.setSuperPickaxeRadius(radius);
+                    player.sendMessage(ChatColor.GREEN + "Super pickaxe mode was set to " + ChatColor.RED + "destroyer " + ChatColor.GREEN + "mode and radius to " + ChatColor.YELLOW + radius + ChatColor.GREEN + ".");
             } else if (args[0].equalsIgnoreCase("single")) {
                 session.setSuperPickaxeMode(SuperPickaxeMode.SINGLE);
                 player.sendMessage(ChatColor.GREEN + "Super pickaxe mode was set to " + ChatColor.GOLD + "single " + ChatColor.GREEN + "mode.");
@@ -43,6 +53,8 @@ public class SuperPickaxeCommand extends PlayerCommandExecutor {
             } else {
                 player.sendMessage(ChatColor.LIGHT_PURPLE + "Super Pickaxe commands:");
                 player.sendMessage(ChatColor.GREEN + "/" + RegionEditPlugin.COMMAND_PREFIX + "sp " + ChatColor.GOLD + "area " + ChatColor.YELLOW + "<radius> "
+                        + ChatColor.GRAY + "- " + ChatColor.AQUA + "Breaks blocks in specified radius with only clicked block. Does not drop items.");
+                player.sendMessage(ChatColor.GREEN + "/" + RegionEditPlugin.COMMAND_PREFIX + "sp " + ChatColor.GOLD + "destroyer " + ChatColor.YELLOW + "<radius> "
                         + ChatColor.GRAY + "- " + ChatColor.AQUA + "Breaks blocks in specified radius. Does not drop items.");
                 player.sendMessage(ChatColor.GREEN + "/" + RegionEditPlugin.COMMAND_PREFIX + "sp " + ChatColor.GOLD + "single "
                         + ChatColor.GRAY + "- " + ChatColor.AQUA + "Breaks single block, and drops item.");
@@ -72,8 +84,8 @@ public class SuperPickaxeCommand extends PlayerCommandExecutor {
             player.sendMessage(ChatColor.RED + "A number must be higher than 0.");
             return -1;
         }
-        if (radius > 10) {
-            player.sendMessage(ChatColor.RED + "A number must be lower than 10.");
+        if (radius > 25) {
+            player.sendMessage(ChatColor.RED + "A number must be lower than 25.");
             return -1;
         }
         return radius;

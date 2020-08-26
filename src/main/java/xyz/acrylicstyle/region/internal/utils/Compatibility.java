@@ -86,7 +86,7 @@ public class Compatibility {
 
     /**
      * Checks compatibility for {@link Block#getData()}.<br />
-     * Returns true on all known versions (1.8-1.16.1).<br />
+     * Returns true on all known versions (1.8-1.16.2).<br />
      * There are no known versions of Bukkit API that doesn't have this method.
      */
     @SuppressWarnings("deprecation")
@@ -128,7 +128,7 @@ public class Compatibility {
 
     /**
      * Checks compatibility for {@link Player#sendBlockChange(Location, int, byte)}.<br />
-     * For 1.8-1.16.1, it returns true.<br />
+     * For 1.8-1.16.2, it returns true.<br />
      * There are no known versions of Bukkit API that doesn't have this method.
      */
     @SuppressWarnings("deprecation")

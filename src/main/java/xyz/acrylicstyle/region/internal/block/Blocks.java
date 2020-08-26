@@ -38,6 +38,12 @@ public class Blocks {
                 .invoke(null, blockData.getState());
     }
 
+    public static int getCombinedId(@NotNull Object obj) {
+        return (int) Ref.forName(ReflectionUtil.getNMSPackage() + ".Block")
+                .getMethod("getCombinedId", Ref.forName(ReflectionUtil.getNMSPackage() + ".IBlockData").getClazz())
+                .invoke(null, obj);
+    }
+
     public static Object getByCombinedId(int i) {
         try {
             return ReflectionUtil.getNMSClass("Block").getMethod("getByCombinedId", int.class).invoke(null, i);

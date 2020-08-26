@@ -4,13 +4,12 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
-import util.CollectionList;
+import util.ICollectionList;
 import xyz.acrylicstyle.mcutil.lang.MCVersion;
 import xyz.acrylicstyle.region.api.block.state.BlockState;
 import xyz.acrylicstyle.region.api.exception.RegionEditException;
 import xyz.acrylicstyle.region.api.region.CuboidRegion;
 import xyz.acrylicstyle.region.api.region.RegionSelection;
-import xyz.acrylicstyle.region.api.schematic.Schematic;
 import xyz.acrylicstyle.region.api.selection.SelectionMode;
 
 import java.util.UUID;
@@ -127,8 +126,7 @@ public interface UserSession {
     @NotNull
     String getCUIChannel();
 
-    @Nullable
-    CollectionList<BlockState> getClipboard();
+    ICollectionList<BlockState> getClipboard();
 
-    void setClipboard(@Nullable CollectionList<BlockState> blocks);
+    void setClipboard(ICollectionList<BlockState> blocks);
 }

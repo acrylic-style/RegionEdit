@@ -15,10 +15,13 @@ import org.jetbrains.annotations.Nullable;
 import util.Collection;
 import util.CollectionList;
 import util.CollectionSet;
+import xyz.acrylicstyle.region.api.block.state.BlockState;
+import xyz.acrylicstyle.region.api.block.state.BlockStatePropertyMap;
 import xyz.acrylicstyle.region.api.manager.HistoryManager;
 import xyz.acrylicstyle.region.api.player.UserSession;
 import xyz.acrylicstyle.region.api.schematic.Schematic;
 import xyz.acrylicstyle.region.api.schematic.SchematicFormat;
+import xyz.acrylicstyle.region.api.util.BlockPos;
 import xyz.acrylicstyle.tomeito_api.utils.Callback;
 
 import java.util.Map;
@@ -161,9 +164,9 @@ public interface RegionEdit extends Plugin {
         return blocks;
     }
 
-    static CollectionSet<Chunk> getChunks(Collection<Location, xyz.acrylicstyle.region.api.block.Block> blocks) {
+    static CollectionSet<Chunk> getChunks(Collection<BlockPos, BlockState> blocks) {
         CollectionSet<Chunk> chunks = new CollectionSet<>();
-        blocks.forEach((l, b) -> chunks.add(b.getLocation().getChunk()));
+        blocks.forEach((l, b) -> chunks.add(l.getChunk()));
         return chunks;
     }
 
@@ -173,7 +176,7 @@ public interface RegionEdit extends Plugin {
         return chunks;
     }
 
-    static void loadChunks(Collection<Location, xyz.acrylicstyle.region.api.block.Block> blocks) {
+    static void loadChunks(Collection<BlockPos, BlockState> blocks) {
         CollectionSet<Chunk> chunks = getChunks(blocks);
         new BukkitRunnable() {
             @Override
@@ -219,4 +222,10 @@ public interface RegionEdit extends Plugin {
 
     @NotNull
     HistoryManager getHistoryManager();
+
+    @NotNull
+    BlockState implementMethods(BlockState blockState);
+
+    @NotNull
+    BlockStatePropertyMap implementMethods(BlockStatePropertyMap propertyMap);
 }

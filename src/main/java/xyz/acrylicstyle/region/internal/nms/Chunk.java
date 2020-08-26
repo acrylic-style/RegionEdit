@@ -18,10 +18,14 @@ import java.util.Objects;
 public class Chunk extends NMSAPI {
     public Chunk(Object o) {
         super(o, "Chunk");
-        this.sections = ICollectionList
-                .asList((Object[]) getField("sections"))
-                .map((s, i) -> s == null ? new ChunkSection(this, i << 4) : new ChunkSection(this, s))
-                .toArray(new ChunkSection[0]);
+        if (Compatibility.checkChunkSection()) {
+            this.sections = ICollectionList
+                    .asList((Object[]) getField("sections"))
+                    .map((s, i) -> s == null ? new ChunkSection(this, i << 4) : new ChunkSection(this, s))
+                    .toArray(new ChunkSection[0]);
+        } else {
+            this.sections = new ChunkSection[0];
+        }
     }
 
     public final ChunkSection[] sections;

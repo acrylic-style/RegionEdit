@@ -181,11 +181,11 @@ public final class UserSessionImpl implements UserSession {
         return getMinecraftVersion().isModern() ? RegionEditPlugin.CUI : RegionEditPlugin.CUI_LEGACY;
     }
 
-    private CollectionList<BlockState> clipboard = null;
+    private ICollectionList<BlockState> clipboard = null;
 
     @Override
-    public @Nullable CollectionList<BlockState> getClipboard() { return clipboard; }
+    public ICollectionList<BlockState> getClipboard() { return clipboard; }
 
     @Override
-    public void setClipboard(@Nullable CollectionList<BlockState> blocks) { this.clipboard = blocks; }
+    public void setClipboard(ICollectionList<BlockState> blocks) { this.clipboard = blocks; }
 }

@@ -1,6 +1,6 @@
 name: RegionEdit
 main: xyz.acrylicstyle.region.RegionEditPlugin
-version: 0.1.17
+version: 0.1.18
 author: acrylic-style
 api-version: "1.13" # we do not want to use legacy material on 1.13+
 depend:

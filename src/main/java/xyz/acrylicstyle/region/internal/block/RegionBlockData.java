@@ -9,10 +9,11 @@ import xyz.acrylicstyle.region.api.block.BlockData;
 import xyz.acrylicstyle.region.internal.utils.Reflection;
 import xyz.acrylicstyle.tomeito_api.utils.ReflectionUtil;
 
+import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Objects;
 
-public class RegionBlockData implements BlockData {
+public class RegionBlockData implements BlockData, Serializable {
     @NotNull
     private final Block block;
     @NotNull

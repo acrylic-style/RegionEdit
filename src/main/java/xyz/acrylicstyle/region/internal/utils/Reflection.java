@@ -11,6 +11,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.material.MaterialData;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -26,7 +27,7 @@ import xyz.acrylicstyle.tomeito_api.utils.ReflectionUtil;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import static xyz.acrylicstyle.region.internal.nms.NMSClasses.*;
+import static xyz.acrylicstyle.region.api.util.NMSClasses.*;
 
 public class Reflection {
     /**
@@ -130,6 +131,24 @@ public class Reflection {
         }
     }
 
+    @SuppressWarnings({"deprecation", "JavaReflectionMemberAccess"})
+    public static void sendBlockChange(@NotNull Player player, Location location, Material material, byte data, Object iBlockData) {
+        if (!Compatibility.checkNewPlayer_sendBlockChange()) {
+            Validate.notNull(location, "Location cannot be null");
+            Validate.notNull(material, "Material cannot be null");
+            player.sendBlockChange(location, material, data);
+        } else {
+            try {
+                Validate.notNull(iBlockData, "IBlockData cannot be null");
+                Object blockData = ReflectionUtil.getNMSClass("BlockBase$BlockData").getMethod("createCraftBlockData").invoke(iBlockData);
+                Player.class.getMethod("sendBlockChange", Location.class, Class.forName("org.bukkit.block.data.BlockData"))
+                        .invoke(player, location, blockData);
+            } catch (ReflectiveOperationException e) {
+                throw new RuntimeException(e); // to avoid console spamming
+            }
+        }
+    }
+
     public static void markDirty(Chunk chunk) {
         if (!Compatibility.checkChunk_markDirty()) return;
         try {
@@ -190,6 +209,37 @@ public class Reflection {
                     .newInstance((double) i0, (double) i1, (double) i2);
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public static void setBlockData(Block block, Object iBlockData) {
+        if (Compatibility.getBukkitVersion() == BukkitVersion.v1_8) return;
+        Object nmsBlock = Ref.forName(ReflectionUtil.getCraftBukkitPackage() + ".block.CraftBlock").getMethod("getNMS").invoke(block);
+        Ref.forName(ReflectionUtil.getNMSPackage() + ".Block").getDeclaredField("blockData").accessible(true).set(nmsBlock, iBlockData);
+    }
+
+    public static Object getBlock(Material material, byte data) {
+        return Ref.forName(ReflectionUtil.getCraftBukkitPackage() + ".util.CraftMagicNumbers")
+                .getMethod("getBlock", Material.class, byte.class)
+                .invoke(null, material, data);
+    }
+
+    public static Object getBlock(MaterialData material) {
+        return Ref.forName(ReflectionUtil.getCraftBukkitPackage() + ".util.CraftMagicNumbers")
+                .getMethod("getBlock", MaterialData.class)
+                .invoke(null, material);
+    }
+
+    public static Object getBlock(Object iBlockData) {
+        BukkitVersion version = Compatibility.getBukkitVersion();
+        if (version.ordinal() < BukkitVersion.v1_16.ordinal()) {
+            try {
+                return IBlockData.getMethod("getBlock").invoke(iBlockData);
+            } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            return Ref.forName(ReflectionUtil.getNMSPackage() + ".IBlockDataHolder").getDeclaredField("c").accessible(true).get(iBlockData);
         }
     }
 }
