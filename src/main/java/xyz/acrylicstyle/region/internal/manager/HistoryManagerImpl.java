@@ -2,7 +2,6 @@ package xyz.acrylicstyle.region.internal.manager;
 
 import org.jetbrains.annotations.NotNull;
 import util.Collection;
-import util.CollectionList;
 import util.ICollectionList;
 import util.file.FileBasedCollectionList;
 import xyz.acrylicstyle.region.api.block.Block;
@@ -16,7 +15,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class HistoryManagerImpl implements HistoryManager {
     @NotNull
-    public final Collection<UUID, ICollectionList<AbstractMap.SimpleEntry<Collection<BlockPos, BlockState>, Collection<BlockPos, BlockState>>>> histories = new Collection<>();
+    public final Collection<UUID, ICollectionList< AbstractMap.SimpleEntry<Collection<BlockPos, BlockState>, Collection<BlockPos, BlockState>> >> histories = new Collection<>();
 
     @NotNull
     public final Collection<UUID, AtomicInteger> indexes = new Collection<>();
@@ -38,7 +37,7 @@ public class HistoryManagerImpl implements HistoryManager {
     @Override
     public void addEntry(@NotNull UUID uuid, @NotNull Collection<BlockPos, BlockState> blocks) {
         resetPointer(uuid);
-        if (!histories.containsKey(uuid)) histories.add(uuid, new CollectionList<>());
+        if (!histories.containsKey(uuid)) histories.add(uuid, new FileBasedCollectionList<>());
         Collection<BlockPos, BlockState> undoBlocks = new Collection<>();
         blocks.forEach((l, b) -> undoBlocks.add(l, new BlockState(l.getBlock()))); // its important to get current state of blocks
         histories.get(uuid).add(new AbstractMap.SimpleEntry<>(undoBlocks, blocks));

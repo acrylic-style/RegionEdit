@@ -29,7 +29,7 @@ import java.lang.reflect.Method;
 
 import static xyz.acrylicstyle.region.api.util.NMSClasses.*;
 
-public class Reflection {
+public final class Reflection {
     /**
      * Returns get ItemStack in hand.<br />
      * For 1.8-1.12.2, it uses Inventory#getItemInHand.<br />

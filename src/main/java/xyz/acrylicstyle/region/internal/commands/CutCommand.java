@@ -25,7 +25,7 @@ public class CutCommand extends PlayerCommandExecutor {
             assert region.getLocation2() != null;
             RegionEdit.getBlocksInvertAsync(region.getLocation(), region.getLocation2(), Material.AIR, (blocks, throwable) -> {
                 RegionEdit.getInstance().getHistoryManager().resetPointer(player.getUniqueId());
-                RegionEditPlugin.setBlocks(player, blocks, Material.AIR, (byte) 0);
+                RegionEdit.pool.execute(() -> RegionEditPlugin.setBlocks(player, blocks, Material.AIR, (byte) 0));
             });
         } else {
             throw new RegionEditException("Invalid RegionSelection class: " + regionSelection.getClass().getCanonicalName());

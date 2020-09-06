@@ -7,7 +7,7 @@ import org.bukkit.block.Block;
 
 import java.io.Serializable;
 
-public class BlockPos extends BlockTuple<Integer, Integer, Integer> implements Serializable {
+public final class BlockPos extends BlockTuple<Integer, Integer, Integer> implements Serializable {
     public BlockPos(World world, Tuple<Integer, Integer, Integer> tuple) {
         super(world, tuple.getX(), tuple.getY(), tuple.getZ());
     }

@@ -17,10 +17,11 @@ import xyz.acrylicstyle.region.api.block.state.types.EnumHalf;
 import xyz.acrylicstyle.region.api.block.state.types.EnumRedstoneDirection;
 import xyz.acrylicstyle.region.api.block.state.types.EnumSlabType;
 import xyz.acrylicstyle.region.api.block.state.types.EnumStairsShape;
+import xyz.acrylicstyle.region.api.exception.RegionEditException;
 
 import java.util.function.Function;
 
-public class BlockPropertyType<T> {
+public final class BlockPropertyType<T> {
     public static final BlockPropertyType<String> STRING = new BlockPropertyType<>(String.class, Function.identity());
     public static final BlockPropertyType<Boolean> BOOLEAN = new BlockPropertyType<>(boolean.class, Boolean::parseBoolean);
     public static final BlockPropertyType<Integer> INTEGER = new BlockPropertyType<>(int.class, Integer::parseInt);
@@ -63,7 +64,7 @@ public class BlockPropertyType<T> {
         try {
             return (EnumNMS) parser.apply(s);
         } catch (RuntimeException e) {
-            throw new RuntimeException("Couldn't parse " + s, e);
+            throw new RegionEditException("Couldn't parse " + s, e);
         }
     }
 

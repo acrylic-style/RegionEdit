@@ -9,7 +9,7 @@ import xyz.acrylicstyle.region.api.RegionEdit;
 import java.io.File;
 import java.io.IOException;
 
-public class SchematicManager {
+public final class SchematicManager {
     // requires loaded plugin to work
     @Nullable
     public static Schematic load(@NotNull File file) {

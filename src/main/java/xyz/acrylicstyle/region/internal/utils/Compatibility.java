@@ -9,7 +9,7 @@ import org.bukkit.inventory.PlayerInventory;
 import util.ReflectionHelper;
 import xyz.acrylicstyle.tomeito_api.utils.ReflectionUtil;
 
-public class Compatibility {
+public final class Compatibility {
     public static BukkitVersion getBukkitVersion() {
         if (checkPacketPlayOutMapChunk1_16Constructor()) return BukkitVersion.v1_16;
         if (!checkBlock_getData()) return BukkitVersion.UNKNOWN;

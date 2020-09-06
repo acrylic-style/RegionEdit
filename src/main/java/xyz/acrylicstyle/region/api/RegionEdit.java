@@ -176,24 +176,38 @@ public interface RegionEdit extends Plugin {
         return chunks;
     }
 
-    static void loadChunks(Collection<BlockPos, BlockState> blocks) {
+    static void unloadChunks(Collection<BlockPos, BlockState> blocks) {
         CollectionSet<Chunk> chunks = getChunks(blocks);
         new BukkitRunnable() {
             @Override
             public void run() {
-                chunks.forEach(Chunk::load);
+                chunks.forEach(Chunk::unload);
             }
         }.runTask(getInstance());
     }
 
-    static void loadChunks(CollectionList<Block> blocks) {
+    static void unloadChunks(CollectionList<Block> blocks) {
         CollectionSet<Chunk> chunks = getChunks(blocks);
         new BukkitRunnable() {
             @Override
             public void run() {
-                chunks.forEach(Chunk::load);
+                chunks.forEach(Chunk::unload);
             }
         }.runTask(getInstance());
+    }
+
+    static long memoryUsageInBytes() {
+        Runtime runtime = Runtime.getRuntime();
+        return runtime.totalMemory() - runtime.freeMemory();
+    }
+
+    static double memoryUsageInGB() {
+        Runtime runtime = Runtime.getRuntime();
+        return memoryUsageInBytes() / 1024D / 1024D / 1024D;
+    }
+
+    static double memoryUsageInGBRounded() {
+        return Math.round(memoryUsageInGB() * 100) / 100D;
     }
 
     @NotNull

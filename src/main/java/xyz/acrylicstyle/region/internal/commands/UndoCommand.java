@@ -17,6 +17,6 @@ public class UndoCommand extends PlayerCommandExecutor {
             player.sendMessage(ChatColor.RED + "There's nothing to undo.");
             return;
         }
-        RegionEditPlugin.setBlocks(player, blocks);
+        RegionEdit.pool.execute(() -> RegionEditPlugin.setBlocks(player, blocks));
     }
 }

@@ -6,7 +6,7 @@ import org.bukkit.World;
 import java.io.Serializable;
 import java.util.function.Function;
 
-public class Tuple<X, Y, Z> implements Serializable {
+public final class Tuple<X, Y, Z> implements Serializable {
     private final X x;
     private final Y y;
     private final Z z;

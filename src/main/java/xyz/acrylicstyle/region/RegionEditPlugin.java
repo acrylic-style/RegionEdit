@@ -430,6 +430,23 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
         return new BlockState(blockState) {
             @Override
             public void updateFast(@NotNull World world) {
+                org.bukkit.Chunk chunk = world.getChunkAt(getLocation().getX() >> 4, getLocation().getZ() >> 4);
+                if (!chunk.isLoaded()) {
+                    new BukkitRunnable() {
+                        @Override
+                        public void run() {
+                            chunk.load(true);
+                            RegionEdit.pool.execute(() -> {
+                                if (Compatibility.checkChunkSection()) {
+                                    setBlockOld(world);
+                                } else {
+                                    setBlockNew(world);
+                                }
+                            });
+                        }
+                    }.runTask(RegionEditPlugin.this);
+                    return;
+                }
                 if (Compatibility.checkChunkSection()) {
                     setBlockOld(world);
                 } else {
@@ -515,7 +532,7 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
                                 try {
                                     blockData.set(method.invoke(blockData.get(), prop.getBlockProperty(), prop.getValueType().get(entry.getValue())));
                                 } catch (IllegalArgumentException ex) {
-                                    throw new RuntimeException("Could not set block data for " + raw + " (tried to set " + entry.getKey() + "=" + entry.getValue() + ")", ex);
+                                    throw new RegionEditException("Could not set block data for " + raw + " (tried to set " + entry.getKey() + "=" + entry.getValue() + ")", ex);
                                 }
                             }
                         } catch (IllegalAccessException | InvocationTargetException e) {
@@ -541,7 +558,6 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
 
     public static void setBlocks(Player player, @NotNull CollectionList<Block> blocks, final Material material, final byte data) {
         double start = System.currentTimeMillis();
-        RegionEdit.loadChunks(blocks);
         CollectionList<xyz.acrylicstyle.region.api.block.Block> blocks2 = blocks.map(RegionBlock::new);
         if (!playerTasks.containsKey(player.getUniqueId())) playerTasks.add(player.getUniqueId(), new CollectionList<>());
         Plugin plugin = RegionEdit.getInstance();
@@ -634,7 +650,7 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
         tasks.add(taskId, OperationStatus.FINISHED);
         double end = System.currentTimeMillis();
         double seconds = (end-start)/1000F;
-        int bpt = (int) (size /((float) (end-start)/50F));
+        int bpt = (int) (size / ((float) (end - start) / 50F)); // 50ms
         player.sendMessage(ChatColor.GREEN + "Operation completed. " + ChatColor.LIGHT_PURPLE + "(" + bpt + " blocks per ticks, took " + seconds + " seconds)");
     }
 
@@ -645,20 +661,25 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
     public static void setBlocks(Player player, Collection<BlockPos, BlockState> blocks, boolean history) {
         double start = System.currentTimeMillis();
         AsyncCatcher.setEnabled(false);
-        RegionEdit.loadChunks(blocks);
-        if (history) historyManager.addEntry(player.getUniqueId(), blocks);
-        if (!playerTasks.containsKey(player.getUniqueId())) playerTasks.add(player.getUniqueId(), new CollectionList<>());
-        Plugin plugin = RegionEdit.getInstance();
-        AtomicInteger i0 = new AtomicInteger();
-        AtomicInteger i = new AtomicInteger();
         final int taskId = RegionEditPlugin.taskId.getAndIncrement();
+        final Plugin plugin = RegionEdit.getInstance();
+        final AtomicInteger i0 = new AtomicInteger();
+        final AtomicInteger i = new AtomicInteger();
+        final boolean fastMode = sessions.get(player.getUniqueId()).isFastMode();
+        final int size = blocks.size();
+        final int in = Math.max((int) (size / 1000D), 1);
+        final World world = blocks.size() == 0 ? null : Objects.requireNonNull(blocks.firstKey()).getWorld();
+        if (history) {
+            pool.execute(() -> {
+                Log.as("RegionEdit").info("[" + taskId + "] Adding into the history in background... (" + player.getName() + ")");
+                historyManager.addEntry(player.getUniqueId(), blocks);
+                Log.as("RegionEdit").info("[" + taskId + "] Added into the history (" + player.getName() + ")");
+            });
+        }
+        if (!playerTasks.containsKey(player.getUniqueId())) playerTasks.add(player.getUniqueId(), new CollectionList<>());
         playerTasks.get(player.getUniqueId()).add(taskId);
         tasks.add(taskId, OperationStatus.RUNNING);
-        final boolean fastMode = sessions.get(player.getUniqueId()).isFastMode();
         player.sendMessage("" + ChatColor.RED + blocks.size() + ChatColor.GREEN + " blocks will be affected. " + ChatColor.LIGHT_PURPLE + " (Task ID: " + taskId + ")");
-        int size = blocks.size();
-        int in = Math.max((int) (size / 1000D), 1);
-        World world = blocks.size() == 0 ? null : Objects.requireNonNull(blocks.firstKey()).getWorld();
         blocks.forEach((loc, block) -> {
             assert world != null;
             if (!fastMode) {
@@ -686,6 +707,8 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
                     public void run() {
                         while (true) {
                             if (i0.get() >= blocks.size()) {
+                                Log.debug("Unloading chunks");
+                                RegionEdit.unloadChunks(blocks);
                                 Log.debug("Updating " + blocks.size() + " blocks");
                                 AtomicInteger i1 = new AtomicInteger();
                                 blocks.valuesList().forEach(b -> {

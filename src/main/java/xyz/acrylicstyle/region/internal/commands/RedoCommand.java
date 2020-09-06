@@ -17,6 +17,6 @@ public class RedoCommand extends PlayerCommandExecutor {
             player.sendMessage(ChatColor.RED + "There's nothing to redo.");
             return;
         }
-        RegionEditPlugin.setBlocks(player, blocks);
+        RegionEdit.pool.execute(() -> RegionEditPlugin.setBlocks(player, blocks));
     }
 }

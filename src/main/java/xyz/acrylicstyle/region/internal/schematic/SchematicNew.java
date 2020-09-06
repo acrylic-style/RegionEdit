@@ -46,7 +46,7 @@ public final class SchematicNew extends AbstractSchematic {
         boolean warnLogged = false;
         byte[] arr = tag.getByteArray("BlockData");
         for (byte i : arr) {
-            if (width.get() > maxWidth) {
+            if (width.get() > maxWidth) { // todo: make sure it's doing correctly
                 width.set(0);
                 length.incrementAndGet();
             }

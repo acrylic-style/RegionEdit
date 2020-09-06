@@ -25,6 +25,7 @@ public enum EnumBlockPropertyKey {
     WATERLOGGED("waterlogged", BlockPropertyType.BOOLEAN, blockProperties("C")),
     OCCUPIED("occupied", BlockPropertyType.BOOLEAN, blockProperties("t")),
     PART("part", BlockPropertyType.BED_PART, blockProperties("aE")),
+    SIGNAL_FIRE("signal_fire", BlockPropertyType.BOOLEAN, blockProperties("y")),
 
     SLAB_TYPE("type", BlockPropertyType.SLAB, blockProperties("aK")),
     CHEST_TYPE("type", BlockPropertyType.CHEST, blockProperties("aF")),
@@ -124,7 +125,7 @@ public enum EnumBlockPropertyKey {
         return cachedValues;
     }
 
-    // todo: add mapping (switch statement) if thrown error like "xxxx has missing mapping!"
+    // todo: add mapping (switch statement) if thrown error like "xxxx has missing mapping!" or "Could not set block data"
     @Nullable
     public static EnumBlockPropertyKey getProperty(@NotNull String id, @NotNull String s) {
         CollectionList<EnumBlockPropertyKey> list = getValues().filter(prop -> prop.name.equals(s));
@@ -137,19 +138,23 @@ public enum EnumBlockPropertyKey {
             case "level":
                 if (id.contains("lava") || id.contains("water")) {
                     return LEVEL_0_15;
+                } else if (id.contains("cauldron")) {
+                    return LEVEL_0_3;
                 }
             case "age":
                 if (id.contains("cocoa")) {
                     return AGE_2;
                 } else if (id.contains("sweet_berry_bush")) {
                     return AGE_3;
+                } else if (id.contains("sugar_cane") || id.contains("cactus")) {
+                    return AGE_15;
                 }
             case "distance":
                 if (id.contains("leaves")) {
                     return DISTANCE;
                 }
             case "axis":
-                if (id.contains("_log")) {
+                if (id.contains("_log") || id.contains("bone_block")) {
                     return AXIS_XYZ;
                 }
             case "facing":
@@ -161,7 +166,9 @@ public enum EnumBlockPropertyKey {
             case "half":
                 if (id.contains("_door")
                         || id.contains("tall_seagrass")
-                        || id.contains("large_fern")) {
+                        || id.contains("large_fern")
+                        || id.contains("peony")
+                        || id.contains("tall_grass")) {
                     return DOUBLE_HALF;
                 } else {
                     return HALF;

@@ -12,6 +12,7 @@ import xyz.acrylicstyle.region.api.player.UserSession;
 import xyz.acrylicstyle.region.api.util.BlockPos;
 import xyz.acrylicstyle.region.api.util.Tuple;
 import xyz.acrylicstyle.tomeito_api.command.PlayerCommandExecutor;
+import xyz.acrylicstyle.tomeito_api.utils.Log;
 
 public class PasteCommand extends PlayerCommandExecutor {
     @Override
@@ -25,6 +26,8 @@ public class PasteCommand extends PlayerCommandExecutor {
         final Location l1 = player.getLocation();
         AsyncCatcher.setEnabled(false);
         RegionEdit.pool.execute(() -> {
+            double start = RegionEdit.memoryUsageInGBRounded();
+            Log.as("RegionEdit").info(player.getName() + ": Calculating blocks in background");
             Collection<BlockPos, BlockState> blocks = new Collection<>();
             session.getClipboard().forEach(state -> {
                 int x = l1.getBlockX() + state.getLocation().getX();
@@ -34,6 +37,7 @@ public class PasteCommand extends PlayerCommandExecutor {
                 blocks.add(loc, new BlockState(state, new Tuple<>(x, y, z)));
             });
             player.sendMessage(ChatColor.GREEN + "Pasting clipboard... (it may take a while!)");
+            Log.as("RegionEdit").info(player.getName() + ": Setting blocks");
             try {
                 RegionEditPlugin.setBlocks(player, blocks, true);
             } catch (OutOfMemoryError e) {
@@ -44,6 +48,8 @@ public class PasteCommand extends PlayerCommandExecutor {
                 System.gc();
                 player.sendMessage(ChatColor.RED + "It looks like you tried to paste a lot of blocks. Clipboard has been cleared.");
             }
+            double end = RegionEdit.memoryUsageInGBRounded();
+            Log.as("RegionEdit").info("Memory usage: start: " + start + ", end: " + end);
         });
     }
 }

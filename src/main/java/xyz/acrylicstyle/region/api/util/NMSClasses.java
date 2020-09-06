@@ -9,7 +9,7 @@ import java.lang.reflect.Method;
 
 import static xyz.acrylicstyle.shared.NMSAPI.getClassWithoutException;
 
-public class NMSClasses {
+public final class NMSClasses {
     public static final Class<?> BlockPosition = getClassWithoutException("BlockPosition");
     public static final Class<?> IBlockData = getClassWithoutException("IBlockData");
     public static final Class<?> World = getClassWithoutException("World");
