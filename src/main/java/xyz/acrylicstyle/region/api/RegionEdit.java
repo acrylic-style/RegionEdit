@@ -5,6 +5,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
@@ -15,6 +16,7 @@ import org.jetbrains.annotations.Nullable;
 import util.Collection;
 import util.CollectionList;
 import util.CollectionSet;
+import util.ICollectionList;
 import xyz.acrylicstyle.region.api.block.state.BlockState;
 import xyz.acrylicstyle.region.api.block.state.BlockStatePropertyMap;
 import xyz.acrylicstyle.region.api.manager.HistoryManager;
@@ -28,6 +30,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -176,6 +179,15 @@ public interface RegionEdit extends Plugin {
         return chunks;
     }
 
+    static CollectionSet<Chunk> getChunks(@NotNull World world, @NotNull CollectionList<BlockState> blocks) {
+        CollectionSet<Chunk> chunks = new CollectionSet<>();
+        blocks.forEach(b -> chunks.add(b.getBlockPos(world).getChunk()));
+        new Thread(System::gc).start(); // run gc if we can
+        return chunks;
+    }
+
+    void relightChunks(@NotNull ICollectionList<Chunk> chunks);
+
     static void unloadChunks(Collection<BlockPos, BlockState> blocks) {
         CollectionSet<Chunk> chunks = getChunks(blocks);
         new BukkitRunnable() {
@@ -202,12 +214,27 @@ public interface RegionEdit extends Plugin {
     }
 
     static double memoryUsageInGB() {
-        Runtime runtime = Runtime.getRuntime();
         return memoryUsageInBytes() / 1024D / 1024D / 1024D;
     }
 
     static double memoryUsageInGBRounded() {
         return Math.round(memoryUsageInGB() * 100) / 100D;
+    }
+
+    static void setBlocks(@NotNull World world, @NotNull CollectionList<BlockState> blocks) {
+        pool.execute(() -> {
+            AtomicInteger i = new AtomicInteger();
+            blocks.forEach(block -> RegionEdit.pool.execute(() -> {
+                try {
+                    block.updateFast(world);
+                } finally {
+                    i.incrementAndGet();
+                    if (i.get() >= blocks.size()) {
+                        getInstance().relightChunks(getChunks(world, blocks));
+                    }
+                }
+            }));
+        });
     }
 
     @NotNull

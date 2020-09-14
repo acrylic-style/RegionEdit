@@ -362,6 +362,11 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
     }
 
     @Override
+    public void relightChunks(@NotNull ICollectionList<org.bukkit.Chunk> chunks) {
+        chunks.forEach(chunk -> Chunk.wrap(chunk).initLighting());
+    }
+
+    @Override
     public @NotNull Schematic createSchematic(@NotNull SchematicFormat format, @NotNull CompoundTag tag) {
         switch (format) {
             case LEGACY: return new SchematicLegacy(tag);
@@ -380,7 +385,6 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
         return navigationItem;
     }
 
-    @SuppressWarnings("UnstableApiUsage")
     @Override
     public @Nullable Map.Entry<Material, Byte> resolveMaterial(@NotNull String id) {
         if (id.matches("^\\d+|\\d+:\\d+$")) {
