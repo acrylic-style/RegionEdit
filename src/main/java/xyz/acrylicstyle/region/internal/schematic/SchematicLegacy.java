@@ -31,19 +31,9 @@ public final class SchematicLegacy extends AbstractSchematic {
         AtomicInteger height = new AtomicInteger();
         AtomicInteger length = new AtomicInteger();
         byte[] arr = tag.getByteArray("Blocks");
+        boolean warnLogged = false;
         for (byte i : arr) {
-            if (width.get() > maxWidth) {
-                width.set(0);
-                length.incrementAndGet();
-            }
-            if (length.get() > maxLength) {
-                length.set(0);
-                height.incrementAndGet();
-            }
-            if (height.get() > maxHeight) {
-                Log.warn("Resetting height to 0 (curr: " + height.get() + ", max: " + maxHeight + ")");
-                height.set(0);
-            }
+            warnLogged = SchematicNew.checkConditions(maxWidth, maxHeight, maxLength, width, height, length, warnLogged);
             byte data = dataTag.get(index.getAndIncrement()).asByte();
             blocks.add(new BlockState(Objects.requireNonNull(Blocks.getMaterialById(i)), data, null, new Location(null, width.get(), height.get(), length.get())));
         }

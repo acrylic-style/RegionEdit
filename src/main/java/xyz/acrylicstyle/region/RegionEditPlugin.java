@@ -367,7 +367,7 @@ public class RegionEditPlugin extends JavaPlugin implements RegionEdit, Listener
     }
 
     @Override
-    public @NotNull Schematic createSchematic(@NotNull SchematicFormat format, @NotNull CompoundTag tag) {
+    public @NotNull Schematic loadSchematic(@NotNull SchematicFormat format, @NotNull CompoundTag tag) {
         switch (format) {
             case LEGACY: return new SchematicLegacy(tag);
             case MODERN: return new SchematicNew(tag);

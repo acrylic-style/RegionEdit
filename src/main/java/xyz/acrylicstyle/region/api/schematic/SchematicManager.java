@@ -10,7 +10,12 @@ import java.io.File;
 import java.io.IOException;
 
 public final class SchematicManager {
-    // requires loaded plugin to work
+    /**
+     * Loads schematic from file, and returns the loaded schematic.
+     * This method requires plugin to be loaded.
+     * @param file the schematic file, if not found, the null will be returned.
+     * @return schematic if successfully loaded, null if file wasn't found or the an error occurred while loading schematic
+     */
     @Nullable
     public static Schematic load(@NotNull File file) {
         try {
@@ -23,9 +28,10 @@ public final class SchematicManager {
                     throw new IllegalArgumentException("Unsupported Materials tag: " + materials);
                 format = SchematicFormat.LEGACY;
             }
-            return RegionEdit.getInstance().createSchematic(format, tag);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            return RegionEdit.getInstance().loadSchematic(format, tag);
+        } catch (RuntimeException | IOException e) {
+            e.printStackTrace();
+            return null;
         }
     }
 

@@ -238,7 +238,7 @@ public interface RegionEdit extends Plugin {
     }
 
     @NotNull
-    Schematic createSchematic(@NotNull SchematicFormat format, @NotNull CompoundTag tag);
+    Schematic loadSchematic(@NotNull SchematicFormat format, @NotNull CompoundTag tag);
 
     @NotNull
     Material getWandItem();
