@@ -224,7 +224,7 @@ public interface RegionEdit extends Plugin {
     static void setBlocks(@NotNull World world, @NotNull CollectionList<BlockState> blocks) {
         pool.execute(() -> {
             AtomicInteger i = new AtomicInteger();
-            blocks.forEach(block -> RegionEdit.pool.execute(() -> {
+            blocks.forEach(block -> {
                 try {
                     block.updateFast(world);
                 } finally {
@@ -233,7 +233,7 @@ public interface RegionEdit extends Plugin {
                         getInstance().relightChunks(getChunks(world, blocks));
                     }
                 }
-            }));
+            });
         });
     }
 

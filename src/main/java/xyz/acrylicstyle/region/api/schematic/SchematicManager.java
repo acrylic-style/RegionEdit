@@ -10,6 +10,19 @@ import java.io.File;
 import java.io.IOException;
 
 public final class SchematicManager {
+    @Nullable
+    public static File findSchematic(@NotNull String name) {
+        File file = new File("./plugins/RegionEdit/schematics/" + name + ".schem");
+        if (file.exists()) return file;
+        file = new File("./plugins/RegionEdit/schematics/" + name + ".schematic");
+        if (file.exists()) return file;
+        file = new File("./plugins/WorldEdit/schematics/" + name + ".schem");
+        if (file.exists()) return file;
+        file = new File("./plugins/WorldEdit/schematics/" + name + ".schematic");
+        if (file.exists()) return file;
+        return null;
+    }
+
     /**
      * Loads schematic from file, and returns the loaded schematic.
      * This method requires plugin to be loaded.

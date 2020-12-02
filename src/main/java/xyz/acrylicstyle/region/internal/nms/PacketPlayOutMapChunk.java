@@ -1,9 +1,8 @@
 package xyz.acrylicstyle.region.internal.nms;
 
-import xyz.acrylicstyle.minecraft.Packet;
-import xyz.acrylicstyle.minecraft.PacketDataSerializer;
-import xyz.acrylicstyle.minecraft.PacketListener;
-import xyz.acrylicstyle.minecraft.PacketListenerPlayOut;
+import xyz.acrylicstyle.minecraft.v1_8_R1.Packet;
+import xyz.acrylicstyle.minecraft.v1_8_R1.PacketDataSerializer;
+import xyz.acrylicstyle.minecraft.v1_8_R1.PacketListenerPlayOut;
 import xyz.acrylicstyle.region.internal.utils.Compatibility;
 import xyz.acrylicstyle.tomeito_api.utils.ReflectionUtil;
 
@@ -15,14 +14,17 @@ public class PacketPlayOutMapChunk implements Packet<PacketListenerPlayOut> {
     public PacketPlayOutMapChunk(Chunk chunk) {
         try {
             if (Compatibility.checkPacketPlayOutMapChunk1_8Constructor()) {
+                // 1.8.x
                 this.o = ReflectionUtil.getNMSClass("PacketPlayOutMapChunk")
                         .getConstructor(ReflectionUtil.getNMSClass("Chunk"), boolean.class, int.class)
                         .newInstance(chunk.getNMSClass(), true, 20);
             } else if (Compatibility.checkPacketPlayOutMapChunk1_16Constructor()) {
+                // 1.16+
                 this.o = ReflectionUtil.getNMSClass("PacketPlayOutMapChunk")
                         .getConstructor(ReflectionUtil.getNMSClass("Chunk"), int.class, boolean.class)
                         .newInstance(chunk.getNMSClass(), 20, true);
             } else {
+                // 1.9-1.15.2
                 this.o = ReflectionUtil.getNMSClass("PacketPlayOutMapChunk")
                         .getConstructor(ReflectionUtil.getNMSClass("Chunk"), int.class)
                         .newInstance(chunk.getNMSClass(), 20);

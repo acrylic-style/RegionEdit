@@ -17,6 +17,7 @@ import xyz.acrylicstyle.region.api.player.UserSession;
 import xyz.acrylicstyle.region.api.region.CuboidRegion;
 import xyz.acrylicstyle.region.api.region.RegionSelection;
 import xyz.acrylicstyle.region.api.selection.SelectionMode;
+import xyz.acrylicstyle.region.internal.RegionEditImpl;
 import xyz.acrylicstyle.shared.NMSAPI;
 import xyz.acrylicstyle.shared.OBCAPI;
 import xyz.acrylicstyle.tomeito_api.utils.Log;
@@ -25,10 +26,10 @@ import java.util.Objects;
 import java.util.UUID;
 
 public final class UserSessionImpl implements UserSession {
-    private final RegionEditPlugin plugin;
+    private final RegionEditImpl plugin;
     private final UUID uuid;
 
-    public UserSessionImpl(@NotNull RegionEditPlugin plugin, @NotNull UUID uuid) {
+    public UserSessionImpl(@NotNull RegionEditImpl plugin, @NotNull UUID uuid) {
         Validate.notNull(plugin, "plugin cannot be null");
         Validate.notNull(uuid, "uuid cannot be null");
         this.plugin = plugin;
