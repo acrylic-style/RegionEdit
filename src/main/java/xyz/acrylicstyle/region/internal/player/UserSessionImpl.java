@@ -20,6 +20,7 @@ import xyz.acrylicstyle.region.api.selection.SelectionMode;
 import xyz.acrylicstyle.region.internal.RegionEditImpl;
 import xyz.acrylicstyle.shared.NMSAPI;
 import xyz.acrylicstyle.shared.OBCAPI;
+import xyz.acrylicstyle.tomeito_api.TomeitoAPI;
 import xyz.acrylicstyle.tomeito_api.utils.Log;
 
 import java.util.Objects;
@@ -155,17 +156,14 @@ public final class UserSessionImpl implements UserSession {
     @Override
     public void setCUISupport(boolean flag) { this.cuiSupport = flag; }
 
-    private int protocolVersion = 1;
+    private int protocolVersion = -1;
 
     @Override
     public int getProtocolVersion() {
-        if (protocolVersion != 1) return protocolVersion;
+        if (protocolVersion != -1) return protocolVersion;
         Player player = getPlayer();
         if (player == null) return protocolVersion;
-        NMSAPI ep = NMSAPI.getEmptyNMSAPI(OBCAPI.getEmptyOBCAPI(player, "entity.CraftPlayer").getHandle(), "EntityPlayer");
-        NMSAPI pc = NMSAPI.getEmptyNMSAPI(ep.getField("playerConnection"), "PlayerConnection");
-        NMSAPI nm = NMSAPI.getEmptyNMSAPI(pc.getField("networkManager"), "NetworkManager");
-        protocolVersion = (int) nm.invoke("getVersion");
+        protocolVersion = TomeitoAPI.getProtocolVersion(player).complete();
         return protocolVersion;
     }
 
@@ -179,7 +177,7 @@ public final class UserSessionImpl implements UserSession {
 
     @Override
     public @NotNull String getCUIChannel() {
-        return getMinecraftVersion().isModern() ? RegionEditPlugin.CUI : RegionEditPlugin.CUI_LEGACY;
+        return getMinecraftVersion().isModern() || getMinecraftVersion() == MCVersion.UNKNOWN ? RegionEditPlugin.CUI : RegionEditPlugin.CUI_LEGACY;
     }
 
     private ICollectionList<BlockState> clipboard = null;

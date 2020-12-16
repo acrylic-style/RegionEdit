@@ -2,8 +2,11 @@ package xyz.acrylicstyle.region.api.schematic;
 
 import net.querz.nbt.io.NBTUtil;
 import net.querz.nbt.tag.CompoundTag;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import util.CollectionSet;
+import util.ICollectionList;
 import xyz.acrylicstyle.region.api.RegionEdit;
 
 import java.io.File;
@@ -21,6 +24,21 @@ public final class SchematicManager {
         file = new File("./plugins/WorldEdit/schematics/" + name + ".schematic");
         if (file.exists()) return file;
         return null;
+    }
+
+    @Contract(pure = true)
+    @NotNull
+    public static CollectionSet<String> findSchematicFiles() {
+        CollectionSet<String> set = new CollectionSet<>();
+        File file = new File("./plugins/RegionEdit/schematics/");
+        if (file.exists()) {
+            set.addAll(ICollectionList.asList(file.listFiles(f -> f.isFile() && f.getName().endsWith(".schem") || f.getName().endsWith(".schematic"))).map(File::getName));
+        }
+        file = new File("./plugins/WorldEdit/schematics/");
+        if (file.exists()) {
+            set.addAll(ICollectionList.asList(file.listFiles(f -> f.isFile() && f.getName().endsWith(".schem") || f.getName().endsWith(".schematic"))).map(File::getName));
+        }
+        return set;
     }
 
     /**

@@ -27,7 +27,7 @@ import xyz.acrylicstyle.region.api.schematic.Schematic;
 import xyz.acrylicstyle.region.api.schematic.SchematicFormat;
 import xyz.acrylicstyle.region.api.selection.SelectionMode;
 import xyz.acrylicstyle.region.api.util.NMSClasses;
-import xyz.acrylicstyle.region.internal.block.Blocks;
+import xyz.acrylicstyle.region.internal.block.BlockUtil;
 import xyz.acrylicstyle.region.internal.command.CommandDescriptionManager;
 import xyz.acrylicstyle.region.internal.manager.HistoryManagerImpl;
 import xyz.acrylicstyle.region.internal.player.UserSessionImpl;
@@ -36,6 +36,7 @@ import xyz.acrylicstyle.region.internal.schematic.SchematicNew;
 import xyz.acrylicstyle.region.internal.utils.BukkitVersion;
 import xyz.acrylicstyle.region.internal.utils.Compatibility;
 import xyz.acrylicstyle.region.internal.utils.Reflection;
+import xyz.acrylicstyle.tomeito_api.utils.Log;
 import xyz.acrylicstyle.tomeito_api.utils.ReflectionUtil;
 
 import java.lang.reflect.InvocationTargetException;
@@ -109,14 +110,14 @@ public class RegionEditImpl extends JavaPlugin implements RegionEdit {
                 int x = getLocation().getX();
                 int y = getLocation().getY();
                 int z = getLocation().getZ();
-                Object blockId;
+                Object iBlockData;
                 if (Compatibility.checkBlockData() && getPropertyMap() != null) {
-                    blockId = getPropertyMap().getIBlockData(new MaterialData(type, data));
+                    iBlockData = getPropertyMap().getIBlockData(new MaterialData(type, data));
                 } else {
-                    blockId = Blocks.getByCombinedId(type.getId() + (data << 12));
+                    iBlockData = BlockUtil.getByCombinedId(type.getId() + (data << 12));
                 }
-                //lastIBlockData = blockId;
-                xyz.acrylicstyle.region.internal.nms.Chunk.wrap(world.getChunkAt(x >> 4, z >> 4)).sections[y >> 4].setType(x & 15, y & 15, z & 15, blockId);
+                //lastIBlockData = iBlockData;
+                BlockUtil.setBlockOld(world, x, y, z, iBlockData);
             }
 
             @SuppressWarnings("deprecation")
@@ -124,9 +125,10 @@ public class RegionEditImpl extends JavaPlugin implements RegionEdit {
                 int x = getLocation().getX();
                 int y = getLocation().getY();
                 int z = getLocation().getZ();
-                Block block = world.getBlockAt(x, y, z);
-                org.bukkit.Chunk chunk = block.getChunk();
-                xyz.acrylicstyle.region.internal.nms.Chunk.wrap(chunk).setType(Reflection.newRawBlockPosition(x, y, z), getPropertyMap() == null ? null : getPropertyMap().getIBlockData(new MaterialData(type, data)), false);
+                org.bukkit.Chunk chunk = world.getChunkAt(x >> 4, z >> 4);
+                Object iBlockData = null;
+                if (getPropertyMap() != null) iBlockData = getPropertyMap().getIBlockData(new MaterialData(type, data));
+                xyz.acrylicstyle.region.internal.nms.Chunk.wrap(chunk).setType(Reflection.newRawBlockPosition(x, y, z), iBlockData, false);
             }
         };
     }
@@ -217,15 +219,16 @@ public class RegionEditImpl extends JavaPlugin implements RegionEdit {
             if (arr.length != 1) {
                 data = Integer.parseInt(arr[1]);
             } else {
-                data = 0;
+                data = -1;
             }
-            return new AbstractMap.SimpleImmutableEntry<>(Blocks.getMaterialById(Integer.parseInt(arr[0])), (byte) data);
+            return new AbstractMap.SimpleImmutableEntry<>(BlockUtil.getMaterialById(Integer.parseInt(arr[0])), (byte) data);
         } else {
             CollectionList<String> materials = ICollectionList.asList(Material.values()).filter(Material::isBlock).map(Enum::name).map((Function<String, String>) String::toLowerCase);
             if (!materials.contains(id.split(":")[0].toLowerCase())) {
                 return null;
             }
-            int data = JavaScript.parseInt((id + ":0").split(":")[1], 10);
+            int data = JavaScript.parseInt((id + ":-1").split(":")[1], 10);
+            Log.debug("Data: " + data);
             return new AbstractMap.SimpleImmutableEntry<>(Material.getMaterial(Objects.requireNonNull(materials.filter(s -> s.equalsIgnoreCase((id + ":0").split(":")[0])).first()).toUpperCase()), (byte) data);
         }
     }

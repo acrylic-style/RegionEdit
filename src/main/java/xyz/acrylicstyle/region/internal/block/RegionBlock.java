@@ -67,7 +67,7 @@ public class RegionBlock implements Block, Cloneable, Serializable {
     @Override
     public void setBlockData(BlockData blockData) {
         if (!Compatibility.checkBlockData()) return;
-        if (blockData == null) throw new NullPointerException("blockData is null!"); // BlockData class is available so blockData shouldn't be null.
+        if (blockData == null) throw new AssertionError(); // BlockData class is available so blockData shouldn't be null.
         try {
             ReflectionHelper.invokeMethod(location.getBlock().getClass(), location.getBlock(), "setBlockData", ((RegionBlockData) blockData).getHandle());
         } catch (InvocationTargetException | IllegalAccessException | NoSuchMethodException e) {

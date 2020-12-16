@@ -74,7 +74,7 @@ public class Chunk extends NMSAPI {
         } else {
             invoke("initLighting");
         }
-         */
+        */
         if (!Compatibility.checkLightEngine()) invoke("initLighting");
     }
 

@@ -2,6 +2,7 @@ package xyz.acrylicstyle.region.api.block.state;
 
 import org.bukkit.block.Block;
 import org.bukkit.material.MaterialData;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import util.CollectionSet;
@@ -39,6 +40,7 @@ public class BlockStatePropertyMap implements Serializable {
     public <T> T get(@NotNull String key, @NotNull BlockPropertyType<T> type) {
         Map.Entry<String, String> v = nodes.filter(entry -> entry.getKey().equals(key)).first();
         Validate.notNull(v, key + " has missing mapping!");
+        assert v != null;
         return type.parse(v.getValue());
     }
 
@@ -62,13 +64,10 @@ public class BlockStatePropertyMap implements Serializable {
         return this.cachedImpl;
     }
 
-    public void apply(Block block) {
-        implementMethods().apply(block);
-    }
+    public void apply(Block block) { implementMethods().apply(block); }
 
-    public Object getIBlockData(MaterialData data) {
-        return implementMethods().getIBlockData(data);
-    }
+    @Contract(pure = true)
+    public Object getIBlockData(MaterialData data) { return implementMethods().getIBlockData(data); }
 
     /* static methods */
 

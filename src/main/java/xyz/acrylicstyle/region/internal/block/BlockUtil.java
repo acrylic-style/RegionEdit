@@ -27,9 +27,13 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class Blocks {
+public class BlockUtil {
     public static void setBlockOld(World world, int x, int y, int z, int blockId, byte data) {
-        Chunk.wrap(world.getChunkAt(x >> 4, z >> 4)).sections[y >> 4].setType(x & 15, y & 15, z & 15, getByCombinedId(blockId + (data << 12)));
+        setBlockOld(world, x, y, z, getByCombinedId(blockId + (data << 12)));
+    }
+
+    public static void setBlockOld(World world, int x, int y, int z, Object iBlockData) {
+        Chunk.wrap(world.getChunkAt(x >> 4, z >> 4)).sections[y >> 4].setType(x & 15, y & 15, z & 15, iBlockData);
     }
 
     public static int getCombinedId(@NotNull BlockData blockData) {
@@ -48,9 +52,8 @@ public class Blocks {
         try {
             return ReflectionUtil.getNMSClass("Block").getMethod("getByCombinedId", int.class).invoke(null, i);
         } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException | ClassNotFoundException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
-        return null;
     }
 
     @Nullable
@@ -140,7 +143,7 @@ public class Blocks {
             int y = block.getLocation().getBlockY();
             int z = block.getLocation().getBlockZ();
             World world = block.getLocation().getWorld();
-            Blocks.setBlock(world, x, y, z, material, data, block.getBlockData());
+            BlockUtil.setBlock(world, x, y, z, material, data, block.getBlockData());
             i0.incrementAndGet();
         });
         new BukkitRunnable() {

@@ -37,7 +37,7 @@ import xyz.acrylicstyle.region.api.region.CuboidRegion;
 import xyz.acrylicstyle.region.api.selection.SelectionMode;
 import xyz.acrylicstyle.region.api.util.BlockPos;
 import xyz.acrylicstyle.region.internal.RegionEditImpl;
-import xyz.acrylicstyle.region.internal.block.Blocks;
+import xyz.acrylicstyle.region.internal.block.BlockUtil;
 import xyz.acrylicstyle.region.internal.block.RegionBlock;
 import xyz.acrylicstyle.region.internal.command.CommandDescription;
 import xyz.acrylicstyle.region.internal.commands.CancelCommand;
@@ -90,7 +90,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 @SuppressWarnings("UnstableApiUsage")
 public class RegionEditPlugin extends RegionEditImpl implements RegionEdit, Listener {
-    public static final ReservedMemory reserve = new ReservedMemory(1024*1024*128);
+    public static final ReservedMemory reserve = new ReservedMemory(1024*1024*128); // 128mb?
     public static final String COMMAND_PREFIX = "/";
     public static final String CUI = "worldedit:cui";
     public static final String CUI_LEGACY = "WECUI";
@@ -253,7 +253,7 @@ public class RegionEditPlugin extends RegionEditImpl implements RegionEdit, List
                         World world = e.getClickedBlock().getWorld();
                         RegionEdit.getNearbyBlocksAsync(e.getClickedBlock().getLocation(), getUserSession(e.getPlayer()).getSuperPickaxeRadius(), (blocks, e1) -> {
                             blocks = blocks.filter(block -> block.getType() == type && Reflection.getData(block) == data);
-                            blocks.forEach(block -> Blocks.setBlockSendBlockChange(world, block.getX(), block.getY(), block.getZ(), Material.AIR, (byte) 0, Reflection.createBlockData(block.getLocation(), Material.AIR)));
+                            blocks.forEach(block -> BlockUtil.setBlockSendBlockChange(world, block.getX(), block.getY(), block.getZ(), Material.AIR, (byte) 0, Reflection.createBlockData(block.getLocation(), Material.AIR)));
                             //Blocks.sendBlockChanges(blocks, type, data);
                         });
                     } else if (session.getSuperPickaxeMode() == SuperPickaxeMode.DESTROYER) {
@@ -261,7 +261,7 @@ public class RegionEditPlugin extends RegionEditImpl implements RegionEdit, List
                         //final byte data = Reflection.getData(e.getClickedBlock());
                         World world = e.getClickedBlock().getWorld();
                         RegionEdit.getNearbyBlocksAsync(e.getClickedBlock().getLocation(), getUserSession(e.getPlayer()).getSuperPickaxeRadius(), (blocks, e1) -> {
-                            blocks.forEach(block -> Blocks.setBlockSendBlockChange(world, block.getX(), block.getY(), block.getZ(), Material.AIR, (byte) 0, Reflection.createBlockData(block.getLocation(), Material.AIR)));
+                            blocks.forEach(block -> BlockUtil.setBlockSendBlockChange(world, block.getX(), block.getY(), block.getZ(), Material.AIR, (byte) 0, Reflection.createBlockData(block.getLocation(), Material.AIR)));
                             //Blocks.sendBlockChanges(blocks, type, data);
                         });
                     } else if (session.getSuperPickaxeMode() == SuperPickaxeMode.SINGLE) {
@@ -279,9 +279,9 @@ public class RegionEditPlugin extends RegionEditImpl implements RegionEdit, List
                                     item.setItemStack(data == 0 ? new ItemStack(type) : new ItemStack(type, 1, data));
                                     item.setPickupDelay(0);
                                 });
-                                Blocks.setBlock(world, block.getX(), block.getY(), block.getZ(), Material.AIR, (byte) 0, Reflection.createBlockData(block.getLocation(), Material.AIR));
+                                BlockUtil.setBlock(world, block.getX(), block.getY(), block.getZ(), Material.AIR, (byte) 0, Reflection.createBlockData(block.getLocation(), Material.AIR));
                             });
-                            Blocks.sendBlockChanges(blocks, type, data);
+                            BlockUtil.sendBlockChanges(blocks, type, data);
                         });
                     }
                 }
@@ -350,7 +350,7 @@ public class RegionEditPlugin extends RegionEditImpl implements RegionEdit, List
                 int y = block.getLocation().getBlockY();
                 int z = block.getLocation().getBlockZ();
                 World world = block.getLocation().getWorld();
-                Blocks.setBlock(world, x, y, z, material, data, Reflection.createBlockData(block.getLocation(), material));
+                BlockUtil.setBlock(world, x, y, z, material, data, Reflection.createBlockData(block.getLocation(), material));
                 showPercentage(i0, size, in, player, taskId);
             });
         } else {
@@ -370,7 +370,11 @@ public class RegionEditPlugin extends RegionEditImpl implements RegionEdit, List
                 new BukkitRunnable() {
                     @Override
                     public void run() {
-                        historyManager.addEntry(player.getUniqueId(), blocks2);
+                        if (blocks2.size() <= 30000) {
+                            historyManager.addEntry(player.getUniqueId(), blocks2);
+                        } else {
+                            player.sendMessage(ChatColor.YELLOW + "History was not saved (large edit).");
+                        }
                         if (fastMode) {
                             while (true) {
                                 if (i0.get() >= blocks.size()) {
@@ -394,7 +398,7 @@ public class RegionEditPlugin extends RegionEditImpl implements RegionEdit, List
                     entries.add(b.getChunk());
                     for (Player p : Bukkit.getOnlinePlayers())
                         Reflection.sendBlockChange(p, b.getLocation(), material, data, Reflection.createBlockData(b.getLocation(), material));
-                    showPercentage(i1, size, in, player, "Sending block changes", "Blocks");
+                    showAndIncrementPercentage(i1, size, in, player, "Sending block changes", "Blocks");
                     // if (!fastMode) Reflection.notify(b.getWorld(), b, Reflection.newRawBlockPosition(b.getLocation().getBlockX(), b.getLocation().getBlockY(), b.getLocation().getBlockZ()));
                 });
             }
@@ -410,11 +414,15 @@ public class RegionEditPlugin extends RegionEditImpl implements RegionEdit, List
         }
     }
 
-    private static void showPercentage(AtomicInteger i0, int size, int in, Player player, String action, String ps) {
-        double p = Math.round(i0.incrementAndGet() / (double) size * 1000) / 10D;
-        if (i0.get() % in == 0 || i0.get() == size) {
+    private static void showAndIncrementPercentage(AtomicInteger i0, int size, int in, Player player, String action, String ps) {
+        showPercentage(i0.incrementAndGet(), size, in, player, action, ps);
+    }
+
+    private static void showPercentage(int i0, int size, int in, Player player, String action, String ps) {
+        double p = Math.round(i0 / (double) size * 1000) / 10D;
+        if (i0 % in == 0 || i0 == size) {
             ActionBar.sendActionbar(player, ChatColor.LIGHT_PURPLE + action + " | "
-                    + ChatColor.GREEN + ps + ": " + ChatColor.YELLOW + i0.get() + ChatColor.LIGHT_PURPLE + " / " + ChatColor.YELLOW + size
+                    + ChatColor.GREEN + ps + ": " + ChatColor.YELLOW + i0 + ChatColor.LIGHT_PURPLE + " / " + ChatColor.YELLOW + size
                     + ChatColor.GOLD + " | " + ChatColor.YELLOW + p + "%");
         }
     }
@@ -443,11 +451,17 @@ public class RegionEditPlugin extends RegionEditImpl implements RegionEdit, List
         final int size = blocks.size();
         final int in = Math.max((int) (size / 1000D), 1);
         final World world = blocks.size() == 0 ? null : Objects.requireNonNull(blocks.firstKey()).getWorld();
+        if (world == null) return;
         if (history) {
             pool.execute(() -> {
                 Log.as("RegionEdit").info("[" + taskId + "] Adding into the history in background... (" + player.getName() + ")");
-                historyManager.addEntry(player.getUniqueId(), blocks);
-                Log.as("RegionEdit").info("[" + taskId + "] Added into the history (" + player.getName() + ")");
+                if (blocks.size() <= 30000) {
+                    historyManager.addEntry(player.getUniqueId(), blocks);
+                    Log.as("RegionEdit").info("[" + taskId + "] Added into the history (" + player.getName() + ")");
+                } else {
+                    player.sendMessage(ChatColor.YELLOW + "History was not saved (large edit).");
+                    Log.as("RegionEdit").info("[" + taskId + "] History was not saved (large edit) (" + player.getName() + ")");
+                }
             });
         }
         if (!playerTasks.containsKey(player.getUniqueId())) playerTasks.add(player.getUniqueId(), new CollectionList<>());
@@ -455,21 +469,19 @@ public class RegionEditPlugin extends RegionEditImpl implements RegionEdit, List
         tasks.add(taskId, OperationStatus.RUNNING);
         player.sendMessage("" + ChatColor.RED + blocks.size() + ChatColor.GREEN + " blocks will be affected. " + ChatColor.LIGHT_PURPLE + " (Task ID: " + taskId + ")");
         blocks.forEach((loc, block) -> {
-            assert world != null;
             if (!fastMode) {
-                new Thread(() -> new BukkitRunnable() {
+                new BukkitRunnable() {
                     @Override
                     public void run() {
                         if (tasks.get(taskId) == OperationStatus.CANCELLED) return;
                         block.update(world);
                         showPercentage(i0, size, in, player, taskId);
                     }
-                }.runTaskLater(plugin, i0.get() % RegionEditPlugin.blocksPerTick == 0 ? i.getAndIncrement() : i.get())).start();
+                }.runTaskLater(plugin, i0.get() % RegionEditPlugin.blocksPerTick == 0 ? i.getAndIncrement() : i.get());
             } else {
-                pool.execute(() -> {
-                    block.updateFast(world);
-                    showPercentage(i0, size, in, player, taskId);
-                });
+                if (tasks.get(taskId) == OperationStatus.CANCELLED) return;
+                block.updateFast(world);
+                showPercentage(i0, size, in, player, taskId);
             }
         });
         new BukkitRunnable() {
@@ -486,9 +498,10 @@ public class RegionEditPlugin extends RegionEditImpl implements RegionEdit, List
                                 Log.debug("Updating " + blocks.size() + " blocks");
                                 AtomicInteger i1 = new AtomicInteger();
                                 blocks.valuesList().forEach(b -> {
+                                    i1.incrementAndGet();
                                     for (Player p : Bukkit.getOnlinePlayers()) {
                                         Reflection.sendBlockChange(p, b.getBlockPos(world).getLocation(), b.getType(), b.getData(), b.getPropertyMap() == null ? null : b.getPropertyMap().getIBlockData(new MaterialData(b.getType(), b.getData())));
-                                        showPercentage(i1, size, in, player, "Sending block changes", "Blocks");
+                                        showPercentage(i1.get(), size, in, player, "Sending block changes", "Blocks");
                                     }
                                     // Reflection.notify(b.getLocation().getWorld(), b.getBukkitBlock(), new BlockPosition(b.getLocation().getBlockX(), b.getLocation().getBlockY(), b.getLocation().getBlockZ()).getHandle());
                                 });
@@ -500,7 +513,7 @@ public class RegionEditPlugin extends RegionEditImpl implements RegionEdit, List
                                     c.initLighting();
                                     Reflection.sendChunk(player, c);
                                     Reflection.markDirty(chunk);
-                                    showPercentage(ch, chunks.size(), 1, player, "Relighting chunks", "Chunks");
+                                    showAndIncrementPercentage(ch, chunks.size(), 1, player, "Relighting chunks", "Chunks");
                                 });
                                 AsyncCatcher.setEnabled(true);
                                 break;

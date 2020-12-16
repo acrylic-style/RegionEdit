@@ -41,7 +41,8 @@ public class ReplaceCommand extends PlayerCommandExecutor {
             return;
         }
         int data1 = entry1.getValue();
-        int data2 = entry2.getValue();
+        int data20 = entry2.getValue();
+        int data2 = data20 == -1 ? 0 : data20;
         Material material1 = entry1.getKey();
         Material material2 = entry2.getKey();
         RegionSelection regionSelection = RegionEditPlugin.regionSelection.get(player.getUniqueId());
@@ -50,12 +51,12 @@ public class ReplaceCommand extends PlayerCommandExecutor {
             assert region.getLocation() != null;
             if (args[0].startsWith("!")) {
                 RegionEdit.getBlocksInvertAsync(region.getLocation(), region.getLocation2(), material1, (blocks, throwable) -> {
-                    blocks = blocks.filter(block -> Reflection.getData(block) != (byte) data1);
+                    if (data1 != -1) blocks = blocks.filter(block -> Reflection.getData(block) != (byte) data1);
                     RegionEdit.getInstance().getHistoryManager().resetPointer(player.getUniqueId());
                     RegionEditPlugin.setBlocks(player, blocks, material2, (byte) data2);
                 });
             } else {
-                RegionEdit.getBlocksAsync(region.getLocation(), region.getLocation2(), material1, block -> Reflection.getData(block) == (byte) data1, (blocks, throwable) -> {
+                RegionEdit.getBlocksAsync(region.getLocation(), region.getLocation2(), material1, block -> data1 == -1 || Reflection.getData(block) == (byte) data1, (blocks, throwable) -> {
                     RegionEdit.getInstance().getHistoryManager().resetPointer(player.getUniqueId());
                     RegionEditPlugin.setBlocks(player, blocks, material2, (byte) data2);
                 });

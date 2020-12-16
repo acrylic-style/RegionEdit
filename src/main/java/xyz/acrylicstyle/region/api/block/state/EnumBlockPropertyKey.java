@@ -13,6 +13,7 @@ import java.util.Objects;
 // see nms.BlockProperties for implementing this
 // todo: add more things
 // todo: if something throws exception "xxxx has missing property" then add the missing property key here
+// todo: incompatible versions
 public enum EnumBlockPropertyKey {
     SNOWY("snowy", BlockPropertyType.BOOLEAN, blockProperties("z")),
     PERSISTENT("persistent", BlockPropertyType.BOOLEAN, blockProperties("v")),

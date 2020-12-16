@@ -27,6 +27,7 @@ public class PasteCommand extends PlayerCommandExecutor {
         AsyncCatcher.setEnabled(false);
         RegionEdit.pool.execute(() -> {
             double start = RegionEdit.memoryUsageInGBRounded();
+            double max = start;
             Log.as("RegionEdit").info(player.getName() + ": Calculating blocks in background");
             Collection<BlockPos, BlockState> blocks = new Collection<>();
             session.getClipboard().forEach(state -> {
@@ -36,20 +37,24 @@ public class PasteCommand extends PlayerCommandExecutor {
                 BlockPos loc = new BlockPos(l1.getWorld(), x, y, z);
                 blocks.add(loc, new BlockState(state, new Tuple<>(x, y, z)));
             });
+            if (max < RegionEdit.memoryUsageInGBRounded()) max = RegionEdit.memoryUsageInGBRounded();
             player.sendMessage(ChatColor.GREEN + "Pasting clipboard... (it may take a while!)");
             Log.as("RegionEdit").info(player.getName() + ": Setting blocks");
             try {
                 RegionEditPlugin.setBlocks(player, blocks, true);
             } catch (OutOfMemoryError e) {
+                Log.warn("Ran out of memory during pasting clipboard (" + RegionEdit.getInstance().getUserSession(player).getClipboard().size() + " blocks total)");
+                e.printStackTrace();
                 RegionEditPlugin.reserve.freeImmediately();
                 blocks.clear();
                 System.gc();
                 RegionEdit.getInstance().getUserSession(player).setClipboard(null);
                 System.gc();
-                player.sendMessage(ChatColor.RED + "It looks like you tried to paste a lot of blocks. Clipboard has been cleared.");
+                player.sendMessage(ChatColor.RED + "It looks like you tried to paste a lot of blocks. Clipboard have been cleared.");
             }
             double end = RegionEdit.memoryUsageInGBRounded();
-            Log.as("RegionEdit").info("Memory usage: start: " + start + ", end: " + end);
+            if (max < end) max = end;
+            Log.as("RegionEdit").info("Memory usage: start: " + start + "G, end: " + end + "G, max: " + max + "G");
         });
     }
 }

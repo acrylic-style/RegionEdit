@@ -20,7 +20,7 @@ public final class BlockPos extends BlockTuple<Integer, Integer, Integer> implem
         super(world, x, y, z);
     }
 
-    public Location getLocation() { return new Location(world, x, y, z); }
+    public Location getLocation() { return new Location(getWorld(), x, y, z); }
 
     public Block getBlock() {
         return getLocation().getBlock();

@@ -34,14 +34,16 @@ public class SetCommand extends PlayerCommandExecutor {
             return;
         }
         int data = entry.getValue();
+        if (data == -1) data = 0;
         Material material = entry.getKey();
         RegionSelection regionSelection = RegionEditPlugin.regionSelection.get(player.getUniqueId());
         if (regionSelection instanceof CuboidRegion) {
             CuboidRegion region = (CuboidRegion) regionSelection;
             assert region.getLocation() != null;
-            RegionEdit.getBlocksAsync(region.getLocation(), region.getLocation2(), null, block -> block.getType() != material || Reflection.getData(block) != data, (blocks, throwable) -> {
+            int finalData = data;
+            RegionEdit.getBlocksAsync(region.getLocation(), region.getLocation2(), null, block -> block.getType() != material || Reflection.getData(block) != finalData, (blocks, throwable) -> {
                 RegionEdit.getInstance().getHistoryManager().resetPointer(player.getUniqueId());
-                RegionEdit.pool.execute(() -> RegionEditPlugin.setBlocks(player, blocks, material, (byte) data));
+                RegionEdit.pool.execute(() -> RegionEditPlugin.setBlocks(player, blocks, material, (byte) finalData));
             });
         } else {
             throw new RegionEditException("Invalid RegionSelection class: " + regionSelection.getClass().getCanonicalName());
