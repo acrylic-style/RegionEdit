@@ -122,14 +122,14 @@ public enum EnumBlockPropertyKey {
     private static CollectionList<EnumBlockPropertyKey> cachedValues;
     private static CollectionList<EnumBlockPropertyKey> getValues() {
         if (cachedValues != null) return cachedValues;
-        cachedValues = ICollectionList.asList(values());
+        cachedValues = (CollectionList<EnumBlockPropertyKey>) ICollectionList.asList(values());
         return cachedValues;
     }
 
     // todo: add mapping (switch statement) if thrown error like "xxxx has missing mapping!" or "Could not set block data"
     @Nullable
     public static EnumBlockPropertyKey getProperty(@NotNull String id, @NotNull String s) {
-        CollectionList<EnumBlockPropertyKey> list = getValues().filter(prop -> prop.name.equals(s));
+        ICollectionList<EnumBlockPropertyKey> list = getValues().filter(prop -> prop.name.equals(s));
         if (list.size() == 1) return Objects.requireNonNull(list.first());
         if (list.size() == 0) {
             Log.warn("Parsing " + id + ": " + id + " has missing property!");

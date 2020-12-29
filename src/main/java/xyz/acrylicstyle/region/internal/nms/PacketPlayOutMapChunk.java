@@ -19,10 +19,15 @@ public class PacketPlayOutMapChunk implements Packet<PacketListenerPlayOut> {
                         .getConstructor(ReflectionUtil.getNMSClass("Chunk"), boolean.class, int.class)
                         .newInstance(chunk.getNMSClass(), true, 20);
             } else if (Compatibility.checkPacketPlayOutMapChunk1_16Constructor()) {
-                // 1.16+
+                // 1.16.x
                 this.o = ReflectionUtil.getNMSClass("PacketPlayOutMapChunk")
                         .getConstructor(ReflectionUtil.getNMSClass("Chunk"), int.class, boolean.class)
                         .newInstance(chunk.getNMSClass(), 20, true);
+            } else if (Compatibility.checkPacketPlayOutMapChunk1_17Constructor()) {
+                // 1.17.x
+                this.o = ReflectionUtil.getNMSClass("PacketPlayOutMapChunk")
+                        .getConstructor(ReflectionUtil.getNMSClass("Chunk"))
+                        .newInstance(chunk.getNMSClass());
             } else {
                 // 1.9-1.15.2
                 this.o = ReflectionUtil.getNMSClass("PacketPlayOutMapChunk")

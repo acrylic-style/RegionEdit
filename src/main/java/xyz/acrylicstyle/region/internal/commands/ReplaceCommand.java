@@ -2,7 +2,9 @@ package xyz.acrylicstyle.region.internal.commands;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import util.CollectionList;
 import xyz.acrylicstyle.region.RegionEditPlugin;
 import xyz.acrylicstyle.region.api.RegionEdit;
 import xyz.acrylicstyle.region.api.exception.RegionEditException;
@@ -51,7 +53,7 @@ public class ReplaceCommand extends PlayerCommandExecutor {
             assert region.getLocation() != null;
             if (args[0].startsWith("!")) {
                 RegionEdit.getBlocksInvertAsync(region.getLocation(), region.getLocation2(), material1, (blocks, throwable) -> {
-                    if (data1 != -1) blocks = blocks.filter(block -> Reflection.getData(block) != (byte) data1);
+                    if (data1 != -1) blocks = (CollectionList<Block>) blocks.filter(block -> Reflection.getData(block) != (byte) data1);
                     RegionEdit.getInstance().getHistoryManager().resetPointer(player.getUniqueId());
                     RegionEditPlugin.setBlocks(player, blocks, material2, (byte) data2);
                 });

@@ -11,7 +11,6 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import util.Collection;
-import util.CollectionList;
 import util.ICollectionList;
 import util.javascript.JavaScript;
 import util.reflect.Ref;
@@ -223,7 +222,7 @@ public class RegionEditImpl extends JavaPlugin implements RegionEdit {
             }
             return new AbstractMap.SimpleImmutableEntry<>(BlockUtil.getMaterialById(Integer.parseInt(arr[0])), (byte) data);
         } else {
-            CollectionList<String> materials = ICollectionList.asList(Material.values()).filter(Material::isBlock).map(Enum::name).map((Function<String, String>) String::toLowerCase);
+            ICollectionList<String> materials = ICollectionList.asList(Material.values()).filter(Material::isBlock).map(Enum::name).map((Function<String, String>) String::toLowerCase);
             if (!materials.contains(id.split(":")[0].toLowerCase())) {
                 return null;
             }

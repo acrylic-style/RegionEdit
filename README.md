@@ -1,5 +1,5 @@
 # RegionEdit [![](https://ci.acrylicstyle.xyz/job/RegionEdit/badge/icon)](https://ci.acrylicstyle.xyz/job/RegionEdit)
-A lightweight block manipulation
+A lightweight block manipulation (Supports 1.8 - 1.17)
 
 ## Features
 - WorldEdit CUI Support

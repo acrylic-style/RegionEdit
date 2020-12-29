@@ -12,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import util.BiBiConsumer;
 import util.CollectionList;
+import util.ICollectionList;
 import util.reflect.Ref;
 import xyz.acrylicstyle.region.RegionEditPlugin;
 import xyz.acrylicstyle.region.api.RegionEdit;
@@ -114,7 +115,7 @@ public class BlockUtil {
         });
     }
 
-    public static void sendBlockChanges(CollectionList<Block> blocks, Material type, byte data) {
+    public static void sendBlockChanges(ICollectionList<Block> blocks, Material type, byte data) {
         Bukkit.getScheduler().runTaskAsynchronously(RegionEdit.getInstance(), () -> {
             CollectionList<Map.Entry<Integer, Integer>> chunks = new CollectionList<>();
             blocks.forEach(b -> {

@@ -5,7 +5,6 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import util.CollectionList;
 import util.ICollectionList;
 import util.Validate;
 import xyz.acrylicstyle.mcutil.lang.MCVersion;
@@ -18,8 +17,6 @@ import xyz.acrylicstyle.region.api.region.CuboidRegion;
 import xyz.acrylicstyle.region.api.region.RegionSelection;
 import xyz.acrylicstyle.region.api.selection.SelectionMode;
 import xyz.acrylicstyle.region.internal.RegionEditImpl;
-import xyz.acrylicstyle.shared.NMSAPI;
-import xyz.acrylicstyle.shared.OBCAPI;
 import xyz.acrylicstyle.tomeito_api.TomeitoAPI;
 import xyz.acrylicstyle.tomeito_api.utils.Log;
 
@@ -169,7 +166,7 @@ public final class UserSessionImpl implements UserSession {
 
     @Override
     public @NotNull MCVersion getMinecraftVersion() {
-        CollectionList<MCVersion> list = ICollectionList.asList(MCVersion.getByProtocolVersion(getProtocolVersion()));
+        ICollectionList<MCVersion> list = ICollectionList.asList(MCVersion.getByProtocolVersion(getProtocolVersion()));
         return list.filter(v -> !v.isSnapshot()).size() == 0 // if non-snapshot version wasn't found
                 ? Objects.requireNonNull(list.first()) // return the last version anyway
                 : Objects.requireNonNull(list.filter(v -> !v.isSnapshot()).first()); // or return non-snapshot version if any

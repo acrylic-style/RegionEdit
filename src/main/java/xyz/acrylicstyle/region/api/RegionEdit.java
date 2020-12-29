@@ -136,7 +136,7 @@ public interface RegionEdit extends Plugin {
         return blocks;
     }
 
-    static void getNearbyBlocksAsync(@NotNull Location location, int radius, @NotNull Callback<CollectionList<Block>> callback) {
+    static void getNearbyBlocksAsync(@NotNull Location location, int radius, @NotNull Callback<ICollectionList<Block>> callback) {
         pool.execute(() -> callback.done(getNearbyBlocks(location, radius), null));
     }
 

@@ -11,6 +11,7 @@ import xyz.acrylicstyle.tomeito_api.utils.ReflectionUtil;
 
 public final class Compatibility {
     public static BukkitVersion getBukkitVersion() {
+        if (checkPacketPlayOutMapChunk1_17Constructor()) return BukkitVersion.v1_17;
         if (checkPacketPlayOutMapChunk1_16Constructor()) return BukkitVersion.v1_16;
         if (!checkBlock_getData()) return BukkitVersion.UNKNOWN;
         if (!checkOldPlayer_sendBlockChange()) return BukkitVersion.UNKNOWN; // There are no known versions of Bukkit API that doesn't have this method.
@@ -47,13 +48,25 @@ public final class Compatibility {
     }
 
     /**
-     * Checks compatibility for nms.PacketPlayOutMapChunk constructor (1.16).<br />
-     * For 1.16+, it returns true.
+     * Checks compatibility for nms.PacketPlayOutMapChunk constructor (1.16.x).<br />
+     * For 1.16.x, it returns true.
      * Otherwise it returns false.
      */
     public static boolean checkPacketPlayOutMapChunk1_16Constructor() {
         try {
             return ReflectionHelper.findConstructor(ReflectionUtil.getNMSClass("PacketPlayOutMapChunk"), ReflectionUtil.getNMSClass("Chunk"), int.class, boolean.class) != null;
+        } catch (ClassNotFoundException ignored) {}
+        return false;
+    }
+
+    /**
+     * Checks compatibility for nms.PacketPlayOutMapChunk constructor (1.17.x).<br />
+     * For 1.17.x, it returns true.
+     * Otherwise it returns false.
+     */
+    public static boolean checkPacketPlayOutMapChunk1_17Constructor() {
+        try {
+            return ReflectionHelper.findConstructor(ReflectionUtil.getNMSClass("PacketPlayOutMapChunk"), ReflectionUtil.getNMSClass("Chunk")) != null;
         } catch (ClassNotFoundException ignored) {}
         return false;
     }
