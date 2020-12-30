@@ -17,6 +17,7 @@ import util.Collection;
 import util.CollectionList;
 import util.CollectionSet;
 import util.ICollectionList;
+import xyz.acrylicstyle.region.RegionEditPlugin;
 import xyz.acrylicstyle.region.api.block.state.BlockState;
 import xyz.acrylicstyle.region.api.block.state.BlockStatePropertyMap;
 import xyz.acrylicstyle.region.api.manager.HistoryManager;
@@ -40,6 +41,7 @@ import java.util.function.Predicate;
  */
 public interface RegionEdit extends Plugin {
     ThreadPoolExecutor pool = (ThreadPoolExecutor) Executors.newCachedThreadPool();
+    RegionEdit INSTANCE = new RegionEditPlugin();
 
     static void drawParticleLine(@NotNull Player player, @NotNull Location _from, @NotNull Location _to) {
         /*
@@ -58,17 +60,13 @@ public interface RegionEdit extends Plugin {
     }
 
     /**
-     * Obtain the RegionEdit instance. This
-     * method requires the RegionEdit plugin
-     * to work or it will throw error.
-     *
-     * @throws NullPointerException when the RegionEdit plugin wasn't found
+     * Obtain the RegionEdit instance.
      * @return RegionEdit instance
      */
     @NotNull
     static RegionEdit getInstance() throws NullPointerException {
         RegisteredServiceProvider<RegionEdit> service = Bukkit.getServicesManager().getRegistration(RegionEdit.class);
-        if (service == null) throw new NullPointerException();
+        if (service == null) return RegionEdit.INSTANCE;
         return service.getProvider();
     }
 
