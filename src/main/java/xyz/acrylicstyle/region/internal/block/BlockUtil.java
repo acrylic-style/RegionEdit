@@ -34,7 +34,7 @@ public class BlockUtil {
     }
 
     public static void setBlockOld(World world, int x, int y, int z, Object iBlockData) {
-        Chunk.wrap(world.getChunkAt(x >> 4, z >> 4)).sections[y >> 4].setType(x & 15, y & 15, z & 15, iBlockData);
+        Chunk.getInstance(world.getChunkAt(x >> 4, z >> 4)).sections[y >> 4].setType(x, y, z, iBlockData);
     }
 
     public static int getCombinedId(@NotNull BlockData blockData) {
@@ -78,7 +78,7 @@ public class BlockUtil {
     public static void setBlockNew(World world, int x, int y, int z, @Nullable RegionBlockData blockData) {
         org.bukkit.Chunk chunk = world.getBlockAt(x, y, z).getChunk();
         try {
-            Chunk.wrap(chunk).setType(Reflection.newRawBlockPosition(x, y, z), blockData == null ? null : blockData.getHandle().getClass().getMethod("getState").invoke(blockData.getHandle()), false);
+            Chunk.getInstance(chunk).setType(Reflection.newRawBlockPosition(x, y, z), blockData == null ? null : blockData.getHandle().getClass().getMethod("getState").invoke(blockData.getHandle()), false);
         } catch (ReflectiveOperationException e) {
             e.printStackTrace();
         }
@@ -108,7 +108,7 @@ public class BlockUtil {
             Reflection.notify(world, loc.getBlock(), Reflection.newRawBlockPosition(x, y, z));
             chunks.add(new AbstractMap.SimpleEntry<>(x >> 4, z >> 4));
             chunks.unique().forEach(e -> {
-                Chunk chunk = Chunk.wrap(world.getChunkAt(e.getKey(), e.getValue()));
+                Chunk chunk = Chunk.getInstance(world.getChunkAt(e.getKey(), e.getValue()));
                 chunk.initLighting();
                 for (Player p : Bukkit.getOnlinePlayers()) Reflection.sendChunk(p, chunk);
             });
@@ -125,7 +125,7 @@ public class BlockUtil {
                 chunks.add(new AbstractMap.SimpleEntry<>(b.getChunk().getX(), b.getChunk().getZ()));
             });
             chunks.unique().forEach(entry -> {
-                Chunk chunk = Chunk.wrap(Objects.requireNonNull(blocks.first()).getWorld().getChunkAt(entry.getKey(), entry.getValue()));
+                Chunk chunk = Chunk.getInstance(Objects.requireNonNull(blocks.first()).getWorld().getChunkAt(entry.getKey(), entry.getValue()));
                 chunk.initLighting();
                 for (Player p : Bukkit.getOnlinePlayers()) Reflection.sendChunk(p, chunk);
             });

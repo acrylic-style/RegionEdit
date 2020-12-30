@@ -95,7 +95,5 @@ public class BlockState implements Serializable {
         return RegionEdit.getInstance().implementMethods(this);
     }
 
-    public void updateFast(@NotNull World world) {
-        implementMethods().updateFast(world);
-    }
+    public void updateFast(@NotNull World world) { implementMethods().updateFast(world); }
 }

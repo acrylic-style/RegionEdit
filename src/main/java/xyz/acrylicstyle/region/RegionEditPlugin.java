@@ -23,9 +23,11 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import util.Collection;
 import util.CollectionList;
 import util.CollectionSet;
+import util.ICollectionList;
 import util.memory.ReservedMemory;
 import xyz.acrylicstyle.region.api.AsyncCatcher;
 import xyz.acrylicstyle.region.api.RegionEdit;
@@ -66,7 +68,6 @@ import xyz.acrylicstyle.region.internal.commands.UndoCommand;
 import xyz.acrylicstyle.region.internal.commands.UnstuckCommand;
 import xyz.acrylicstyle.region.internal.commands.WandCommand;
 import xyz.acrylicstyle.region.internal.listener.CUIChannelListener;
-import xyz.acrylicstyle.region.internal.nms.ActionBar;
 import xyz.acrylicstyle.region.internal.nms.Chunk;
 import xyz.acrylicstyle.region.internal.player.UserSessionImpl;
 import xyz.acrylicstyle.region.internal.tabCompleters.BlocksTabCompleter;
@@ -330,29 +331,37 @@ public class RegionEditPlugin extends RegionEditImpl implements RegionEdit, List
 
     public static final Collection<UUID, CollectionList<Integer>> playerTasks = new Collection<>();
 
-    public static void setBlocks(Player player, @NotNull CollectionList<Block> blocks, final Material material, final byte data) {
-        double start = System.currentTimeMillis();
-        CollectionList<xyz.acrylicstyle.region.api.block.Block> blocks2 = blocks.map(RegionBlock::new);
-        if (!playerTasks.containsKey(player.getUniqueId())) playerTasks.add(player.getUniqueId(), new CollectionList<>());
+    @Override
+    public void setBlocks(@Nullable Player player, @NotNull ICollectionList<Block> blocks, final Material material, final byte data) {
+        setBlocks0(player, blocks, material, data);
+    }
+
+    public static void setBlocks0(@Nullable Player player, @NotNull ICollectionList<Block> blocks, final Material material, final byte data) {
+        ICollectionList<xyz.acrylicstyle.region.api.block.Block> blocks2 = blocks.map(RegionBlock::new);
+        if (player != null && !playerTasks.containsKey(player.getUniqueId())) playerTasks.add(player.getUniqueId(), new CollectionList<>());
         Plugin plugin = RegionEdit.getInstance();
         AtomicInteger i0 = new AtomicInteger();
         AtomicInteger i = new AtomicInteger();
         final int taskId = RegionEditPlugin.taskId.getAndIncrement();
-        playerTasks.get(player.getUniqueId()).add(taskId);
+        if (player != null) playerTasks.get(player.getUniqueId()).add(taskId);
         tasks.add(taskId, OperationStatus.RUNNING);
-        final boolean fastMode = sessions.get(player.getUniqueId()).isFastMode();
-        player.sendMessage("" + ChatColor.RED + blocks.size() + ChatColor.GREEN + " blocks will be affected. " + ChatColor.LIGHT_PURPLE + " (Task ID: " + taskId + ")");
+        final boolean fastMode = player == null || sessions.get(player.getUniqueId()).isFastMode();
+        if (player != null) player.sendMessage("" + ChatColor.RED + blocks.size() + ChatColor.GREEN + " blocks will be affected. " + ChatColor.LIGHT_PURPLE + " (Task ID: " + taskId + ")");
         int size = blocks.size();
         int in = Math.max((int) (size / 1000D), 1);
+        long start = System.currentTimeMillis();
         if (fastMode) {
-            blocks.map(RegionBlock::wrap).forEach(block -> {
-                int x = block.getLocation().getBlockX();
-                int y = block.getLocation().getBlockY();
-                int z = block.getLocation().getBlockZ();
-                World world = block.getLocation().getWorld();
-                BlockUtil.setBlock(world, x, y, z, material, data, Reflection.createBlockData(block.getLocation(), material));
-                showPercentage(i0, size, in, player, taskId);
-            });
+            split(blocks, 1000).forEach(list -> pool.execute(() -> list.map(RegionBlock::wrap).forEach(block -> {
+                try {
+                    int x = block.getLocation().getBlockX();
+                    int y = block.getLocation().getBlockY();
+                    int z = block.getLocation().getBlockZ();
+                    World world = block.getLocation().getWorld();
+                    BlockUtil.setBlock(world, x, y, z, material, data, Reflection.createBlockData(block.getLocation(), material));
+                } finally {
+                    showPercentage(i0, size, in, player, taskId);
+                }
+            })));
         } else {
             blocks.map(RegionBlock::wrap).forEach(block -> new Thread(() -> new BukkitRunnable() {
                 @Override
@@ -370,19 +379,23 @@ public class RegionEditPlugin extends RegionEditImpl implements RegionEdit, List
                 new BukkitRunnable() {
                     @Override
                     public void run() {
-                        if (blocks2.size() <= 30000) {
-                            historyManager.addEntry(player.getUniqueId(), blocks2);
-                        } else {
-                            player.sendMessage(ChatColor.YELLOW + "History was not saved (large edit).");
+                        if (player != null) {
+                            if (blocks2.size() <= 30000) {
+                                historyManager.addEntry(player.getUniqueId(), blocks2);
+                            } else {
+                                player.sendMessage(ChatColor.YELLOW + "History was not saved (large edit).");
+                            }
                         }
                         if (fastMode) {
                             while (true) {
                                 if (i0.get() >= blocks.size()) {
+                                    long end = System.currentTimeMillis();
+                                    completeOperation(blocks.size(), taskId, start, end, player);
                                     Log.debug("Relighting " + entries.size() + " chunks");
                                     entries.forEach(e -> {
-                                        Chunk chunk = Chunk.wrap(e);
+                                        Chunk chunk = Chunk.getInstance(e);
                                         chunk.initLighting();
-                                        Reflection.sendChunk(player, chunk);
+                                        if (player != null) Reflection.sendChunk(player, chunk);
                                         Reflection.markDirty(e);
                                     });
                                     break;
@@ -391,7 +404,6 @@ public class RegionEditPlugin extends RegionEditImpl implements RegionEdit, List
                         }
                     }
                 }.runTaskLaterAsynchronously(RegionEdit.getInstance(), 5);
-                completeOperation(blocks.size(), taskId, start, player);
                 Log.debug("Updating " + blocks.size() + " blocks");
                 AtomicInteger i1 = new AtomicInteger();
                 blocks.forEach(b -> {
@@ -408,31 +420,33 @@ public class RegionEditPlugin extends RegionEditImpl implements RegionEdit, List
     private static void showPercentage(AtomicInteger i0, int size, int in, Player player, int taskId) {
         double p = Math.round(i0.incrementAndGet() / (double) size * 1000) / 10D;
         if (i0.get() % in == 0 || i0.get() == size) {
-            ActionBar.sendActionbar(player, ChatColor.GREEN + "ID " + ChatColor.YELLOW + taskId + ChatColor.GOLD + " | "
+            TomeitoAPI.sendActionbar(player, ChatColor.GREEN + "ID " + ChatColor.YELLOW + taskId + ChatColor.GOLD + " | "
                     + ChatColor.GREEN + "Blocks: " + ChatColor.YELLOW + i0.get() + ChatColor.LIGHT_PURPLE + " / " + ChatColor.YELLOW + size
                     + ChatColor.GOLD + " | " + ChatColor.YELLOW + p + "%");
         }
     }
 
     private static void showAndIncrementPercentage(AtomicInteger i0, int size, int in, Player player, String action, String ps) {
+        if (player == null) return;
         showPercentage(i0.incrementAndGet(), size, in, player, action, ps);
     }
 
     private static void showPercentage(int i0, int size, int in, Player player, String action, String ps) {
+        if (player == null) return;
         double p = Math.round(i0 / (double) size * 1000) / 10D;
         if (i0 % in == 0 || i0 == size) {
-            ActionBar.sendActionbar(player, ChatColor.LIGHT_PURPLE + action + " | "
+            TomeitoAPI.sendActionbar(player, ChatColor.LIGHT_PURPLE + action + " | "
                     + ChatColor.GREEN + ps + ": " + ChatColor.YELLOW + i0 + ChatColor.LIGHT_PURPLE + " / " + ChatColor.YELLOW + size
                     + ChatColor.GOLD + " | " + ChatColor.YELLOW + p + "%");
         }
     }
 
-    private static void completeOperation(int size, int taskId, double start, Player player) {
+    private static void completeOperation(int size, int taskId, long start, long end, Player player) {
+        if (player == null) return;
         if (tasks.get(taskId) == OperationStatus.CANCELLED) return;
         tasks.add(taskId, OperationStatus.FINISHED);
-        double end = System.currentTimeMillis();
-        double seconds = (end-start)/1000F;
-        int bpt = (int) (size / ((float) (end - start) / 50F)); // 50ms
+        double seconds = Math.round((end - start) / 1000D * 100) / 100D;
+        int bpt = (int) (size / ((float) (end - start) / 50D)); // 50ms
         player.sendMessage(ChatColor.GREEN + "Operation completed. " + ChatColor.LIGHT_PURPLE + "(" + bpt + " blocks per ticks, took " + seconds + " seconds)");
     }
 
@@ -441,7 +455,6 @@ public class RegionEditPlugin extends RegionEditImpl implements RegionEdit, List
     }
 
     public static void setBlocks(Player player, Collection<BlockPos, BlockState> blocks, boolean history) {
-        double start = System.currentTimeMillis();
         AsyncCatcher.setEnabled(false);
         final int taskId = RegionEditPlugin.taskId.getAndIncrement();
         final Plugin plugin = RegionEdit.getInstance();
@@ -468,6 +481,7 @@ public class RegionEditPlugin extends RegionEditImpl implements RegionEdit, List
         playerTasks.get(player.getUniqueId()).add(taskId);
         tasks.add(taskId, OperationStatus.RUNNING);
         player.sendMessage("" + ChatColor.RED + blocks.size() + ChatColor.GREEN + " blocks will be affected. " + ChatColor.LIGHT_PURPLE + " (Task ID: " + taskId + ")");
+        long start = System.currentTimeMillis();
         blocks.forEach((loc, block) -> {
             if (!fastMode) {
                 new BukkitRunnable() {
@@ -479,11 +493,14 @@ public class RegionEditPlugin extends RegionEditImpl implements RegionEdit, List
                     }
                 }.runTaskLater(plugin, i0.get() % RegionEditPlugin.blocksPerTick == 0 ? i.getAndIncrement() : i.get());
             } else {
-                if (tasks.get(taskId) == OperationStatus.CANCELLED) return;
-                block.updateFast(world);
-                showPercentage(i0, size, in, player, taskId);
+                split(blocks, 1000).forEach(list -> pool.execute(() -> {
+                    if (tasks.get(taskId) == OperationStatus.CANCELLED) return;
+                    block.updateFast(world);
+                    showPercentage(i0, size, in, player, taskId);
+                }));
             }
         });
+        long end = System.currentTimeMillis();
         new BukkitRunnable() {
             @Override
             public void run() {
@@ -509,7 +526,7 @@ public class RegionEditPlugin extends RegionEditImpl implements RegionEdit, List
                                 Log.debug("Relighting " + chunks.size() + " chunks");
                                 AtomicInteger ch = new AtomicInteger();
                                 chunks.forEach(chunk -> {
-                                    Chunk c = Chunk.wrap(chunk);
+                                    Chunk c = Chunk.getInstance(chunk);
                                     c.initLighting();
                                     Reflection.sendChunk(player, c);
                                     Reflection.markDirty(chunk);
@@ -521,7 +538,7 @@ public class RegionEditPlugin extends RegionEditImpl implements RegionEdit, List
                         }
                     }
                 }.runTaskLaterAsynchronously(RegionEdit.getInstance(), 10);
-                completeOperation(blocks.size(), taskId, start, player);
+                completeOperation(blocks.size(), taskId, start, end, player);
             }
         }.runTaskLater(plugin, i.getAndIncrement());
     }

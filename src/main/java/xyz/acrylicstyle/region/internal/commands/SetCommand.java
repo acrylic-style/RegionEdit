@@ -43,7 +43,7 @@ public class SetCommand extends PlayerCommandExecutor {
             int finalData = data;
             RegionEdit.getBlocksAsync(region.getLocation(), region.getLocation2(), null, block -> block.getType() != material || Reflection.getData(block) != finalData, (blocks, throwable) -> {
                 RegionEdit.getInstance().getHistoryManager().resetPointer(player.getUniqueId());
-                RegionEdit.pool.execute(() -> RegionEditPlugin.setBlocks(player, blocks, material, (byte) finalData));
+                RegionEdit.pool.execute(() -> RegionEditPlugin.setBlocks0(player, blocks, material, (byte) finalData));
             });
         } else {
             throw new RegionEditException("Invalid RegionSelection class: " + regionSelection.getClass().getCanonicalName());

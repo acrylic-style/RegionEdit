@@ -11,6 +11,8 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import util.Collection;
+import util.CollectionList;
+import util.ICollection;
 import util.ICollectionList;
 import util.javascript.JavaScript;
 import util.reflect.Ref;
@@ -48,7 +50,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
-public class RegionEditImpl extends JavaPlugin implements RegionEdit {
+public abstract class RegionEditImpl extends JavaPlugin implements RegionEdit {
     protected static final HistoryManagerImpl historyManager = new HistoryManagerImpl();
     public static final BukkitVersion VERSION = Compatibility.getBukkitVersion();
     public static final Collection<UUID, SelectionMode> selectionMode = new Collection<>();
@@ -63,7 +65,7 @@ public class RegionEditImpl extends JavaPlugin implements RegionEdit {
 
     @Override
     public void relightChunks(@NotNull ICollectionList<Chunk> chunks) {
-        chunks.forEach(chunk -> xyz.acrylicstyle.region.internal.nms.Chunk.wrap(chunk).initLighting());
+        chunks.forEach(chunk -> xyz.acrylicstyle.region.internal.nms.Chunk.getInstance(chunk).initLighting());
     }
 
     @Override
@@ -127,7 +129,7 @@ public class RegionEditImpl extends JavaPlugin implements RegionEdit {
                 org.bukkit.Chunk chunk = world.getChunkAt(x >> 4, z >> 4);
                 Object iBlockData = null;
                 if (getPropertyMap() != null) iBlockData = getPropertyMap().getIBlockData(new MaterialData(type, data));
-                xyz.acrylicstyle.region.internal.nms.Chunk.wrap(chunk).setType(Reflection.newRawBlockPosition(x, y, z), iBlockData, false);
+                xyz.acrylicstyle.region.internal.nms.Chunk.getInstance(chunk).setType(Reflection.newRawBlockPosition(x, y, z), iBlockData, false);
             }
         };
     }
@@ -252,4 +254,26 @@ public class RegionEditImpl extends JavaPlugin implements RegionEdit {
 
     @Override
     public @NotNull HistoryManagerImpl getHistoryManager() { return historyManager; }
+
+    protected static <V> @NotNull ICollectionList<ICollectionList<V>> split(ICollectionList<V> collectionList, int max) {
+        CollectionList<ICollectionList<V>> list = new CollectionList<>();
+        collectionList.foreach((v, i) -> {
+            if (i % max == 0) {
+                list.add(new CollectionList<>());
+            }
+            Objects.requireNonNull(list.last()).add(v);
+        });
+        return list;
+    }
+
+    protected static <K, V> @NotNull ICollectionList<ICollection<K, V>> split(ICollection<K, V> collection, int max) {
+        CollectionList<ICollection<K, V>> list = new CollectionList<>();
+        collection.forEach((k, v, i, arr) -> {
+            if (i % max == 0) {
+                list.add(new Collection<>());
+            }
+            Objects.requireNonNull(list.last()).add(k, v);
+        });
+        return list;
+    }
 }

@@ -269,4 +269,6 @@ public interface RegionEdit extends Plugin {
 
     @NotNull
     BlockStatePropertyMap implementMethods(BlockStatePropertyMap propertyMap);
+
+    void setBlocks(@Nullable Player player, @NotNull ICollectionList<Block> blocks, final Material material, final byte data);
 }

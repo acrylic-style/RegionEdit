@@ -242,4 +242,18 @@ public final class Reflection {
             return Ref.forName(ReflectionUtil.getNMSPackage() + ".IBlockDataHolder").getDeclaredField("c").accessible(true).get(iBlockData);
         }
     }
+
+    public static void hackChunkSection(Object chunkSection) {
+        try {
+            hackReentrantLock(Ref.forName(ReflectionUtil.getNMSPackage() + ".ChunkSection").getDeclaredField("blockIds").accessible(true).get(chunkSection));
+        } catch (ReflectiveOperationException | RuntimeException ignore) {}
+    }
+
+    public static void hackReentrantLock(Object dataPaletteBlock) throws ReflectiveOperationException {
+        Ref.forName(ReflectionUtil.getNMSPackage() + ".DataPaletteBlock")
+                .getDeclaredField("j")
+                .accessible(true)
+                .removeFinal()
+                .set(dataPaletteBlock, new NopeReentrantLock());
+    }
 }

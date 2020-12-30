@@ -10,6 +10,7 @@ import util.ReflectionHelper;
 import xyz.acrylicstyle.tomeito_api.utils.ReflectionUtil;
 
 public final class Compatibility {
+    public static final BukkitVersion BUKKIT_VERSION = getBukkitVersion();
     public static BukkitVersion getBukkitVersion() {
         if (checkPacketPlayOutMapChunk1_17Constructor()) return BukkitVersion.v1_17;
         if (checkPacketPlayOutMapChunk1_16Constructor()) return BukkitVersion.v1_16;
@@ -20,6 +21,7 @@ public final class Compatibility {
         if (checkChunk_setType()) return BukkitVersion.v1_13_2;
         if (checkLightEngine()) return BukkitVersion.v1_13;
         if (!checkPlayerInventory_getItemInHand()) return BukkitVersion.v1_13; // returns false in 1.13+
+        if (!checkDataPaletteBlock()) return BukkitVersion.v1_8;
         return BukkitVersion.v1_9; // otherwise
     }
 
@@ -190,6 +192,20 @@ public final class Compatibility {
     public static boolean checkLightEngine() {
         try {
             ReflectionUtil.getNMSClass("LightEngine");
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Checks whether class DataPaletteBlock exists.<br />
+     * For 1.8, it returns false.<br />
+     * For 1.9+, it returns true.
+     */
+    public static boolean checkDataPaletteBlock() {
+        try {
+            ReflectionUtil.getNMSClass("DataPaletteBlock");
             return true;
         } catch (ClassNotFoundException e) {
             return false;

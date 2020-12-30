@@ -4,6 +4,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 import util.CollectionList;
 import xyz.acrylicstyle.region.RegionEditPlugin;
 import xyz.acrylicstyle.region.api.RegionEdit;
@@ -14,7 +15,7 @@ import xyz.acrylicstyle.tomeito_api.utils.TypeUtil;
 
 public class DrainCommand extends PlayerCommandExecutor {
     @Override
-    public void onCommand(Player player, String[] args) {
+    public void onCommand(@NotNull Player player, String[] args) {
         int radius = 10;
         BlockType type = BlockType.WATER;
         if (args.length != 0) {
@@ -61,7 +62,7 @@ public class DrainCommand extends PlayerCommandExecutor {
                     return block.getType() == Material.getMaterial("SEAGRASS") || block.getType() == Material.getMaterial("TALL_SEAGRASS");
                 }
             });
-            RegionEditPlugin.setBlocks(player, blocks, Material.AIR, (byte) 0);
+            RegionEditPlugin.setBlocks0(player, blocks, Material.AIR, (byte) 0);
         });
     }
 

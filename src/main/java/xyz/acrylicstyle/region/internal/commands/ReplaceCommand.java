@@ -55,12 +55,12 @@ public class ReplaceCommand extends PlayerCommandExecutor {
                 RegionEdit.getBlocksInvertAsync(region.getLocation(), region.getLocation2(), material1, (blocks, throwable) -> {
                     if (data1 != -1) blocks = (CollectionList<Block>) blocks.filter(block -> Reflection.getData(block) != (byte) data1);
                     RegionEdit.getInstance().getHistoryManager().resetPointer(player.getUniqueId());
-                    RegionEditPlugin.setBlocks(player, blocks, material2, (byte) data2);
+                    RegionEditPlugin.setBlocks0(player, blocks, material2, (byte) data2);
                 });
             } else {
                 RegionEdit.getBlocksAsync(region.getLocation(), region.getLocation2(), material1, block -> data1 == -1 || Reflection.getData(block) == (byte) data1, (blocks, throwable) -> {
                     RegionEdit.getInstance().getHistoryManager().resetPointer(player.getUniqueId());
-                    RegionEditPlugin.setBlocks(player, blocks, material2, (byte) data2);
+                    RegionEditPlugin.setBlocks0(player, blocks, material2, (byte) data2);
                 });
             }
         } else {

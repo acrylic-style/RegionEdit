@@ -1,55 +1,82 @@
 package xyz.acrylicstyle.region.internal.nms;
 
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
+import util.ActionableResult;
+import util.Collection;
 import util.ICollectionList;
 import util.ReflectionHelper;
+import xyz.acrylicstyle.region.api.util.Tuple;
 import xyz.acrylicstyle.region.internal.utils.Compatibility;
 import xyz.acrylicstyle.shared.NMSAPI;
+import xyz.acrylicstyle.tomeito_api.utils.Log;
 import xyz.acrylicstyle.tomeito_api.utils.ReflectionUtil;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Modifier;
+import java.util.AbstractMap;
+import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 
 /**
  * Partial implementation of NMS Chunk.
  */
 public class Chunk extends NMSAPI {
-    public Chunk(Object o) {
+    private static final Collection<Tuple<UUID, Integer, Integer>, Chunk> chunks = new Collection<>();
+    private static final Log.Logger LOGGER = Log.with("RegionEdit");
+    private static final Object LOCK = new Object();
+    public static final Class<?> CLASS = getClassWithoutException("Chunk");
+    public final int x;
+    public final int z;
+
+    private Chunk(Object o) {
         super(o, "Chunk");
         if (Compatibility.checkChunkSection()) {
             this.sections = ICollectionList
                     .asList((Object[]) getField("sections"))
-                    .map((s, i) -> s == null ? new ChunkSection(this, i << 4) : new ChunkSection(this, s))
+                    .map((section, i) -> section == null ? new ChunkSection(this, i << 4) : new ChunkSection(this, section))
                     .toArray(new ChunkSection[0]);
         } else {
             this.sections = new ChunkSection[0];
         }
+        Object loc = ActionableResult.ofThrowable(() -> ReflectionHelper.getField(CLASS, this.o, "loc")).nullableValue();
+        this.x = (int) ActionableResult.ofThrowable(() -> ReflectionHelper.getField(CLASS, this.o, "locX")).orElseGet(() -> ReflectionHelper.getFieldWithoutException(getClassWithoutException("ChunkCoordIntPair"), loc, "x"));
+        this.z = (int) ActionableResult.ofThrowable(() -> ReflectionHelper.getField(CLASS, this.o, "locZ")).orElseGet(() -> ReflectionHelper.getFieldWithoutException(getClassWithoutException("ChunkCoordIntPair"), loc, "z"));
     }
 
     public final ChunkSection[] sections;
 
-    public static Chunk wrap(org.bukkit.Chunk chunk) {
-        try {
-            return new Chunk(ReflectionHelper.invokeMethod(chunk.getClass(), chunk, "getHandle"));
-        } catch (InvocationTargetException | IllegalAccessException | NoSuchMethodException e) {
-            throw new RuntimeException(e);
+    public static @NotNull Chunk getInstance(org.bukkit.Chunk chunk) {
+        Chunk result = chunks.get(new Tuple<>(chunk.getWorld().getUID(), chunk.getX(), chunk.getZ()));
+        if (result == null) {
+            result = new Chunk(ReflectionHelper.invokeMethodWithoutException(chunk.getClass(), chunk, "getHandle"));
+            chunks.add(new Tuple<>(chunk.getWorld().getUID(), chunk.getX(), chunk.getZ()), result);
         }
+        return result;
     }
 
+    /*
+    public static Chunk getInstance(Object o) {
+        return new Chunk(o);
+    }
+    */
+
     public void save() {
-        try {
-            Field field = Objects.requireNonNull(ReflectionHelper.findField(ReflectionUtil.getNMSClass("Chunk"), "sections"));
-            Field modifiers = Field.class.getDeclaredField("modifiers");
-            modifiers.setAccessible(true);
-            modifiers.setInt(field, field.getModifiers() & ~Modifier.FINAL);
-            field.setAccessible(true);
-            Object arr = Array.newInstance(ReflectionUtil.getNMSClass("ChunkSection"), this.sections.length);
-            ICollectionList.asList(this.sections).map(ChunkSection::getNMSClass).foreach((o, i) -> Array.set(arr, i, o));
-            field.set(getNMSClass(), arr);
-        } catch (ReflectiveOperationException e) {
-            throw new RuntimeException(e);
+        synchronized (LOCK) {
+            try {
+                Field field = Objects.requireNonNull(ReflectionHelper.findField(ReflectionUtil.getNMSClass("Chunk"), "sections"));
+                field.setAccessible(true);
+                Object arr = field.get(getNMSClass());
+                ICollectionList.asList(this.sections).map(ChunkSection::getNMSClass).foreach((o, i) -> {
+                    if (Array.get(arr, i) == null) {
+                        Array.set(arr, i, o);
+                    }
+                });
+            } catch (ReflectiveOperationException e) {
+                LOGGER.warn("Failed to save ChunkSection at Chunk[" + x + ", " + z + "]");
+                e.printStackTrace();
+            }
         }
     }
 
@@ -90,5 +117,14 @@ public class Chunk extends NMSAPI {
         } catch (ReflectiveOperationException e) {
             e.printStackTrace();
         }
+    }
+
+    @Contract(pure = true)
+    @NotNull
+    public static Map.Entry<Integer, Integer> getChunkPos(Object o) {
+        Object loc = ActionableResult.ofThrowable(() -> ReflectionHelper.getField(CLASS, o, "loc")).nullableValue();
+        int x = (int) ActionableResult.ofThrowable(() -> ReflectionHelper.getField(CLASS, o, "locX")).orElseGet(() -> ReflectionHelper.getFieldWithoutException(getClassWithoutException("ChunkCoordIntPair"), loc, "x"));
+        int z = (int) ActionableResult.ofThrowable(() -> ReflectionHelper.getField(CLASS, o, "locZ")).orElseGet(() -> ReflectionHelper.getFieldWithoutException(getClassWithoutException("ChunkCoordIntPair"), loc, "z"));
+        return new AbstractMap.SimpleImmutableEntry<>(x, z);
     }
 }

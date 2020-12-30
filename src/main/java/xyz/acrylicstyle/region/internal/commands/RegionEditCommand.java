@@ -114,6 +114,11 @@ public class RegionEditCommand implements CommandExecutor {
             } else {
                 sender.sendMessage(ChatColor.RED + " ✖ " + ChatColor.YELLOW + "Not Found LightEngine (1.8 - 1.12.2)");
             }
+            if (Compatibility.checkDataPaletteBlock()) {
+                sender.sendMessage(ChatColor.GREEN + " ✔ " + ChatColor.YELLOW + "Found DataPaletteBlock (1.9+)");
+            } else {
+                sender.sendMessage(ChatColor.RED + " ✖ " + ChatColor.YELLOW + "Not Found DataPaletteBlock (1.8.x)");
+            }
             if (Compatibility.checkChunk_setType()) {
                 sender.sendMessage(ChatColor.GREEN + " ✔ " + ChatColor.YELLOW + "Found nms.Chunk#setType (1.13.2+)");
             } else {
@@ -125,10 +130,12 @@ public class RegionEditCommand implements CommandExecutor {
                 sender.sendMessage(ChatColor.RED + " ✖ " + ChatColor.YELLOW + "Not Found STATIONARY_WATER in Material enum (1.13+)");
             }
             sender.sendMessage(ChatColor.GOLD + "-------------------------");
-            if (!Compatibility.checkChunkSection()) {
-                sender.sendMessage(ChatColor.YELLOW + " - Modify blocks using " + ChatColor.DARK_PURPLE + "Chunk#setType");
-            } else {
-                sender.sendMessage(ChatColor.YELLOW + " - Modify blocks using " + ChatColor.LIGHT_PURPLE + "ChunkSection#setType");
+            {
+                String what = ChatColor.DARK_PURPLE + "Chunk#setType";
+                if (Compatibility.checkChunkSection()) {
+                    what = ChatColor.LIGHT_PURPLE + "ChunkSection#setType";
+                }
+                sender.sendMessage(ChatColor.YELLOW + " - Modify blocks using " + what);
             }
             if (Compatibility.checkLightEngine()) {
                 sender.sendMessage(ChatColor.YELLOW + " - Does " + ChatColor.RED + "not " + ChatColor.YELLOW + "perform light update");
@@ -136,9 +143,9 @@ public class RegionEditCommand implements CommandExecutor {
                 sender.sendMessage(ChatColor.YELLOW + " - " + ChatColor.GREEN + "Does " + ChatColor.YELLOW + "perform light update");
             }
             if (Compatibility.checkNewPlayer_sendBlockChange()) {
-                sender.sendMessage(ChatColor.YELLOW + " - Uses new Player#sendBlockChange to send block changes");
+                sender.sendMessage(ChatColor.YELLOW + " - Uses " + ChatColor.LIGHT_PURPLE + "new" + ChatColor.YELLOW + " Player#sendBlockChange to send block changes");
             } else {
-                sender.sendMessage(ChatColor.YELLOW + " - Uses old Player#sendBlockChange to send block changes");
+                sender.sendMessage(ChatColor.YELLOW + " - Uses " + ChatColor.DARK_PURPLE + "old" + ChatColor.YELLOW + " Player#sendBlockChange to send block changes");
             }
             sender.sendMessage(ChatColor.GOLD + "-------------------------");
         } else if (args[0].equalsIgnoreCase("reload")) {
