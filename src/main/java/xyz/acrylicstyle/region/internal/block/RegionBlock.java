@@ -5,16 +5,13 @@ import org.bukkit.Material;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import util.ReflectionHelper;
 import xyz.acrylicstyle.region.api.block.Block;
 import xyz.acrylicstyle.region.api.block.BlockData;
+import xyz.acrylicstyle.region.api.reflector.org.bukkit.craftbukkit.block.CraftBlock;
 import xyz.acrylicstyle.region.internal.utils.Compatibility;
 import xyz.acrylicstyle.region.internal.utils.Reflection;
 
-import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
-
-public class RegionBlock implements Block, Cloneable, Serializable {
+public class RegionBlock implements Block, Cloneable {
     @NotNull
     private final Location location;
     @NotNull
@@ -68,11 +65,7 @@ public class RegionBlock implements Block, Cloneable, Serializable {
     public void setBlockData(BlockData blockData) {
         if (!Compatibility.checkBlockData()) return;
         if (blockData == null) throw new AssertionError(); // BlockData class is available so blockData shouldn't be null.
-        try {
-            ReflectionHelper.invokeMethod(location.getBlock().getClass(), location.getBlock(), "setBlockData", ((RegionBlockData) blockData).getHandle());
-        } catch (InvocationTargetException | IllegalAccessException | NoSuchMethodException e) {
-            e.printStackTrace();
-        }
+        CraftBlock.getInstance(location.getBlock()).setBlockData(((RegionBlockData) blockData).getHandle());
     }
 
     /**

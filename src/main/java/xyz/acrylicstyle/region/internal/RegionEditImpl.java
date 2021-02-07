@@ -15,8 +15,7 @@ import util.CollectionList;
 import util.ICollection;
 import util.ICollectionList;
 import util.javascript.JavaScript;
-import util.reflect.Ref;
-import util.reflect.RefClass;
+import util.reflector.Reflector;
 import xyz.acrylicstyle.region.api.RegionEdit;
 import xyz.acrylicstyle.region.api.block.state.BlockState;
 import xyz.acrylicstyle.region.api.block.state.BlockStatePropertyMap;
@@ -32,16 +31,18 @@ import xyz.acrylicstyle.region.internal.block.BlockUtil;
 import xyz.acrylicstyle.region.internal.command.CommandDescriptionManager;
 import xyz.acrylicstyle.region.internal.manager.HistoryManagerImpl;
 import xyz.acrylicstyle.region.internal.player.UserSessionImpl;
+import xyz.acrylicstyle.region.api.reflector.net.minecraft.server.BlockStateList;
+import xyz.acrylicstyle.region.api.reflector.net.minecraft.server.IBlockData;
+import xyz.acrylicstyle.region.api.reflector.net.minecraft.server.IBlockState;
+import xyz.acrylicstyle.region.api.reflector.org.bukkit.craftbukkit.block.CraftBlock;
+import xyz.acrylicstyle.region.api.reflector.org.bukkit.craftbukkit.util.CraftMagicNumbers;
 import xyz.acrylicstyle.region.internal.schematic.SchematicLegacy;
 import xyz.acrylicstyle.region.internal.schematic.SchematicNew;
 import xyz.acrylicstyle.region.internal.utils.BukkitVersion;
 import xyz.acrylicstyle.region.internal.utils.Compatibility;
 import xyz.acrylicstyle.region.internal.utils.Reflection;
 import xyz.acrylicstyle.tomeito_api.utils.Log;
-import xyz.acrylicstyle.tomeito_api.utils.ReflectionUtil;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.AbstractMap;
 import java.util.Map;
 import java.util.Objects;
@@ -111,11 +112,11 @@ public abstract class RegionEditImpl extends JavaPlugin implements RegionEdit {
                 int x = getLocation().getX();
                 int y = getLocation().getY();
                 int z = getLocation().getZ();
-                Object iBlockData;
+                IBlockData iBlockData;
                 if (Compatibility.checkBlockData() && getPropertyMap() != null) {
                     iBlockData = getPropertyMap().getIBlockData(new MaterialData(type, data));
                 } else {
-                    iBlockData = BlockUtil.getByCombinedId(type.getId() + (data << 12));
+                    iBlockData = xyz.acrylicstyle.region.api.reflector.net.minecraft.server.Block.STATIC.getByCombinedId(type.getId() + (data << 12));
                 }
                 //lastIBlockData = iBlockData;
                 BlockUtil.setBlockOld(world, x, y, z, iBlockData);
@@ -128,7 +129,7 @@ public abstract class RegionEditImpl extends JavaPlugin implements RegionEdit {
                 int z = getLocation().getZ();
                 org.bukkit.Chunk chunk = world.getChunkAt(x >> 4, z >> 4);
                 Object iBlockData = null;
-                if (getPropertyMap() != null) iBlockData = getPropertyMap().getIBlockData(new MaterialData(type, data));
+                if (getPropertyMap() != null) iBlockData = Reflector.getUnproxiedInstance(getPropertyMap().getIBlockData(new MaterialData(type, data))).get();
                 xyz.acrylicstyle.region.internal.nms.Chunk.getInstance(chunk).setType(Reflection.newRawBlockPosition(x, y, z), iBlockData, false);
             }
         };
@@ -137,67 +138,52 @@ public abstract class RegionEditImpl extends JavaPlugin implements RegionEdit {
     @Override
     public @NotNull BlockStatePropertyMap implementMethods(BlockStatePropertyMap propertyMap) {
         return new BlockStatePropertyMap(propertyMap) {
-            @SuppressWarnings("unchecked")
+            @SuppressWarnings({ "rawtypes", "unchecked" })
             public void apply(Block block) {
                 if (Compatibility.getBukkitVersion() == BukkitVersion.v1_8) return;
-                Object nmsBlock = Ref.forName(ReflectionUtil.getCraftBukkitPackage() + ".block.CraftBlock").getMethod("getNMS").invoke(block);
-                Object blockStateList = new RefClass<>((Class<Object>) NMSClasses.Block).getDeclaredField("blockStateList").accessible(true).get(nmsBlock);
-                try {
-                    AtomicReference<Object> blockData = new AtomicReference<>(blockStateList.getClass().getMethod("getBlockData").invoke(blockStateList));
-                    Method method = ReflectionUtil.getNMSClass("IBlockDataHolder").getMethod("set", ReflectionUtil.getNMSClass("IBlockState"), Object.class);
-                    AtomicBoolean modified = new AtomicBoolean(false);
-                    forEach(entry -> {
-                        EnumBlockPropertyKey prop = EnumBlockPropertyKey.getProperty(raw, entry.getKey());
-                        try {
-                            if (prop != null) {
-                                blockData.set(method.invoke(blockData.get(), prop.getBlockProperty(), prop.getValueType().get(entry.getValue())));
-                                modified.set(true);
-                            }
-                        } catch (IllegalAccessException | InvocationTargetException e) {
-                            e.printStackTrace();
-                        }
-                    });
-                    if (modified.get()) Reflection.setBlockData(block, blockData); // only update if BlockData is updated
-                } catch (ReflectiveOperationException ignore) {} // some mc versions doesn't have this feature
+                xyz.acrylicstyle.region.api.reflector.net.minecraft.server.Block nmsBlock = CraftBlock.getInstance(block).getNMSBlock();
+                BlockStateList blockStateList = nmsBlock.getBlockStateList();
+                if (blockStateList == null) return;
+                AtomicReference<IBlockData> blockData = new AtomicReference<>(blockStateList.getBlockData());
+                AtomicBoolean modified = new AtomicBoolean(false);
+                forEach(entry -> {
+                    EnumBlockPropertyKey prop = EnumBlockPropertyKey.getProperty(raw, entry.getKey());
+                    if (prop == null) return;
+                    IBlockState blockState = IBlockState.make(prop.getBlockProperty());
+                    blockData.get().set(blockState, (Comparable) prop.getValueType().get(entry.getValue()));
+                    modified.set(true);
+                });
+                if (modified.get()) nmsBlock.setBlockData(blockData.get()); // only update if BlockData is updated
                 // this.j(this.blockStateList.getBlockData().set(BlockLeaves.DISTANCE, 7).set(BlockLeaves.PERSISTENT, false)); // for reference
             }
 
-            private Object cachedData;
+            private IBlockData cachedData;
 
-            @SuppressWarnings("unchecked")
-            public Object getIBlockData(MaterialData data) {
+            @SuppressWarnings({ "rawtypes", "unchecked" })
+            public IBlockData getIBlockData(MaterialData data) {
                 if (Compatibility.getBukkitVersion() == BukkitVersion.v1_8) return null;
                 if (cachedData != null) return cachedData;
                 Object blk;
                 if (VERSION.atLeast(BukkitVersion.v1_13) && NMSClasses.Blocks() != null) {
                     blk = NMSClasses.Blocks().getField(data.getItemType().name()).get(null);
                 } else {
-                    blk = Reflection.getBlock(Reflection.getBlock(data));
+                    blk = Reflection.getBlock(CraftMagicNumbers.INSTANCE.getBlock(data));
                 }
-                Object blockStateList = new RefClass<>((Class<Object>) NMSClasses.Block).getDeclaredField("blockStateList").accessible(true).get(blk);
-                try {
-                    AtomicReference<Object> blockData = new AtomicReference<>(blockStateList.getClass().getMethod("getBlockData").invoke(blockStateList));
-                    Method method = ReflectionUtil.getNMSClass("IBlockDataHolder").getMethod("set", ReflectionUtil.getNMSClass("IBlockState"), Comparable.class);
-                    forEach(entry -> {
-                        EnumBlockPropertyKey prop = EnumBlockPropertyKey.getProperty(raw, entry.getKey());
-                        try {
-                            if (prop != null) {
-                                try {
-                                    blockData.set(method.invoke(blockData.get(), prop.getBlockProperty(), prop.getValueType().get(entry.getValue())));
-                                } catch (IllegalArgumentException ex) {
-                                    throw new RegionEditException("Could not set block data for " + raw + " (tried to set " + entry.getKey() + "=" + entry.getValue() + ")", ex);
-                                }
-                            }
-                        } catch (IllegalAccessException | InvocationTargetException e) {
-                            if (e.getCause() instanceof IllegalArgumentException) return; // ignore
-                            e.printStackTrace();
-                        }
-                    });
-                    cachedData = blockData.get();
-                    return blockData.get();
-                } catch (ReflectiveOperationException e) {
-                    throw new RuntimeException(e);
-                }
+                xyz.acrylicstyle.region.api.reflector.net.minecraft.server.Block nmsBlock = xyz.acrylicstyle.region.api.reflector.net.minecraft.server.Block.getInstance(blk);
+                BlockStateList blockStateList = nmsBlock.getBlockStateList();
+                if (blockStateList == null) return nmsBlock.getBlockData();
+                AtomicReference<IBlockData> blockData = new AtomicReference<>(blockStateList.getBlockData());
+                forEach(entry -> {
+                    EnumBlockPropertyKey prop = EnumBlockPropertyKey.getProperty(raw, entry.getKey());
+                    if (prop == null) return;
+                    IBlockState blockState = IBlockState.make(prop.getBlockProperty());
+                    try {
+                        blockData.get().set(blockState, (Comparable) prop.getValueType().get(entry.getValue()));
+                    } catch (IllegalArgumentException ex) {
+                        throw new RegionEditException("Could not set block data for " + raw + " (tried to set " + entry.getKey() + "=" + entry.getValue() + ")", ex);
+                    }
+                });
+                return cachedData = blockData.get();
             }
         };
     }

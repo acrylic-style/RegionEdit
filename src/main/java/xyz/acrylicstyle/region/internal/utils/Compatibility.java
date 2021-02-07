@@ -7,6 +7,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.PlayerInventory;
 import util.ReflectionHelper;
+import xyz.acrylicstyle.region.api.util.NMSClasses;
 import xyz.acrylicstyle.tomeito_api.utils.ReflectionUtil;
 
 public final class Compatibility {
@@ -69,6 +70,30 @@ public final class Compatibility {
     public static boolean checkPacketPlayOutMapChunk1_17Constructor() {
         try {
             return ReflectionHelper.findConstructor(ReflectionUtil.getNMSClass("PacketPlayOutMapChunk"), ReflectionUtil.getNMSClass("Chunk")) != null;
+        } catch (ClassNotFoundException ignored) {}
+        return false;
+    }
+
+    /**
+     * Checks compatibility for old nms.PacketPlayOutMultiBlockChange constructor.<br />
+     * For 1.8.x - 1.16.1, it returns true.
+     * Otherwise it returns false.
+     */
+    public static boolean checkPacketPlayOutMultiBlockChange1_8Constructor() {
+        try {
+            return ReflectionHelper.findConstructor(ReflectionUtil.getNMSClass("PacketPlayOutMultiBlockChange"), int.class, short[].class, NMSClasses.Chunk) != null;
+        } catch (ClassNotFoundException ignored) {}
+        return false;
+    }
+
+    /**
+     * Checks compatibility for new nms.PacketPlayOutMultiBlockChange constructor.<br />
+     * For 1.16.2+, it returns true.
+     * Otherwise it returns false.
+     */
+    public static boolean checkPacketPlayOutMultiBlockChange1_16_2Constructor() {
+        try {
+            return ReflectionHelper.findConstructor(ReflectionUtil.getNMSClass("PacketPlayOutMultiBlockChange"), ReflectionUtil.getNMSClass("SectionPosition"), Class.forName("org.bukkit.craftbukkit.libs.it.unimi.dsi.fastutil.shorts.ShortSet"), ReflectionUtil.getNMSClass("ChunkSection"), boolean.class) != null;
         } catch (ClassNotFoundException ignored) {}
         return false;
     }

@@ -2,6 +2,7 @@ package xyz.acrylicstyle.region.api.block;
 
 import org.bukkit.Material;
 import org.jetbrains.annotations.NotNull;
+import xyz.acrylicstyle.region.api.reflector.net.minecraft.server.IBlockData;
 
 public interface BlockData {
     /**
@@ -45,7 +46,7 @@ public interface BlockData {
      * @return NMS BlockState
      */
     @NotNull
-    Object getState();
+    IBlockData getState();
 
     /**
      * Merges two BlockData.<br />

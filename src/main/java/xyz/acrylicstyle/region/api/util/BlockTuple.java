@@ -6,6 +6,7 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 
 import java.io.Serializable;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Function;
 
@@ -42,5 +43,28 @@ public class BlockTuple<X, Y, Z> implements Serializable {
         public static Function<BlockTuple<Integer, Integer, Integer>, Location> toLocation(World world) {
             return tuple -> new Location(world, tuple.x, tuple.y, tuple.z);
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        BlockTuple<?, ?, ?> that = (BlockTuple<?, ?, ?>) o;
+        return Objects.equals(uid, that.uid) && Objects.equals(x, that.x) && Objects.equals(y, that.y) && Objects.equals(z, that.z);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(uid, x, y, z);
+    }
+
+    @Override
+    public String toString() {
+        return "BlockTuple{" +
+                "uid=" + uid +
+                ", x=" + x +
+                ", y=" + y +
+                ", z=" + z +
+                '}';
     }
 }

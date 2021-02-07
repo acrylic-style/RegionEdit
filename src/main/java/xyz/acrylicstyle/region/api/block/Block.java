@@ -76,4 +76,16 @@ public interface Block {
      * Clones this block.
      */
     Block clone();
+
+    static short locationToShort(int x, int y, int z) {
+        return (short) ((x & 15) << 12 | (z & 15) << 8 | y);
+    }
+
+    static short locationToShort(@NotNull Location location) {
+        return locationToShort(location.getBlockX(), location.getBlockY(), location.getBlockZ());
+    }
+
+    default short getLocationAsShort() {
+        return locationToShort(getLocation());
+    }
 }

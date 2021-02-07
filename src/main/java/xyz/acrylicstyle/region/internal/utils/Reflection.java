@@ -1,6 +1,7 @@
 package xyz.acrylicstyle.region.internal.utils;
 
 import org.apache.commons.lang.Validate;
+import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -11,7 +12,6 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
-import org.bukkit.material.MaterialData;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -19,15 +19,32 @@ import util.ReflectionHelper;
 import util.reflect.Ref;
 import xyz.acrylicstyle.craftbukkit.v1_8_R3.util.CraftUtils;
 import xyz.acrylicstyle.region.api.RegionEdit;
+import xyz.acrylicstyle.region.api.reflector.net.minecraft.server.ChunkSection;
+import xyz.acrylicstyle.region.api.reflector.net.minecraft.server.IBlockData;
+import xyz.acrylicstyle.region.api.reflector.net.minecraft.server.PacketPlayOutMultiBlockChange;
+import xyz.acrylicstyle.region.api.reflector.net.minecraft.server.v1_13.IBlockDataHolder;
+import xyz.acrylicstyle.region.api.reflector.net.minecraft.server.v1_16.SectionPosition;
+import xyz.acrylicstyle.region.api.reflector.org.bukkit.craftbukkit.block.CraftBlock;
+import xyz.acrylicstyle.region.api.reflector.org.bukkit.craftbukkit.v1_13.block.data.CraftBlockData;
+import xyz.acrylicstyle.region.api.reflector.org.bukkit.entity.BukkitPlayer;
+import xyz.acrylicstyle.region.api.util.BlockPos;
 import xyz.acrylicstyle.region.internal.block.RegionBlockData;
-import xyz.acrylicstyle.region.internal.nms.PacketPlayOutMapChunk;
 import xyz.acrylicstyle.tomeito_api.utils.Log;
 import xyz.acrylicstyle.tomeito_api.utils.ReflectionUtil;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
-import static xyz.acrylicstyle.region.api.util.NMSClasses.*;
+import static xyz.acrylicstyle.region.api.util.NMSClasses.BlockPosition;
+import static xyz.acrylicstyle.region.api.util.NMSClasses.Chunk;
+import static xyz.acrylicstyle.region.api.util.NMSClasses.IBlockData;
+import static xyz.acrylicstyle.region.api.util.NMSClasses.World;
+import static xyz.acrylicstyle.region.api.util.NMSClasses.sendPacket;
 
 public final class Reflection {
     /**
@@ -85,11 +102,7 @@ public final class Reflection {
     @Nullable
     public static RegionBlockData getBlockData(@NotNull Block block) {
         if (Compatibility.checkBlockData()) {
-            try {
-                return new RegionBlockData(block, ReflectionHelper.invokeMethod(block.getClass(), block, "getBlockData"));
-            } catch (InvocationTargetException | IllegalAccessException | NoSuchMethodException e) {
-                e.printStackTrace();
-            }
+            return new RegionBlockData(block, Objects.requireNonNull(CraftBlock.getInstance(block).getBlockData()));
         }
         return null;
     }
@@ -102,8 +115,8 @@ public final class Reflection {
     @Nullable
     public static RegionBlockData createBlockData(@NotNull Location location, @NotNull Material material) {
         if (!Compatibility.checkBlockData()) return null;
-        Object o = Ref.getClass(Material.class).getMethod("createBlockData").invoke(material);
-        return new RegionBlockData(location.getBlock(), o);
+        CraftBlockData blockData = xyz.acrylicstyle.region.api.reflector.org.bukkit.craftbukkit.v1_13.Material.getInstance(material).createBlockData();
+        return new RegionBlockData(location.getBlock(), Objects.requireNonNull(blockData));
     }
 
     @SuppressWarnings("deprecation")
@@ -114,38 +127,27 @@ public final class Reflection {
                 .invokeObj(blockData.getBukkitBlock(), blockData.getState(), applyPhysics);
     }
 
-    @SuppressWarnings({"deprecation", "JavaReflectionMemberAccess"})
+    @SuppressWarnings({"deprecation"})
     public static void sendBlockChange(@NotNull Player player, Location location, Material material, byte data, RegionBlockData blockData) {
         if (!Compatibility.checkNewPlayer_sendBlockChange()) {
             Validate.notNull(location, "Location cannot be null");
             Validate.notNull(material, "Material cannot be null");
             player.sendBlockChange(location, material, data);
         } else {
-            try {
-                Validate.notNull(blockData, "BlockData cannot be null");
-                Player.class.getMethod("sendBlockChange", Location.class, Class.forName("org.bukkit.block.data.BlockData"))
-                        .invoke(player, location, blockData.getHandle());
-            } catch (ReflectiveOperationException e) {
-                throw new RuntimeException(e); // to avoid console spamming
-            }
+            Validate.notNull(blockData, "BlockData cannot be null");
+            BukkitPlayer.getInstance(player).sendBlockChange(location, blockData.getHandle());
         }
     }
 
-    @SuppressWarnings({"deprecation", "JavaReflectionMemberAccess"})
-    public static void sendBlockChange(@NotNull Player player, Location location, Material material, byte data, Object iBlockData) {
+    @SuppressWarnings({"deprecation"})
+    public static void sendBlockChange(@NotNull Player player, Location location, Material material, byte data, IBlockData iBlockData) {
         if (!Compatibility.checkNewPlayer_sendBlockChange()) {
             Validate.notNull(location, "Location cannot be null");
             Validate.notNull(material, "Material cannot be null");
             player.sendBlockChange(location, material, data);
         } else {
-            try {
-                Validate.notNull(iBlockData, "IBlockData cannot be null");
-                Object blockData = ReflectionUtil.getNMSClass("BlockBase$BlockData").getMethod("createCraftBlockData").invoke(iBlockData);
-                Player.class.getMethod("sendBlockChange", Location.class, Class.forName("org.bukkit.block.data.BlockData"))
-                        .invoke(player, location, blockData);
-            } catch (ReflectiveOperationException e) {
-                throw new RuntimeException(e); // to avoid console spamming
-            }
+            Validate.notNull(iBlockData, "IBlockData cannot be null");
+            BukkitPlayer.getInstance(player).sendBlockChange(location, iBlockData.createCraftBlockData());
         }
     }
 
@@ -191,18 +193,6 @@ public final class Reflection {
         }.runTask(RegionEdit.getInstance());
     }
 
-    public static void sendChunk(Player player, xyz.acrylicstyle.region.internal.nms.Chunk chunk) {
-        try {
-            Object entityPlayer = player.getClass()
-                    .getMethod("getHandle")
-                    .invoke(player);
-            Object pc = playerConnection.get(entityPlayer);
-            sendPacket.invoke(pc, new PacketPlayOutMapChunk(chunk).getNMSClass());
-        } catch (ReflectiveOperationException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     public static Object newRawBlockPosition(int i0, int i1, int i2) {
         try {
             return BlockPosition.getConstructor(double.class, double.class, double.class)
@@ -212,48 +202,71 @@ public final class Reflection {
         }
     }
 
-    public static void setBlockData(Block block, Object iBlockData) {
-        if (Compatibility.getBukkitVersion() == BukkitVersion.v1_8) return;
-        Object nmsBlock = Ref.forName(ReflectionUtil.getCraftBukkitPackage() + ".block.CraftBlock").getMethod("getNMS").invoke(block);
-        Ref.forName(ReflectionUtil.getNMSPackage() + ".Block").getDeclaredField("blockData").accessible(true).set(nmsBlock, iBlockData);
-    }
-
-    public static Object getBlock(Material material, byte data) {
-        return Ref.forName(ReflectionUtil.getCraftBukkitPackage() + ".util.CraftMagicNumbers")
-                .getMethod("getBlock", Material.class, byte.class)
-                .invoke(null, material, data);
-    }
-
-    public static Object getBlock(MaterialData material) {
-        return Ref.forName(ReflectionUtil.getCraftBukkitPackage() + ".util.CraftMagicNumbers")
-                .getMethod("getBlock", MaterialData.class)
-                .invoke(null, material);
-    }
-
-    public static Object getBlock(Object iBlockData) {
+    public static Object getBlock(IBlockData iBlockData) {
         BukkitVersion version = Compatibility.getBukkitVersion();
         if (version.ordinal() < BukkitVersion.v1_16.ordinal()) {
-            try {
-                return IBlockData.getMethod("getBlock").invoke(iBlockData);
-            } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-                throw new RuntimeException(e);
-            }
+            return iBlockData.getBlock();
         } else {
-            return Ref.forName(ReflectionUtil.getNMSPackage() + ".IBlockDataHolder").getDeclaredField("c").accessible(true).get(iBlockData);
+            return Objects.requireNonNull(IBlockDataHolder.getInstance(iBlockData)).getBlock();
         }
     }
 
-    public static void hackChunkSection(Object chunkSection) {
+    @SuppressWarnings("unchecked")
+    @NotNull
+    public static Set<Short> createShortSet() {
         try {
-            hackReentrantLock(Ref.forName(ReflectionUtil.getNMSPackage() + ".ChunkSection").getDeclaredField("blockIds").accessible(true).get(chunkSection));
-        } catch (ReflectiveOperationException | RuntimeException ignore) {}
+            return (Set<Short>) Class.forName("org.bukkit.craftbukkit.libs.it.unimi.dsi.fastutil.shorts.ShortOpenHashSet").newInstance(); // spigot, craftbukkit
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
+            try {
+                return (Set<Short>) Class.forName("it.unimi.dsi.fastutil.shorts.ShortOpenHashSet").newInstance(); // paper, just why.
+            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex1) {
+                return new HashSet<>();
+            }
+        }
     }
 
-    public static void hackReentrantLock(Object dataPaletteBlock) throws ReflectiveOperationException {
-        Ref.forName(ReflectionUtil.getNMSPackage() + ".DataPaletteBlock")
-                .getDeclaredField("j")
-                .accessible(true)
-                .removeFinal()
-                .set(dataPaletteBlock, new NopeReentrantLock());
+    public static void sendBlockChangesWithLocations(Collection<? extends Player> players, Collection<Location> locations, xyz.acrylicstyle.region.internal.nms.Chunk chunk) {
+        sendBlockChanges(players, locations.stream().map(BlockPos::new).collect(Collectors.toSet()), chunk);
+    }
+
+    public static void sendBlockChanges(Collection<? extends Player> players, Set<BlockPos> blockPos, xyz.acrylicstyle.region.internal.nms.Chunk chunk) {
+        Set<Short> shortSet = createShortSet();
+        blockPos.forEach(bp -> shortSet.add(xyz.acrylicstyle.region.api.block.Block.locationToShort(bp.getBlockX(), bp.getBlockY(), bp.getBlockZ())));
+        Set<Object> packets = new HashSet<>();
+        if (Compatibility.checkPacketPlayOutMultiBlockChange1_8Constructor()) {
+            packets.add(PacketPlayOutMultiBlockChange.getInstance(null).constructor_v18_v1161(shortSet.size(), toShortArray(shortSet), xyz.acrylicstyle.region.api.reflector.net.minecraft.server.Chunk.getInstance(chunk.getHandle())).getHandle());
+        } else {
+            for (int i = 0; i < 15; i++) {
+                PacketPlayOutMultiBlockChange packetPlayOutMultiBlockChange = PacketPlayOutMultiBlockChange.getInstance(null);
+                packets.add(packetPlayOutMultiBlockChange.constructor_v1162(SectionPosition.getInstance(null).create(chunk.x, i, chunk.z), shortSet, ChunkSection.getInstance(chunk.sections[i]), false).getHandle());
+            }
+        }
+        if (packets.size() > 0) {
+            players.forEach(player -> packets.forEach(packet -> {
+                try {
+                    sendPacket.invoke(getPlayerConnection(player), packet);
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                    throw new RuntimeException(e);
+                }
+            }));
+        }
+    }
+
+    public static Object getPlayerConnection(Player player) {
+        try {
+            Object ep = CraftUtils.getHandle(player);
+            return ep.getClass().getDeclaredField("playerConnection").get(ep);
+        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException | NoSuchFieldException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static short[] toShortArray(Set<Short> shorts) {
+        short[] shortArray = new short[shorts.size()];
+        int i = 0;
+        for (Short s : shorts) {
+            shortArray[i++] = s;
+        }
+        return shortArray;
     }
 }

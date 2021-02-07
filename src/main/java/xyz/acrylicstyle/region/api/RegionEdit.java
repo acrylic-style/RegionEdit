@@ -17,7 +17,6 @@ import util.Collection;
 import util.CollectionList;
 import util.CollectionSet;
 import util.ICollectionList;
-import xyz.acrylicstyle.region.RegionEditPlugin;
 import xyz.acrylicstyle.region.api.block.state.BlockState;
 import xyz.acrylicstyle.region.api.block.state.BlockStatePropertyMap;
 import xyz.acrylicstyle.region.api.manager.HistoryManager;
@@ -28,6 +27,7 @@ import xyz.acrylicstyle.region.api.util.BlockPos;
 import xyz.acrylicstyle.tomeito_api.utils.Callback;
 
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -41,7 +41,6 @@ import java.util.function.Predicate;
  */
 public interface RegionEdit extends Plugin {
     ThreadPoolExecutor pool = (ThreadPoolExecutor) Executors.newCachedThreadPool();
-    RegionEdit INSTANCE = new RegionEditPlugin();
 
     static void drawParticleLine(@NotNull Player player, @NotNull Location _from, @NotNull Location _to) {
         /*
@@ -64,9 +63,9 @@ public interface RegionEdit extends Plugin {
      * @return RegionEdit instance
      */
     @NotNull
-    static RegionEdit getInstance() throws NullPointerException {
+    static RegionEdit getInstance() {
         RegisteredServiceProvider<RegionEdit> service = Bukkit.getServicesManager().getRegistration(RegionEdit.class);
-        if (service == null) return RegionEdit.INSTANCE;
+        if (service == null) throw new NoSuchElementException();
         return service.getProvider();
     }
 

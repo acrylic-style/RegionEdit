@@ -96,7 +96,7 @@ public final class UserSessionImpl implements UserSession {
     @Override
     public void setSuperPickaxeRadius(int radius) throws RegionEditException {
         if (radius < 1) throw new RegionEditException("cannot set radius lower than 1");
-        if (radius > 10) throw new RegionEditException("cannot set radius higher than 10");
+        if (radius > 100) throw new RegionEditException("cannot set radius higher than 100");
         this.superPickaxeRadius = radius;
     }
 

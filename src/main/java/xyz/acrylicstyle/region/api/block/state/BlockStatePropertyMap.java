@@ -10,6 +10,7 @@ import util.ICollectionList;
 import util.Validate;
 import util.reflect.Ref;
 import xyz.acrylicstyle.region.api.RegionEdit;
+import xyz.acrylicstyle.region.api.reflector.net.minecraft.server.IBlockData;
 import xyz.acrylicstyle.tomeito_api.utils.ReflectionUtil;
 
 import java.io.Serializable;
@@ -67,7 +68,7 @@ public class BlockStatePropertyMap implements Serializable {
     public void apply(Block block) { implementMethods().apply(block); }
 
     @Contract(pure = true)
-    public Object getIBlockData(MaterialData data) { return implementMethods().getIBlockData(data); }
+    public IBlockData getIBlockData(MaterialData data) { return implementMethods().getIBlockData(data); }
 
     /* static methods */
 

@@ -2,6 +2,7 @@ package xyz.acrylicstyle.region.internal.commands;
 
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 import xyz.acrylicstyle.region.RegionEditPlugin;
 import xyz.acrylicstyle.region.api.RegionEdit;
 import xyz.acrylicstyle.region.api.player.SuperPickaxeMode;
@@ -11,7 +12,7 @@ import xyz.acrylicstyle.tomeito_api.utils.TypeUtil;
 
 public class SuperPickaxeCommand extends PlayerCommandExecutor {
     @Override
-    public void onCommand(Player player, String[] args) {
+    public void onCommand(@NotNull Player player, String[] args) {
         UserSession session = RegionEdit.getInstance().getUserSession(player);
         if (args.length != 0) {
             if (args[0].equalsIgnoreCase("area")) {
@@ -84,7 +85,7 @@ public class SuperPickaxeCommand extends PlayerCommandExecutor {
             player.sendMessage(ChatColor.RED + "A number must be higher than 0.");
             return -1;
         }
-        if (radius > 25) {
+        if (radius > 100) {
             player.sendMessage(ChatColor.RED + "A number must be lower than 25.");
             return -1;
         }

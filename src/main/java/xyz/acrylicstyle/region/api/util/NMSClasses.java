@@ -17,7 +17,6 @@ public final class NMSClasses {
     public static final Class<?> PlayerConnection = getClassWithoutException("PlayerConnection");
     public static final Class<?> Packet = getClassWithoutException("Packet");
     public static final Class<?> Chunk = getClassWithoutException("Chunk");
-    public static final Class<?> Block = getClassWithoutException("Block");
 
     public static final Field playerConnection = Ref.getClass(EntityPlayer).getField("playerConnection").getField();
 

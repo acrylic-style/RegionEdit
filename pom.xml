@@ -6,7 +6,7 @@
 
     <groupId>xyz.acrylicstyle</groupId>
     <artifactId>RegionEdit</artifactId>
-    <version>0.1.21</version>
+    <version>0.2.0</version>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
@@ -72,7 +72,7 @@
         <dependency>
             <groupId>xyz.acrylicstyle</groupId>
             <artifactId>api</artifactId>
-            <version>0.7.2</version>
+            <version>0.7.4d</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

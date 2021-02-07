@@ -58,7 +58,7 @@ public final class SchematicNew extends AbstractSchematic {
             }
             blocks.add(new BlockState(state.getType(), state.getData(), state.getPropertyMap(), new Location(null, width.getAndIncrement(), height.get(), length.get())));
         }
-        long ex = maxWidth * maxHeight * maxLength;
+        long ex = (long) maxWidth * maxHeight * maxLength;
         Log.info("---------- Schematic Details (New) ----------");
         Log.info("Max X: " + maxWidth);
         Log.info("Max Y: " + maxHeight);
